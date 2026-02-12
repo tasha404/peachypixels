@@ -1,0 +1,272 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&family=Pacifico&family=Playfair+Display&family=Montserrat:wght@400;600&family=Anton&family=Indie+Flower&family=Dancing+Script&family=Poppins:wght@400;600&display=swap');
+
+/* ===== GLOBAL FIX ===== */
+* {
+  box-sizing: border-box;
+}
+
+/* ===== BODY ===== */
+body {
+  margin: 0;
+  height: 100vh;
+  background:
+    radial-gradient(circle at center, rgba(216, 106, 119, 0.8), transparent 50%),
+    linear-gradient(#f8e4e7, #f3c3c9);
+  background-size: 200% 200%;
+  animation: floatGlow 10s ease-in-out infinite alternate;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Quicksand', sans-serif;
+}
+
+@keyframes floatGlow {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 50% 100%; }
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+  position: relative;
+  background: white;
+  padding: 30px;
+  border-radius: 25px;
+  width: 900px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(255,105,180,0.2);
+}
+
+.home-icon {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  cursor: pointer;
+  background: #fff0f6;
+  padding: 8px 12px;
+  border-radius: 50%;
+}
+
+/* ===== VIDEO + CANVAS ===== */
+.video {
+  width: 100%;        /* keep camera full */
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.canvas {
+  width: 50%;         /* 👈 smaller result strip */
+  max-width: 500px;
+  border-radius: 20px;
+  margin: 0 auto 20px; /* center it */
+  display: block;
+}
+
+
+
+
+.mirror {
+  transform: scaleX(-1);
+}
+
+/* ===== CAMERA EFFECTS ===== */
+.camera-wrapper {
+  position: relative;
+}
+
+.flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0.8;
+  animation: flashAnim 0.3s ease-out;
+  border-radius: 20px;
+}
+
+@keyframes flashAnim {
+  0% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+.countdown-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 90px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 0 25px rgba(0,0,0,0.6);
+  z-index: 10;
+  pointer-events: none;
+  animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+  0% { transform: translate(-50%, -50%) scale(0.5); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ===== BUTTONS ===== */
+button {
+  padding: 12px 28px;
+  border-radius: 30px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #ff9ecb, #ffc3e0);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(255, 105, 180, 0.25);
+  margin: 5px;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(255, 105, 180, 0.4);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+.layout-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.filter-group button {
+  padding: 8px 18px;
+  font-size: 13px;
+  border-radius: 20px;
+  background: #ffe4f2;
+  color: #ff4da6;
+  box-shadow: none;
+}
+
+.filter-group button:hover {
+  background: #ffb6da;
+  color: white;
+}
+
+/* ===== RESULT SIDE-BY-SIDE LAYOUT ===== */
+.result-layout {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.preview-side {
+  flex: 1;
+}
+
+.editor-side {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.editor-title {
+  font-weight: 600;
+  color: #ff4da6;
+}
+
+/* ===== EDITOR CARDS ===== */
+.editor-card {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(255,105,180,0.15);
+  position: relative;
+}
+
+/* ===== TEXT INPUT ===== */
+.editor-card input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 20px;
+  border: 2px solid #ffd6e8;
+  outline: none;
+  transition: 0.3s;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.editor-card input[type="text"]:focus {
+  border-color: #ff9ecb;
+  box-shadow: 0 0 10px rgba(255,158,203,0.4);
+}
+
+/* ===== COLOR BUTTON ===== */
+.color-circle-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+/* ===== COLOR PICKER POPUP ===== */
+.picker-popup {
+  position: absolute;
+  bottom: 95px;
+  left: 0;
+  z-index: 9999;
+  background: white;
+  padding: 15px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+/* ===== TEXT SETTINGS SIDE-BY-SIDE ===== */
+.text-settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.text-setting-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.size-input {
+  width: 70px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 2px solid #ffd6e8;
+  text-align: center;
+  font-weight: 600;
+}
+
+.size-input:focus {
+  outline: none;
+  border-color: #ff9ecb;
+  box-shadow: 0 0 10px rgba(255,158,203,0.4);
+}
+
+/* ===== RESULT BUTTONS ===== */
+.result-buttons {
+  margin-top: 20px;
+  display: center;
+  gap: 15px;
+}
