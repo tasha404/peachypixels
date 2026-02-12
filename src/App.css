@@ -219,8 +219,11 @@ button:active {
   cursor: pointer;
   border: 3px solid white;
   box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-  display: center;
+  display: block;
+  margin: 0 auto;  
 }
+
+
 
 /* ===== COLOR PICKER POPUP ===== */
 .picker-popup {
