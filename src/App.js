@@ -210,7 +210,7 @@ function App() {
   /* UI */
   return (
     <div className="container">
-      <h1>💖 Korean Photobooth</h1>
+      <h1>Peachy Pixels</h1>
 
       {screen !== "home" && (
         <div className="home-icon" onClick={goHome}>🏠</div>
@@ -245,7 +245,7 @@ function App() {
             <button onClick={() => setFilter("bright")}>Bright</button>
           </div>
 
-          <button onClick={startCapture}>Start 📸</button>
+          <button onClick={startCapture}>📸</button>
         </>
       )}
 
@@ -256,8 +256,8 @@ function App() {
           <div className="preview-side">
             <canvas ref={canvasRef} className="canvas" />
             <div className="result-buttons">
-              <button onClick={download}>Download 💗</button>
-              <button onClick={retake}>Retake 📸</button>
+              <button onClick={download}>Download</button>
+              <button onClick={retake}>Retake</button>
             </div>
           </div>
 
@@ -293,7 +293,7 @@ function App() {
                 type="text"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                placeholder="Type something cute..."
+                placeholder="enter text !!"
               />
             </div>
 
