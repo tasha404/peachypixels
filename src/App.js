@@ -305,13 +305,19 @@ if (borderType === "plaid") {
             <div className="editor-card">
               <p>Border</p>
               <div
-                className="color-circle-btn"
-                style={{ background: borderColor }}
-                onClick={() => {
-                  setShowBorderPicker(!showBorderPicker);
-                  setShowTextPicker(false);
-                }}
-              />
+  className="color-circle-btn"
+  style={{
+    background: borderColor,
+    border: borderType === "solid"
+      ? "3px solid #ff4da6"
+      : "3px solid white"
+  }}
+  onClick={() => {
+    setBorderType("solid");   // 🔥 important
+    setShowBorderPicker(!showBorderPicker);
+    setShowTextPicker(false);
+  }}
+/>
 <div style={{
   marginTop: "15px",
   display: "flex",
