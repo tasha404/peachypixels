@@ -320,38 +320,58 @@ function App() {
               </select>
 
               <div className="text-settings-row">
-                <div className="text-setting-item">
-                  <span>Colour</span>
-                  <div
-                    className="color-circle-btn"
-                    style={{ background: captionColor }}
-                    onClick={() => {
-                      setShowTextPicker(!showTextPicker);
-                      setShowBorderPicker(false);
-                    }}
-                  />
-                  {showTextPicker && (
-                    <div className="picker-popup">
-                      <HexColorPicker
-                        color={captionColor}
-                        onChange={setCaptionColor}
-                      />
-                    </div>
-                  )}
-                </div>
 
-                <div className="text-setting-item">
-                  <span>Size</span>
-                  <input
-                    type="number"
-                    min="10"
-                    max="120"
-                    value={captionSize}
-                    onChange={(e) => setCaptionSize(e.target.value)}
-                    className="size-input"
-                  />
-                </div>
-              </div>
+  {/* Colour */}
+  <div className="text-setting-item">
+    <div
+      className="color-circle-btn"
+      style={{ background: captionColor }}
+      onClick={() => {
+        setShowTextPicker(!showTextPicker);
+        setShowBorderPicker(false);
+      }}
+    />
+    {showTextPicker && (
+      <div className="picker-popup">
+        <HexColorPicker
+          color={captionColor}
+          onChange={setCaptionColor}
+        />
+      </div>
+    )}
+  </div>
+
+  {/* Font Dropdown */}
+  <div className="text-setting-item">
+    <select
+      value={captionFont}
+      onChange={(e) => setCaptionFont(e.target.value)}
+      className="font-dropdown"
+    >
+      <option value="Quicksand">Quicksand</option>
+      <option value="Pacifico">Pacifico</option>
+      <option value="Playfair Display">Playfair Display</option>
+      <option value="Montserrat">Montserrat</option>
+      <option value="Anton">Anton</option>
+      <option value="Indie Flower">Indie Flower</option>
+      <option value="Dancing Script">Dancing Script</option>
+      <option value="Poppins">Poppins</option>
+    </select>
+  </div>
+
+  {/* Size */}
+  <div className="text-setting-item">
+    <input
+      type="number"
+      min="10"
+      max="120"
+      value={captionSize}
+      onChange={(e) => setCaptionSize(e.target.value)}
+      className="size-input"
+    />
+  </div>
+
+</div>
             </div>
 
           </div>
