@@ -311,61 +311,63 @@ function App() {
 
             {/* BORDER */}
             <div className="editor-card">
-              <p>Border</p>
-              <div
-  className="color-circle-btn"
-  style={{
-    background: borderColor,
-    border: borderType === "solid"
-      ? "3px solid #ff4da6"
-      : "3px solid white"
-  }}
-  onClick={() => {
-    setBorderType("solid");   // 🔥 switch back to solid
-    setShowBorderPicker(!showBorderPicker);
-    setShowTextPicker(false);
-  }}
-/>
-<div style={{
-  marginTop: "15px",
-  display: "flex",
-  gap: "12px",
-  flexWrap: "wrap"
-}}>
+  <p>Border</p>
 
+  <div style={{
+    marginTop: "15px",
+    display: "flex",
+    gap: "15px",
+    alignItems: "center"
+  }}>
 
-  {/* Plaid Preview */}
-  <div
-  onClick={() => {
-  setBorderType("plaid");
-  setShowBorderPicker(false);
-}}
-  style={{
-    width: "55px",
-    height: "55px",
-    borderRadius: "50%",
-    backgroundImage: "url('/redplaid.png')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    cursor: "pointer",
-    border: borderType === "plaid"
-      ? "3px solid #ff4da6"
-      : "3px solid white",
-    boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
-    
-  }}
-/>
+    {/* Solid (Color Picker Circle) */}
+    <div
+      className="color-circle-btn"
+      style={{
+        background: borderColor,
+        border: borderType === "solid"
+          ? "3px solid #ff4da6"
+          : "3px solid white"
+      }}
+      onClick={() => {
+        setBorderType("solid");
+        setShowBorderPicker(!showBorderPicker);
+        setShowTextPicker(false);
+      }}
+    />
 
+    {/* Plaid Circle */}
+    <div
+      onClick={() => {
+        setBorderType("plaid");
+        setShowBorderPicker(false);
+      }}
+      style={{
+        width: "55px",
+        height: "55px",
+        borderRadius: "50%",
+        backgroundImage: "url('/redplaid.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        cursor: "pointer",
+        border: borderType === "plaid"
+          ? "3px solid #ff4da6"
+          : "3px solid white",
+        boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+      }}
+    />
+
+  </div>
+
+  {showBorderPicker && (
+    <div className="picker-popup">
+      <HexColorPicker
+        color={borderColor}
+        onChange={setBorderColor}
+      />
+    </div>
+  )}
 </div>
-              {showBorderPicker && (
-                <div className="picker-popup">
-                  <HexColorPicker
-                    color={borderColor}
-                    onChange={setBorderColor}
-                  />
-                </div>
-              )}
-            </div>
 
             {/* TEXT */}
             <div className="editor-card">
