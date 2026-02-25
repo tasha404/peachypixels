@@ -77,15 +77,12 @@ body {
 }
 
 .canvas {
-  width: 50%;         /* 👈 smaller result strip */
-  max-width: 500px;
-  border-radius: 20px;
-  margin: 0 auto 20px; /* center it */
+  width: 100%;
+  height: auto;
   display: block;
+  margin: 0 auto 20px;
+  border-radius: 20px;
 }
-
-
-
 
 .mirror {
   transform: scaleX(-1);
