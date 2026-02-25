@@ -8,7 +8,7 @@
 /* ===== BODY ===== */
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
   background:
     radial-gradient(circle at center, rgba(216, 106, 119, 0.8), transparent 50%),
     linear-gradient(#f8e4e7, #f3c3c9);
@@ -326,13 +326,10 @@ button:active {
       align-items: center;
       min-height: 100dvh;
     }
-
+  
     .container {
-      width: 100%;
-      max-width: none;
-      height: 100dvh;
-      margin: 0;
-      border-radius: 0;
+      width: 90%;
+      max-width: 380px;
     }
 
   /* Layout adjustments */
