@@ -173,7 +173,7 @@ function App() {
 
 if (borderType === "plaid") {
   const img = new Image();
-  img.src = "/redplaid.png";
+  img.src = "public/redplaid.png";
 
   img.onload = () => {
     const pattern = ctx.createPattern(img, "repeat");
