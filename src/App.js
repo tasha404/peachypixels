@@ -250,7 +250,7 @@ function App() {
 ]);
   return (
     <div className="container">
-      <h1>💖 Korean Photobooth</h1>
+      <h1> Peachy Pixels</h1>
 
       {screen !== "home" && (
         <div className="home-icon" onClick={goHome}>🏠</div>
@@ -287,7 +287,7 @@ function App() {
 
           <div className="start-wrapper">
   <button disabled={isCapturing} onClick={startCapture}>
-    {isCapturing ? "Capturing..." : "Start 📸"}
+    {isCapturing ? "Capturing..." : "Start"}
   </button>
 </div>
         </>
@@ -300,8 +300,8 @@ function App() {
           <div className="preview-side">
             <canvas ref={canvasRef} className="canvas" />
             <div className="result-buttons">
-              <button onClick={download}>Download 💗</button>
-              <button onClick={retake}>Retake 📸</button>
+              <button onClick={download}>Download</button>
+              <button onClick={retake}>Retake</button>
             </div>
           </div>
 
@@ -376,7 +376,7 @@ function App() {
                 type="text"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                placeholder="Type something cute..."
+                placeholder="Type here"
               />
             </div>
 
