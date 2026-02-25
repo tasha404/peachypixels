@@ -17,12 +17,14 @@ function App() {
 
   const [borderColor, setBorderColor] = useState("#ffe4ef");
   const [caption, setCaption] = useState("");
+  const [borderType, setBorderType] = useState("solid");
   const [captionColor, setCaptionColor] = useState("#000000");
   const [captionSize, setCaptionSize] = useState(30);
   const [captionFont, setCaptionFont] = useState("Quicksand");
 
   const [showBorderPicker, setShowBorderPicker] = useState(false);
   const [showTextPicker, setShowTextPicker] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   /* CLOSE PICKERS */
   useEffect(() => {
@@ -35,6 +37,7 @@ function App() {
     document.addEventListener("mousedown", handleClickOutside);
     return () =>
       document.removeEventListener("mousedown", handleClickOutside);
+    
   }, []);
 
   /* CAMERA */
@@ -70,18 +73,23 @@ function App() {
   };
 
   const startCapture = async () => {
-    let newPhotos = [];
-    const total = getPhotoCount();
+  if (isCapturing) return;   // prevent double click
+  setIsCapturing(true);
 
-    for (let i = 0; i < total; i++) {
-      await startCountdown();
-      newPhotos.push(takePhoto());
-    }
+  let newPhotos = [];
+  const total = getPhotoCount();
 
-    stopCamera();
-    setPhotos(newPhotos);
-    setScreen("result");
-  };
+  for (let i = 0; i < total; i++) {
+    await startCountdown();
+    newPhotos.push(takePhoto());
+  }
+
+  stopCamera();
+  setPhotos(newPhotos);
+  setScreen("result");
+
+  setIsCapturing(false);
+};
 
   const startCountdown = () => {
     return new Promise((resolve) => {
@@ -142,72 +150,104 @@ function App() {
 
   /* DRAW RESULT */
   useEffect(() => {
-    if (screen === "result" && photos.length > 0) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
+  if (screen !== "result" || photos.length === 0) return;
 
-      const width = 500;
-      const height = 350;
-      const padding = 20;
-      const textSpace = 100;
+  const canvas = canvasRef.current;
+  const ctx = canvas.getContext("2d");
+
+  const width = 400;
+  const height = 350;
+  const padding = 20;
+  const textSpace = 100;
+
+  const total =
+    layout === "strip3" ? 3 :
+    layout === "strip4" ? 4 :
+    4;
+
+  // ===== SET CANVAS SIZE =====
+  if (layout === "strip4" || layout === "strip3") {
+    canvas.width = width + padding * 2;
+    canvas.height = total * height + padding * (total + 1) + textSpace;
+  }
+
+  if (layout === "grid2x2") {
+    canvas.width = width * 2 + padding * 3;
+    canvas.height = height * 2 + padding * 3 + textSpace;
+  }
+
+  const drawAll = async () => {
+
+    // 1️⃣ Draw border first
+    if (borderType === "solid") {
+      ctx.fillStyle = borderColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    if (borderType === "plaid") {
+      const bg = new Image();
+      bg.src = "/redplaid.png";
+      await new Promise(resolve => {
+        bg.onload = resolve;
+      });
+
+      const pattern = ctx.createPattern(bg, "repeat");
+      ctx.fillStyle = pattern;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // 2️⃣ Draw photos
+    for (let i = 0; i < photos.length; i++) {
+      const img = new Image();
+      img.src = photos[i];
+
+      await new Promise(resolve => {
+        img.onload = resolve;
+      });
 
       if (layout === "strip4" || layout === "strip3") {
-        const total = photos.length;
-
-        canvas.width = width + padding * 2;
-        canvas.height =
-          total * height + padding * (total + 1) + textSpace;
-
-        ctx.fillStyle = borderColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        photos.forEach((photo, index) => {
-          const img = new Image();
-          img.src = photo;
-          img.onload = () => {
-            ctx.drawImage(
-              img,
-              padding,
-              padding + index * (height + padding),
-              width,
-              height
-            );
-          };
-        });
+        ctx.drawImage(
+          img,
+          padding,
+          padding + i * (height + padding),
+          width,
+          height
+        );
       }
 
       if (layout === "grid2x2") {
-        canvas.width = width * 2 + padding * 3;
-        canvas.height = height * 2 + padding * 3 + textSpace;
-
-        ctx.fillStyle = borderColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        photos.forEach((photo, index) => {
-          const img = new Image();
-          img.src = photo;
-          img.onload = () => {
-            const row = Math.floor(index / 2);
-            const col = index % 2;
-            ctx.drawImage(
-              img,
-              padding + col * (width + padding),
-              padding + row * (height + padding),
-              width,
-              height
-            );
-          };
-        });
+        const row = Math.floor(i / 2);
+        const col = i % 2;
+        ctx.drawImage(
+          img,
+          padding + col * (width + padding),
+          padding + row * (height + padding),
+          width,
+          height
+        );
       }
-
-      ctx.fillStyle = captionColor;
-      ctx.font = `${captionSize}px ${captionFont}`;
-      ctx.textAlign = "center";
-      ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
     }
-  }, [screen, photos, layout, borderColor, caption, captionColor, captionSize, captionFont]);
 
-  /* UI */
+    // 3️⃣ Draw caption last
+    ctx.fillStyle = captionColor;
+    ctx.font = `${captionSize}px ${captionFont}`;
+    ctx.textAlign = "center";
+    ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
+  };
+
+  drawAll();
+
+}, [
+  screen,
+  photos,
+  layout,
+  borderColor,
+  borderType,
+  caption,
+  captionColor,
+  captionSize,
+  captionFont
+]);
   return (
     <div className="container">
       <h1>💖 Korean Photobooth</h1>
@@ -239,13 +279,17 @@ function App() {
           </div>
 
           <div className="filter-group">
-            <button onClick={() => setFilter("none")}>Normal</button>
-            <button onClick={() => setFilter("bw")}>B&W</button>
-            <button onClick={() => setFilter("vintage")}>Vintage</button>
-            <button onClick={() => setFilter("bright")}>Bright</button>
-          </div>
+  <button disabled={isCapturing} onClick={() => setFilter("none")}>Normal</button>
+  <button disabled={isCapturing} onClick={() => setFilter("bw")}>B&W</button>
+  <button disabled={isCapturing} onClick={() => setFilter("vintage")}>Vintage</button>
+  <button disabled={isCapturing} onClick={() => setFilter("bright")}>Bright</button>
+</div>
 
-          <button onClick={startCapture}>Start 📸</button>
+          <div className="start-wrapper">
+  <button disabled={isCapturing} onClick={startCapture}>
+    {isCapturing ? "Capturing..." : "Start 📸"}
+  </button>
+</div>
         </>
       )}
 
@@ -269,13 +313,50 @@ function App() {
             <div className="editor-card">
               <p>Border</p>
               <div
-                className="color-circle-btn"
-                style={{ background: borderColor }}
-                onClick={() => {
-                  setShowBorderPicker(!showBorderPicker);
-                  setShowTextPicker(false);
-                }}
-              />
+  className="color-circle-btn"
+  style={{
+    background: borderColor,
+    border: borderType === "solid"
+      ? "3px solid #ff4da6"
+      : "3px solid white"
+  }}
+  onClick={() => {
+    setBorderType("solid");   // 🔥 switch back to solid
+    setShowBorderPicker(!showBorderPicker);
+    setShowTextPicker(false);
+  }}
+/>
+<div style={{
+  marginTop: "15px",
+  display: "flex",
+  gap: "12px",
+  flexWrap: "wrap"
+}}>
+
+
+  {/* Plaid Preview */}
+  <div
+  onClick={() => {
+  setBorderType("plaid");
+  setShowBorderPicker(false);
+}}
+  style={{
+    width: "55px",
+    height: "55px",
+    borderRadius: "50%",
+    backgroundImage: "url('/redplaid.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    cursor: "pointer",
+    border: borderType === "plaid"
+      ? "3px solid #ff4da6"
+      : "3px solid white",
+    boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+    
+  }}
+/>
+
+</div>
               {showBorderPicker && (
                 <div className="picker-popup">
                   <HexColorPicker
@@ -301,55 +382,61 @@ function App() {
             <div className="editor-card">
               <p>Text Settings</p>
 
-              <label>Font</label>
-              <select
-                value={captionFont}
-                onChange={(e) => setCaptionFont(e.target.value)}
-                className="font-dropdown"
-              >
-                <option value="Quicksand">Quicksand</option>
-                <option value="Pacifico">Pacifico</option>
-                <option value="Playfair Display">Playfair Display</option>
-                <option value="Montserrat">Montserrat</option>
-                <option value="Anton">Anton</option>
-                <option value="Indie Flower">Indie Flower</option>
-                <option value="Dancing Script">Dancing Script</option>
-                <option value="Poppins">Poppins</option>
-              </select>
+
 
               <div className="text-settings-row">
-                <div className="text-setting-item">
-                  <span>Colour</span>
-                  <div
-                    className="color-circle-btn"
-                    style={{ background: captionColor }}
-                    onClick={() => {
-                      setShowTextPicker(!showTextPicker);
-                      setShowBorderPicker(false);
-                    }}
-                  />
-                  {showTextPicker && (
-                    <div className="picker-popup">
-                      <HexColorPicker
-                        color={captionColor}
-                        onChange={setCaptionColor}
-                      />
-                    </div>
-                  )}
-                </div>
 
-                <div className="text-setting-item">
-                  <span>Size</span>
-                  <input
-                    type="number"
-                    min="10"
-                    max="120"
-                    value={captionSize}
-                    onChange={(e) => setCaptionSize(e.target.value)}
-                    className="size-input"
-                  />
-                </div>
-              </div>
+  {/* Colour */}
+  <div className="text-setting-item">
+    <div
+      className="color-circle-btn"
+      style={{ background: captionColor }}
+      onClick={() => {
+        setShowTextPicker(!showTextPicker);
+        setShowBorderPicker(false);
+      }}
+    />
+    {showTextPicker && (
+      <div className="picker-popup">
+        <HexColorPicker
+          color={captionColor}
+          onChange={setCaptionColor}
+        />
+      </div>
+    )}
+  </div>
+
+  {/* Font Dropdown */}
+  <div className="text-setting-item">
+    <select
+      value={captionFont}
+      onChange={(e) => setCaptionFont(e.target.value)}
+      className="font-dropdown"
+    >
+      <option value="Quicksand">Quicksand</option>
+      <option value="Pacifico">Pacifico</option>
+      <option value="Playfair Display">Playfair Display</option>
+      <option value="Montserrat">Montserrat</option>
+      <option value="Anton">Anton</option>
+      <option value="Indie Flower">Indie Flower</option>
+      <option value="Dancing Script">Dancing Script</option>
+      <option value="Poppins">Poppins</option>
+    </select>
+  </div>
+
+  {/* Size */}
+  <div className="text-setting-item">
+    <input
+      type="number"
+      min="10"
+      max="120"
+      value={captionSize}
+      onChange={(e) => setCaptionSize(e.target.value)}
+      className="size-input"
+    />
+  </div>
+
+</div>
             </div>
 
           </div>
