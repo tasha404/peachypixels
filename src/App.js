@@ -23,6 +23,7 @@ function App() {
 
   const [showBorderPicker, setShowBorderPicker] = useState(false);
   const [showTextPicker, setShowTextPicker] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   /* CLOSE PICKERS */
   useEffect(() => {
@@ -70,18 +71,23 @@ function App() {
   };
 
   const startCapture = async () => {
-    let newPhotos = [];
-    const total = getPhotoCount();
+  if (isCapturing) return;   // prevent double click
+  setIsCapturing(true);
 
-    for (let i = 0; i < total; i++) {
-      await startCountdown();
-      newPhotos.push(takePhoto());
-    }
+  let newPhotos = [];
+  const total = getPhotoCount();
 
-    stopCamera();
-    setPhotos(newPhotos);
-    setScreen("result");
-  };
+  for (let i = 0; i < total; i++) {
+    await startCountdown();
+    newPhotos.push(takePhoto());
+  }
+
+  stopCamera();
+  setPhotos(newPhotos);
+  setScreen("result");
+
+  setIsCapturing(false);
+};
 
   const startCountdown = () => {
     return new Promise((resolve) => {
@@ -239,15 +245,15 @@ function App() {
           </div>
 
           <div className="filter-group">
-            <button onClick={() => setFilter("none")}>Normal</button>
-            <button onClick={() => setFilter("bw")}>B&W</button>
-            <button onClick={() => setFilter("vintage")}>Vintage</button>
-            <button onClick={() => setFilter("bright")}>Bright</button>
-          </div>
+  <button disabled={isCapturing} onClick={() => setFilter("none")}>Normal</button>
+  <button disabled={isCapturing} onClick={() => setFilter("bw")}>B&W</button>
+  <button disabled={isCapturing} onClick={() => setFilter("vintage")}>Vintage</button>
+  <button disabled={isCapturing} onClick={() => setFilter("bright")}>Bright</button>
+</div>
 
-          <div className="start-wrapper">
-            <button onClick={startCapture}>Start 📸</button>
-          </div>
+          <button disabled={isCapturing} onClick={startCapture}>
+  {isCapturing ? "Capturing..." : "Start 📸"}
+</button>
         </>
       )}
 
