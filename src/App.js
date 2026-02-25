@@ -146,8 +146,8 @@ function App() {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
 
-      const width = 500;
-      const height = 350;
+      const width = videoRef.current.videoWidth;
+      const height = videoRef.current.videoHeight;
       const padding = 20;
       const textSpace = 100;
 
@@ -210,7 +210,7 @@ function App() {
   /* UI */
   return (
     <div className="container">
-      <h1>Peachy Pixels</h1>
+      <h1>💖 Korean Photobooth</h1>
 
       {screen !== "home" && (
         <div className="home-icon" onClick={goHome}>🏠</div>
@@ -245,7 +245,7 @@ function App() {
             <button onClick={() => setFilter("bright")}>Bright</button>
           </div>
 
-          <button onClick={startCapture}>📸</button>
+          <button onClick={startCapture}>Start 📸</button>
         </>
       )}
 
@@ -256,8 +256,8 @@ function App() {
           <div className="preview-side">
             <canvas ref={canvasRef} className="canvas" />
             <div className="result-buttons">
-              <button onClick={download}>Download</button>
-              <button onClick={retake}>Retake</button>
+              <button onClick={download}>Download 💗</button>
+              <button onClick={retake}>Retake 📸</button>
             </div>
           </div>
 
@@ -293,7 +293,7 @@ function App() {
                 type="text"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                placeholder="enter text !!"
+                placeholder="Type something cute..."
               />
             </div>
 
