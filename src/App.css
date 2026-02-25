@@ -30,7 +30,7 @@ body {
   padding: 30px;
   width: 90%;
   max-width: 520px;
-  margin: 60px auto;
+  margin: auto;
   border-radius: 25px;
   box-shadow: 0 10px 40px rgba(255, 105, 180, 0.2);
   overflow: visible;
@@ -287,43 +287,11 @@ button:active {
 /* ===== RESULT BUTTONS ===== */
 .result-buttons {
   margin-top: 20px;
-  display: center;
+  display: flex;
+  justify-content: center;
   gap: 15px;
 }
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
 
-  .result-layout {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .editor-side {
-    width: 100%;
-  }
-
-  .canvas {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .video {
-    width: 100%;
-  }
-
-  .countdown-overlay {
-    font-size: 60px;
-  }
-
-  h1 {
-    font-size: 22px;
-  }
-
-  button {
-    font-size: 14px;
-    padding: 10px 20px;
-  }
-}
 
 /* ===== DESKTOP ONLY ===== */
 @media (min-width: 768px) {
@@ -348,9 +316,46 @@ button:active {
   }
 
 }
-/* ===== MOBILE VERSION ===== */
+/* ===== MOBILE ===== */
 @media (max-width: 768px) {
 
+  /* Center card vertically */
+  body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100dvh;
+    }
+
+  .container {
+    width: 85%;
+    margin: 0;
+  }
+
+  /* Layout adjustments */
+  .result-layout {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .editor-side {
+    width: 100%;
+  }
+
+  .canvas {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .video {
+    width: 100%;
+  }
+
+  .countdown-overlay {
+    font-size: 60px;
+  }
+
+  /* Buttons vertical */
   .layout-group {
     flex-direction: column;
     align-items: center;
@@ -358,12 +363,18 @@ button:active {
   }
 
   .layout-group button {
-    width: 70%;
-    max-width: 280px;
+    width: 80%;
+    max-width: 300px;
   }
 
-  .container {
-    border-radius: 25px;
-    margin-top: 30px;
+  /* Typography */
+  h1 {
+    font-size: 22px;
   }
+
+  button {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+
 }
