@@ -69,6 +69,11 @@ body {
   border-radius: 50%;
 }
 
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
 /* ===== VIDEO + CANVAS ===== */
 .video {
   width: 100%;        /* keep camera full */
@@ -398,9 +403,10 @@ button:disabled {
   }
 
   /* Typography */
-  h1 {
-    font-size: 22px;
-  }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
 
   button {
     font-size: 14px;
