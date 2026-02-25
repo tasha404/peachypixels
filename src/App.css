@@ -141,7 +141,6 @@ button {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 8px 20px rgba(255, 105, 180, 0.25);
-  margin: 5px;
 }
 
 button:hover {
@@ -312,17 +311,16 @@ button:disabled {
 @media (min-width: 768px) {
 
   body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .container {
-    width: 900px;
-    max-width: 900px;
-    margin: 0;
-    padding: 50px 80px;
-  }
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    .container {
+      width: 900px;
+      max-width: 900px;
+      padding: 50px;
+    }
 
   .layout-group {
     flex-direction: row;
