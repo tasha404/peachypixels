@@ -343,7 +343,18 @@ button:active {
       width: 90%;
       max-width: 380px;
     }
-
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+  
+    .filter-group button {
+      flex: 0 0 auto;
+      width: auto;
+      padding: 8px 16px;
+    }
   /* Layout adjustments */
   .result-layout {
     flex-direction: column;
