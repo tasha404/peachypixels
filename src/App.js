@@ -68,9 +68,10 @@ function App() {
   };
 
   const getPhotoCount = () => {
-    if (layout === "strip3") return 3;
-    return 4;
-  };
+  if (layout === "strip3") return 3;
+  if (layout === "grid3x2") return 6;
+  return 4;
+};
 
   const startCapture = async () => {
   if (isCapturing) return;   // prevent double click
@@ -175,7 +176,10 @@ function App() {
     canvas.width = width * 2 + padding * 3;
     canvas.height = height * 2 + padding * 3 + textSpace;
   }
-
+if (layout === "grid3x2") {
+  canvas.width = width * 2 + padding * 3;
+  canvas.height = height * 3 + padding * 4 + textSpace;
+}
   const drawAll = async () => {
 
     // 1️⃣ Draw border first
@@ -226,6 +230,29 @@ function App() {
           height
         );
       }
+
+if (layout === "grid3x2") {
+  for (let i = 0; i < photos.length; i++) {
+    const img = new Image();
+    img.src = photos[i];
+
+    await new Promise(resolve => {
+      img.onload = resolve;
+    });
+
+    const row = Math.floor(i / 2);
+    const col = i % 2;
+
+    ctx.drawImage(
+      img,
+      padding + col * (width + padding),
+      padding + row * (height + padding),
+      width,
+      height
+    );
+  }
+}
+
     }
 
     // 3️⃣ Draw caption last
@@ -261,6 +288,7 @@ function App() {
           <button onClick={() => { setLayout("strip4"); setScreen("camera"); }}>4 Strip</button>
           <button onClick={() => { setLayout("strip3"); setScreen("camera"); }}>3 Strip</button>
           <button onClick={() => { setLayout("grid2x2"); setScreen("camera"); }}>2x2 Grid</button>
+          <button onClick={() => { setLayout("grid3x2"); setScreen("camera"); }}>3x2 Grid</button>
         </div>
       )}
 
