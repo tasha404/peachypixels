@@ -188,17 +188,31 @@ if (layout === "grid3x2") {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    if (borderType === "plaid") {
-      const bg = new Image();
-      bg.src = "/redplaid.png";
-      await new Promise(resolve => {
-        bg.onload = resolve;
-      });
+    if (borderType === "redPlaid") {
+  const bg = new Image();
+  bg.src = "/redplaid.png";
 
-      const pattern = ctx.createPattern(bg, "repeat");
-      ctx.fillStyle = pattern;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+  await new Promise(resolve => {
+    bg.onload = resolve;
+  });
+
+  const pattern = ctx.createPattern(bg, "repeat");
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+if (borderType === "bluePlaid") {
+  const bg = new Image();
+  bg.src = "/blueplaid.png";
+
+  await new Promise(resolve => {
+    bg.onload = resolve;
+  });
+
+  const pattern = ctx.createPattern(bg, "repeat");
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
     // 2️⃣ Draw photos
     for (let i = 0; i < photos.length; i++) {
@@ -367,7 +381,7 @@ if (layout === "grid3x2") {
     {/* Plaid Circle */}
     <div
       onClick={() => {
-        setBorderType("plaid");
+        setBorderType("redplaid");
         setShowBorderPicker(false);
       }}
       style={{
@@ -378,7 +392,7 @@ if (layout === "grid3x2") {
         backgroundSize: "cover",
         backgroundPosition: "center",
         cursor: "pointer",
-        border: borderType === "plaid"
+        border: borderType === "redplaid"
           ? "3px solid #ff4da6"
           : "3px solid white",
         boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
@@ -386,7 +400,26 @@ if (layout === "grid3x2") {
     />
 
   </div>
-
+{/* Blue Plaid */}
+<div
+  onClick={() => {
+    setBorderType("bluePlaid");
+    setShowBorderPicker(false);
+  }}
+  style={{
+    width: "55px",
+    height: "55px",
+    borderRadius: "50%",
+    backgroundImage: "url('/blueplaid.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    cursor: "pointer",
+    border: borderType === "bluePlaid"
+      ? "3px solid #ff4da6"
+      : "3px solid white",
+    boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+  }}
+/>
   {showBorderPicker && (
     <div className="picker-popup">
       <HexColorPicker
