@@ -27,13 +27,36 @@ body {
 .container {
   position: relative;
   background: white;
-  padding: 20px;
+  padding: 30px;
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  min-height: 100vh;
-  border-radius: 25px 25px 0 0;
+  max-width: 520px;
+  margin: 40px auto;
+  border-radius: 25px;
   box-shadow: 0 10px 40px rgba(255, 105, 180, 0.2);
+  overflow: visible;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 158, 203, 0.4), transparent 70%);
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -1;
+  animation: floatBlob 8s ease-in-out infinite alternate;
+}
+
+@keyframes floatBlob {
+  0% {
+    transform: translateX(-50%) translateY(0px);
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(20px);
+  }
 }
 
 .home-icon {
@@ -136,9 +159,7 @@ button:active {
   justify-content: center;
   gap: 20px;
   margin-top: 30px;
-  flex-wrap: wrap;
 }
-
 .filter-group {
   display: flex;
   justify-content: center;
@@ -314,8 +335,29 @@ button:active {
   }
 
   .container {
-    width: 900px;
-    min-height: auto;
-    border-radius: 25px;
+    max-width: 900px;
+    margin: 0;
   }
+
+}
+
+/* ===== MOBILE VERSION ===== */
+@media (max-width: 768px) {
+
+  .layout-group {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .layout-group button {
+    width: 70%;
+    max-width: 280px;
+  }
+
+  .container {
+    border-radius: 25px;
+    margin-top: 30px;
+  }
+
 }
