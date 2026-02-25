@@ -28,11 +28,11 @@ body {
   position: relative;
   background: white;
   padding: 20px;
-  border-radius: 25px;
-  width: 95%;
+  width: 100%;
   max-width: 500px;
   margin: 0 auto;
   min-height: 100vh;
+  border-radius: 25px 25px 0 0;
   box-shadow: 0 10px 40px rgba(255, 105, 180, 0.2);
 }
 
@@ -301,5 +301,21 @@ button:active {
   button {
     font-size: 14px;
     padding: 10px 20px;
+  }
+}
+
+/* ===== DESKTOP ONLY ===== */
+@media (min-width: 768px) {
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .container {
+    width: 900px;
+    min-height: auto;
+    border-radius: 25px;
   }
 }
