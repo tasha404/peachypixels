@@ -30,11 +30,12 @@ body {
 .container {
   position: relative;
   background: white;
-  padding: 30px;
+  padding: 20px;
   border-radius: 25px;
-  width: 900px;
+  width: 95%;
+  max-width: 900px;
   text-align: center;
-  box-shadow: 0 10px 40px rgba(255,105,180,0.2);
+  box-shadow: 0 10px 40px rgba(255, 105, 180, 0.2);
 }
 
 .home-icon {
@@ -219,11 +220,7 @@ button:active {
   cursor: pointer;
   border: 3px solid white;
   box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-  display: block;
-  margin: 0 auto;  
 }
-
-
 
 /* ===== COLOR PICKER POPUP ===== */
 .picker-popup {
@@ -273,4 +270,38 @@ button:active {
   margin-top: 20px;
   display: center;
   gap: 15px;
+}
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+
+  .result-layout {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .editor-side {
+    width: 100%;
+  }
+
+  .canvas {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .video {
+    width: 100%;
+  }
+
+  .countdown-overlay {
+    font-size: 60px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  button {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
 }
