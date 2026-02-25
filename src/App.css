@@ -186,17 +186,18 @@ button:disabled {
   background: #ffb6da;
   color: white;
 }
+
 .start-wrapper {
+  width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-top: 20px;
 }
 
 .start-wrapper button {
-  margin: 0 !important;
-  display: block;
+  margin: 0;
 }
-
 /* ===== RESULT SIDE-BY-SIDE LAYOUT ===== */
 .result-layout {
   display: flex;
