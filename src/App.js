@@ -17,6 +17,7 @@ function App() {
 
   const [borderColor, setBorderColor] = useState("#ffe4ef");
   const [caption, setCaption] = useState("");
+  const [borderType, setBorderType] = useState("solid");
   const [captionColor, setCaptionColor] = useState("#000000");
   const [captionSize, setCaptionSize] = useState(30);
   const [captionFont, setCaptionFont] = useState("Quicksand");
@@ -36,6 +37,7 @@ function App() {
     document.addEventListener("mousedown", handleClickOutside);
     return () =>
       document.removeEventListener("mousedown", handleClickOutside);
+    
   }, []);
 
   /* CAMERA */
@@ -164,8 +166,21 @@ function App() {
         canvas.height =
           total * height + padding * (total + 1) + textSpace;
 
-        ctx.fillStyle = borderColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (borderType === "solid") {
+  ctx.fillStyle = borderColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+if (borderType === "plaid") {
+  const img = new Image();
+  img.src = "/redplaid.png";
+
+  img.onload = () => {
+    const pattern = ctx.createPattern(img, "repeat");
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  };
+}
 
         photos.forEach((photo, index) => {
           const img = new Image();
@@ -186,8 +201,21 @@ function App() {
         canvas.width = width * 2 + padding * 3;
         canvas.height = height * 2 + padding * 3 + textSpace;
 
-        ctx.fillStyle = borderColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (borderType === "solid") {
+  ctx.fillStyle = borderColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+if (borderType === "plaid") {
+  const img = new Image();
+  img.src = "/redplaid.png";
+
+  img.onload = () => {
+    const pattern = ctx.createPattern(img, "repeat");
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  };
+}
 
         photos.forEach((photo, index) => {
           const img = new Image();
@@ -211,9 +239,7 @@ function App() {
       ctx.textAlign = "center";
       ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
     }
-  }, [screen, photos, layout, borderColor, caption, captionColor, captionSize, captionFont]);
-
-  /* UI */
+}, [screen, photos, layout, borderColor, caption, captionColor, captionSize, captionFont, borderType]);
   return (
     <div className="container">
       <h1>💖 Korean Photobooth</h1>
@@ -286,6 +312,15 @@ function App() {
                   setShowTextPicker(false);
                 }}
               />
+<div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
+  <button onClick={() => setBorderType("solid")}>
+    Solid
+  </button>
+  <button onClick={() => setBorderType("plaid")}>
+    Plaid
+  </button>
+</div>
+
               {showBorderPicker && (
                 <div className="picker-popup">
                   <HexColorPicker
