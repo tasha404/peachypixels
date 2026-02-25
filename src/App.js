@@ -245,7 +245,9 @@ function App() {
             <button onClick={() => setFilter("bright")}>Bright</button>
           </div>
 
-          <button onClick={startCapture}>Start 📸</button>
+          <div className="start-wrapper">
+            <button onClick={startCapture}>Start 📸</button>
+          </div>
         </>
       )}
 
