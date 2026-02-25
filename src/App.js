@@ -303,21 +303,7 @@ function App() {
             <div className="editor-card">
               <p>Text Settings</p>
 
-              <label>Font</label>
-              <select
-                value={captionFont}
-                onChange={(e) => setCaptionFont(e.target.value)}
-                className="font-dropdown"
-              >
-                <option value="Quicksand">Quicksand</option>
-                <option value="Pacifico">Pacifico</option>
-                <option value="Playfair Display">Playfair Display</option>
-                <option value="Montserrat">Montserrat</option>
-                <option value="Anton">Anton</option>
-                <option value="Indie Flower">Indie Flower</option>
-                <option value="Dancing Script">Dancing Script</option>
-                <option value="Poppins">Poppins</option>
-              </select>
+
 
               <div className="text-settings-row">
 
