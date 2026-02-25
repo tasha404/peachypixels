@@ -146,7 +146,7 @@ function App() {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
 
-      const width = 500;
+      const width = 400;
       const height = 350;
       const padding = 20;
       const textSpace = 100;
