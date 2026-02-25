@@ -329,6 +329,7 @@ button:active {
 
     .container {
       width: 100%;
+      max-width: none;
       height: 100dvh;
       margin: 0;
       border-radius: 0;
