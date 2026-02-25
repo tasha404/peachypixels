@@ -6,6 +6,8 @@ function App() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const pickerRef = useRef(null);
+  const borderPickerRef = useRef(null);
+  const textPickerRef = useRef(null);
 
   const [screen, setScreen] = useState("home");
   const [layout, setLayout] = useState(null);
@@ -28,17 +30,29 @@ function App() {
 
   /* CLOSE PICKERS */
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
-        setShowBorderPicker(false);
-        setShowTextPicker(false);
-      }
+  function handleClickOutside(event) {
+
+    if (
+      borderPickerRef.current &&
+      !borderPickerRef.current.contains(event.target)
+    ) {
+      setShowBorderPicker(false);
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-    
-  }, []);
+
+    if (
+      textPickerRef.current &&
+      !textPickerRef.current.contains(event.target)
+    ) {
+      setShowTextPicker(false);
+    }
+
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () =>
+    document.removeEventListener("mousedown", handleClickOutside);
+
+}, []);
 
   /* CAMERA */
   useEffect(() => {
@@ -356,11 +370,12 @@ if (layout === "grid3x2") {
   <p>Border</p>
 
   <div style={{
-    marginTop: "15px",
-    display: "flex",
-    gap: "15px",
-    alignItems: "center"
-  }}>
+  marginTop: "15px",
+  display: "flex",
+  gap: "15px",
+  alignItems: "center",
+  flexWrap: "nowrap"
+}}>
 
     {/* Solid (Color Picker Circle) */}
     <div
@@ -421,7 +436,7 @@ if (layout === "grid3x2") {
   }}
 />
   {showBorderPicker && (
-    <div className="picker-popup">
+  <div className="picker-popup" ref={borderPickerRef}>
       <HexColorPicker
         color={borderColor}
         onChange={setBorderColor}
@@ -459,8 +474,9 @@ if (layout === "grid3x2") {
         setShowBorderPicker(false);
       }}
     />
-    {showTextPicker && (
-      <div className="picker-popup">
+    {  showTextPicker && (
+      <div className="picker-popup" ref={textPickerRef}>
+
         <HexColorPicker
           color={captionColor}
           onChange={setCaptionColor}
