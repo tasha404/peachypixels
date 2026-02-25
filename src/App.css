@@ -129,6 +129,8 @@ body {
   100% { transform: translate(-50%, -50%) scale(1); }
 }
 
+
+
 /* ===== BUTTONS ===== */
 button {
   padding: 12px 28px;
@@ -180,7 +182,16 @@ button:active {
   background: #ffb6da;
   color: white;
 }
+.start-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
 
+.start-wrapper button {
+  margin: 0;
+  /* overrides global 5px margin */
+}
 /* ===== RESULT SIDE-BY-SIDE LAYOUT ===== */
 .result-layout {
   display: flex;
