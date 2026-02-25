@@ -251,9 +251,11 @@ function App() {
   <button disabled={isCapturing} onClick={() => setFilter("bright")}>Bright</button>
 </div>
 
-          <button disabled={isCapturing} onClick={startCapture}>
-  {isCapturing ? "Capturing..." : "Start 📸"}
-</button>
+          <div className="start-wrapper">
+  <button disabled={isCapturing} onClick={startCapture}>
+    {isCapturing ? "Capturing..." : "Start 📸"}
+  </button>
+</div>
         </>
       )}
 
