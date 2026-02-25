@@ -260,25 +260,16 @@ if (borderType === "bluePlaid") {
       }
 
 if (layout === "grid3x2") {
-  for (let i = 0; i < photos.length; i++) {
-    const img = new Image();
-    img.src = photos[i];
+  const row = Math.floor(i / 2);
+  const col = i % 2;
 
-    await new Promise(resolve => {
-      img.onload = resolve;
-    });
-
-    const row = Math.floor(i / 2);
-    const col = i % 2;
-
-    ctx.drawImage(
-      img,
-      padding + col * (width + padding),
-      padding + row * (height + padding),
-      width,
-      height
-    );
-  }
+  ctx.drawImage(
+    img,
+    padding + col * (width + padding),
+    padding + row * (height + padding),
+    width,
+    height
+  );
 }
 
     }
@@ -369,22 +360,25 @@ if (layout === "grid3x2") {
             <div className="editor-card">
   <p>Border</p>
 
-  <div style={{
-  marginTop: "15px",
-  display: "flex",
-  gap: "15px",
-  alignItems: "center",
-  flexWrap: "nowrap"
-}}>
-
-    {/* Solid (Color Picker Circle) */}
+  <div
+    style={{
+      marginTop: "15px",
+      display: "flex",
+      gap: "12px",
+      alignItems: "center",
+      overflowX: "auto",
+      whiteSpace: "nowrap"
+    }}
+  >
+    {/* Solid */}
     <div
       className="color-circle-btn"
       style={{
         background: borderColor,
-        border: borderType === "solid"
-          ? "3px solid #ff4da6"
-          : "3px solid white"
+        border:
+          borderType === "solid"
+            ? "3px solid #ff4da6"
+            : "3px solid white"
       }}
       onClick={() => {
         setBorderType("solid");
@@ -393,50 +387,53 @@ if (layout === "grid3x2") {
       }}
     />
 
-    {/* Plaid Circle */}
+    {/* Red Plaid */}
     <div
       onClick={() => {
-        setBorderType("redplaid");
+        setBorderType("redPlaid");
         setShowBorderPicker(false);
       }}
       style={{
-        width: "55px",
-        height: "55px",
+        width: "48px",
+        height: "48px",
         borderRadius: "50%",
         backgroundImage: "url('/redplaid.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         cursor: "pointer",
-        border: borderType === "redplaid"
-          ? "3px solid #ff4da6"
-          : "3px solid white",
+        border:
+          borderType === "redPlaid"
+            ? "3px solid #ff4da6"
+            : "3px solid white",
         boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
       }}
     />
 
+    {/* Blue Plaid */}
+    <div
+      onClick={() => {
+        setBorderType("bluePlaid");
+        setShowBorderPicker(false);
+      }}
+      style={{
+        width: "48px",
+        height: "48px",
+        borderRadius: "50%",
+        backgroundImage: "url('/blueplaid.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        cursor: "pointer",
+        border:
+          borderType === "bluePlaid"
+            ? "3px solid #ff4da6"
+            : "3px solid white",
+        boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+      }}
+    />
   </div>
-{/* Blue Plaid */}
-<div
-  onClick={() => {
-    setBorderType("bluePlaid");
-    setShowBorderPicker(false);
-  }}
-  style={{
-    width: "55px",
-    height: "55px",
-    borderRadius: "50%",
-    backgroundImage: "url('/blueplaid.png')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    cursor: "pointer",
-    border: borderType === "bluePlaid"
-      ? "3px solid #ff4da6"
-      : "3px solid white",
-    boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
-  }}
-/>
+
   {showBorderPicker && (
-  <div className="picker-popup" ref={borderPickerRef}>
+    <div className="picker-popup" ref={borderPickerRef}>
       <HexColorPicker
         color={borderColor}
         onChange={setBorderColor}
