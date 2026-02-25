@@ -330,6 +330,12 @@ button:disabled {
     gap: 40px;
   }
 
+    .start-wrapper {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
 }
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
