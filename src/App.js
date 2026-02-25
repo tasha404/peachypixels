@@ -208,7 +208,7 @@ if (borderType === "plaid") {
 
 if (borderType === "plaid") {
   const img = new Image();
-  img.src = "public/redplaid.png";
+  img.src = "/redplaid.png";
 
   img.onload = () => {
     const pattern = ctx.createPattern(img, "repeat");
@@ -319,35 +319,24 @@ if (borderType === "plaid") {
   flexWrap: "wrap"
 }}>
 
-  {/* Solid Preview */}
-  <div
-    onClick={() => setBorderType("solid")}
-    style={{
-      width: "55px",
-      height: "55px",
-      borderRadius: "50%",
-      background: borderColor,
-      cursor: "pointer",
-      border: borderType === "solid" ? "3px solid #ff4da6" : "3px solid white",
-      boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
-    }}
-  />
 
   {/* Plaid Preview */}
   <div
-    onClick={() => setBorderType("plaid")}
-    style={{
-      width: "55px",
-      height: "55px",
-      borderRadius: "50%",
-      backgroundImage: "url('/redplaid.png')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      cursor: "pointer",
-      border: borderType === "plaid" ? "3px solid #ff4da6" : "3px solid white",
-      boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
-    }}
-  />
+  onClick={() => setBorderType("plaid")}
+  style={{
+    width: "55px",
+    height: "55px",
+    borderRadius: "50%",
+    backgroundImage: "url('/redplaid.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    cursor: "pointer",
+    border: borderType === "plaid"
+      ? "3px solid #ff4da6"
+      : "3px solid white",
+    boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+  }}
+/>
 
 </div>
               {showBorderPicker && (
