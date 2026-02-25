@@ -28,9 +28,8 @@ body {
   position: relative;
   background: white;
   padding: 30px;
-  width: 100%;
+  width: 90%;
   max-width: 520px;
-  margin: 40px auto;
   border-radius: 25px;
   box-shadow: 0 10px 40px rgba(255, 105, 180, 0.2);
   overflow: visible;
@@ -359,5 +358,9 @@ button:active {
     border-radius: 25px;
     margin-top: 30px;
   }
-
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 }
