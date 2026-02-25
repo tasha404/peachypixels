@@ -146,8 +146,8 @@ function App() {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
 
-      const width = videoRef.current.videoWidth;
-      const height = videoRef.current.videoHeight;
+      const width = 500;
+      const height = 350;
       const padding = 20;
       const textSpace = 100;
 
