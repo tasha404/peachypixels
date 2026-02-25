@@ -342,10 +342,12 @@ button:disabled {
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
 
-  /* Do NOT flex-center body on mobile */
   body {
-    min-height: 100dvh;
-  }
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100dvh;
+    }
 
   .container {
     width: 92%;
@@ -354,21 +356,23 @@ button:disabled {
   }
 
   /* Layout stacking */
-  .result-layout {
-    flex-direction: column !important;
-    align-items: center;
-    gap: 25px;
-  }
-
-  .preview-side {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  .editor-side {
-    width: 100%;
-  }
+    .result-layout {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 25px;
+    }
+  
+    .preview-side {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .editor-side {
+      width: 100%;
+    }
 
   /* Canvas scaling properly */
   .canvas {
@@ -422,5 +426,11 @@ button:disabled {
     font-size: 14px;
     padding: 10px 20px;
   }
-
+.result-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
 }
