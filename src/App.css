@@ -30,6 +30,7 @@ body {
   padding: 30px;
   width: 90%;
   max-width: 520px;
+  margin: 60px auto;
   border-radius: 25px;
   box-shadow: 0 10px 40px rgba(255, 105, 180, 0.2);
   overflow: visible;
@@ -334,12 +335,19 @@ button:active {
   }
 
   .container {
+    width: 900px;
     max-width: 900px;
     margin: 0;
+    padding: 50px 80px;
+  }
+
+  .layout-group {
+    flex-direction: row;
+    justify-content: center;
+    gap: 40px;
   }
 
 }
-
 /* ===== MOBILE VERSION ===== */
 @media (max-width: 768px) {
 
@@ -357,10 +365,5 @@ button:active {
   .container {
     border-radius: 25px;
     margin-top: 30px;
-  }
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 }
