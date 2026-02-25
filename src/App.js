@@ -150,96 +150,104 @@ function App() {
 
   /* DRAW RESULT */
   useEffect(() => {
-    if (screen === "result" && photos.length > 0) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
+  if (screen !== "result" || photos.length === 0) return;
 
-      const width = 400;
-      const height = 350;
-      const padding = 20;
-      const textSpace = 100;
+  const canvas = canvasRef.current;
+  const ctx = canvas.getContext("2d");
+
+  const width = 400;
+  const height = 350;
+  const padding = 20;
+  const textSpace = 100;
+
+  const total =
+    layout === "strip3" ? 3 :
+    layout === "strip4" ? 4 :
+    4;
+
+  // ===== SET CANVAS SIZE =====
+  if (layout === "strip4" || layout === "strip3") {
+    canvas.width = width + padding * 2;
+    canvas.height = total * height + padding * (total + 1) + textSpace;
+  }
+
+  if (layout === "grid2x2") {
+    canvas.width = width * 2 + padding * 3;
+    canvas.height = height * 2 + padding * 3 + textSpace;
+  }
+
+  const drawAll = async () => {
+
+    // 1️⃣ Draw border first
+    if (borderType === "solid") {
+      ctx.fillStyle = borderColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    if (borderType === "plaid") {
+      const bg = new Image();
+      bg.src = "/redplaid.png";
+      await new Promise(resolve => {
+        bg.onload = resolve;
+      });
+
+      const pattern = ctx.createPattern(bg, "repeat");
+      ctx.fillStyle = pattern;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // 2️⃣ Draw photos
+    for (let i = 0; i < photos.length; i++) {
+      const img = new Image();
+      img.src = photos[i];
+
+      await new Promise(resolve => {
+        img.onload = resolve;
+      });
 
       if (layout === "strip4" || layout === "strip3") {
-        const total = photos.length;
-
-        canvas.width = width + padding * 2;
-        canvas.height =
-          total * height + padding * (total + 1) + textSpace;
-
-        if (borderType === "solid") {
-  ctx.fillStyle = borderColor;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-if (borderType === "plaid") {
-  const img = new Image();
-  img.src = "/redplaid.png";
-
-  img.onload = () => {
-    const pattern = ctx.createPattern(img, "repeat");
-    ctx.fillStyle = pattern;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  };
-}
-
-        photos.forEach((photo, index) => {
-          const img = new Image();
-          img.src = photo;
-          img.onload = () => {
-            ctx.drawImage(
-              img,
-              padding,
-              padding + index * (height + padding),
-              width,
-              height
-            );
-          };
-        });
+        ctx.drawImage(
+          img,
+          padding,
+          padding + i * (height + padding),
+          width,
+          height
+        );
       }
 
       if (layout === "grid2x2") {
-        canvas.width = width * 2 + padding * 3;
-        canvas.height = height * 2 + padding * 3 + textSpace;
-
-        if (borderType === "solid") {
-  ctx.fillStyle = borderColor;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-if (borderType === "plaid") {
-  const img = new Image();
-  img.src = "/redplaid.png";
-
-  img.onload = () => {
-    const pattern = ctx.createPattern(img, "repeat");
-    ctx.fillStyle = pattern;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  };
-}
-
-        photos.forEach((photo, index) => {
-          const img = new Image();
-          img.src = photo;
-          img.onload = () => {
-            const row = Math.floor(index / 2);
-            const col = index % 2;
-            ctx.drawImage(
-              img,
-              padding + col * (width + padding),
-              padding + row * (height + padding),
-              width,
-              height
-            );
-          };
-        });
+        const row = Math.floor(i / 2);
+        const col = i % 2;
+        ctx.drawImage(
+          img,
+          padding + col * (width + padding),
+          padding + row * (height + padding),
+          width,
+          height
+        );
       }
-
-      ctx.fillStyle = captionColor;
-      ctx.font = `${captionSize}px ${captionFont}`;
-      ctx.textAlign = "center";
-      ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
     }
-}, [screen, photos, layout, borderColor, caption, captionColor, captionSize, captionFont, borderType]);
+
+    // 3️⃣ Draw caption last
+    ctx.fillStyle = captionColor;
+    ctx.font = `${captionSize}px ${captionFont}`;
+    ctx.textAlign = "center";
+    ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
+  };
+
+  drawAll();
+
+}, [
+  screen,
+  photos,
+  layout,
+  borderColor,
+  borderType,
+  caption,
+  captionColor,
+  captionSize,
+  captionFont
+]);
   return (
     <div className="container">
       <h1>💖 Korean Photobooth</h1>
@@ -313,7 +321,7 @@ if (borderType === "plaid") {
       : "3px solid white"
   }}
   onClick={() => {
-    setBorderType("solid");   // 🔥 important
+    setBorderType("solid");   // 🔥 switch back to solid
     setShowBorderPicker(!showBorderPicker);
     setShowTextPicker(false);
   }}
@@ -328,7 +336,10 @@ if (borderType === "plaid") {
 
   {/* Plaid Preview */}
   <div
-  onClick={() => setBorderType("plaid")}
+  onClick={() => {
+  setBorderType("plaid");
+  setShowBorderPicker(false);
+}}
   style={{
     width: "55px",
     height: "55px",
@@ -341,6 +352,7 @@ if (borderType === "plaid") {
       ? "3px solid #ff4da6"
       : "3px solid white",
     boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+    
   }}
 />
 
