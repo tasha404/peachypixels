@@ -189,9 +189,10 @@ button:active {
 }
 
 .start-wrapper button {
-  margin: 0;
-  /* overrides global 5px margin */
+  margin: 0 !important;
+  display: block;
 }
+
 /* ===== RESULT SIDE-BY-SIDE LAYOUT ===== */
 .result-layout {
   display: flex;
