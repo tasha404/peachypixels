@@ -223,7 +223,20 @@ const drawSticker = useCallback(async (ctx, canvas) => {
     const x = canvas.width * sticker.x;
     const y = canvas.height * sticker.y;
 
-    ctx.drawImage(img, x, y, size, size);
+    const rotation = (sticker.rotation || 0) * Math.PI / 180;
+
+    ctx.save();
+
+    // Move to center of sticker
+    ctx.translate(x + size / 2, y + size / 2);
+
+    // Rotate
+    ctx.rotate(rotation);
+
+    // Draw from center
+    ctx.drawImage(img, -size / 2, -size / 2, size, size);
+
+    ctx.restore();
   }
 
 }, [selectedSticker]);
