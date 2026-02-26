@@ -2,14 +2,19 @@ import React, { useRef, useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import "./App.css";
 
-const stickerTemplates = {
-  ribboncoquette: [
-    { src: "public/stickers/heart.png", x: 0.02, y: 0.02, size: 0.18 },
-    { src: "public/stickers/heart.png", x: 0.85, y: 0.03, size: 0.20 },
-    { src: "public/stickers/heart.png", x: 0.90, y: 0.30, size: 0.16 },
-    { src: "public/stickers/heart.png", x: 0.01, y: 0.35, size: 0.17 },
-    { src: "public/stickers/heart.png", x: 0.82, y: 0.55, size: 0.13 },
-    { src: "public/stickers/heart.png", x: 0.05, y: 0.70, size: 0.15 },
+const stickerLayouts = {
+  heart: [
+    { src: "/stickers/heart.png", x: 0.1, y: 0.3, size: 0.25 }
+  ],
+  star: [
+    { src: "/stickers/star.png", x: 0.05, y: 0.1, size: 0.18 },
+    { src: "/stickers/star.png", x: 0.75, y: 0.4, size: 0.18 },
+    { src: "/stickers/star.png", x: 0.08, y: 0.75, size: 0.18 }
+  ],
+  nailong: [
+    { src: "/stickers/nailong.png", x: 0.05, y: 0.1, size: 0.18 },
+    { src: "/stickers/nailong.png", x: 0.75, y: 0.55, size: 0.20 },
+    { src: "/stickers/nailong.png", x: 0.05, y: 0.65, size: 0.18 }
   ]
 };
 
@@ -188,7 +193,30 @@ const height = video.videoHeight;
     link.click();
   };
 
+//sticker
+const drawSticker = async (ctx, canvas) => {
 
+  if (!selectedSticker) return;
+
+  const layout = stickerLayouts[selectedSticker];
+  if (!layout) return;
+
+  for (let sticker of layout) {
+
+    const img = new Image();
+    img.src = sticker.src;
+
+    await new Promise(resolve => {
+      img.onload = resolve;
+    });
+
+    const size = canvas.width * sticker.size;
+    const x = canvas.width * sticker.x;
+    const y = canvas.height * sticker.y;
+
+    ctx.drawImage(img, x, y, size, size);
+  }
+};
 
  /* DRAW RESULT */
 useEffect(() => {
@@ -335,41 +363,8 @@ ctx.font = `${captionSize}px ${captionFont}`;
 ctx.textAlign = "center";
 ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
 
-// 4️⃣ Draw sticker theme (template system)
-if (selectedSticker && stickerTemplates[selectedSticker]) {
+await drawSticker(ctx, canvas);
 
-  const template = stickerTemplates[selectedSticker];
-
-  for (let sticker of template) {
-
-    const img = new Image();
-    img.src = sticker.src;
-
-    await new Promise(resolve => {
-      img.onload = resolve;
-    });
-
-    const size = canvas.width * sticker.size;
-    const x = canvas.width * sticker.x;
-    const y = canvas.height * sticker.y;
-
-    ctx.save();
-
-    // optional small random tilt
-    ctx.translate(x + size / 2, y + size / 2);
-    ctx.rotate((Math.random() - 0.5) * 0.3);
-
-    ctx.drawImage(
-      img,
-      -size / 2,
-      -size / 2,
-      size,
-      size
-    );
-
-    ctx.restore();
-  }
-}
   };
 
   drawAll();
@@ -560,7 +555,7 @@ if (selectedSticker && stickerTemplates[selectedSticker]) {
     />
 
     <div
-      onClick={() => setSelectedSticker("/stickers/heart.png")}
+      onClick={() => setSelectedSticker("heart")}
       style={{
         width: "48px",
         height: "48px",
@@ -576,7 +571,7 @@ if (selectedSticker && stickerTemplates[selectedSticker]) {
     />
 
     <div
-      onClick={() => setSelectedSticker("/stickers/star.png")}
+      onClick={() => setSelectedSticker("star")}
       style={{
         width: "48px",
         height: "48px",
@@ -591,7 +586,7 @@ if (selectedSticker && stickerTemplates[selectedSticker]) {
       }}
     />
     <div
-      onClick={() => setSelectedSticker("/stickers/nailong.png")}
+      onClick={() => setSelectedSticker("nailong")}
       style={{
         width: "48px",
         height: "48px",
