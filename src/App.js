@@ -2,6 +2,18 @@ import React, { useRef, useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import "./App.css";
 
+const stickerTemplates = {
+  ribboncoquette: [
+    { src: "/stickers/heart.png", x: 0.02, y: 0.02, size: 0.18 },
+    { src: "/stickers/heart.png", x: 0.85, y: 0.03, size: 0.20 },
+    { src: "/stickers/heart.png", x: 0.90, y: 0.30, size: 0.16 },
+    { src: "/stickers/heart.png", x: 0.01, y: 0.35, size: 0.17 },
+    { src: "/stickers/heart.png", x: 0.82, y: 0.55, size: 0.13 },
+    { src: "/stickers/heart.png", x: 0.05, y: 0.70, size: 0.15 },
+  ]
+};
+
+
 function App() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -176,16 +188,7 @@ const height = video.videoHeight;
     link.click();
   };
 
-  const stickerTemplates = {
-  ribboncoquette: [
-    { src: "/stickers/heart.png", x: 0.02, y: 0.02, size: 0.18 },
-    { src: "/stickers/heart.png", x: 0.85, y: 0.03, size: 0.20 },
-    { src: "/stickers/heart.png", x: 0.90, y: 0.30, size: 0.16 },
-    { src: "/stickers/heart.png", x: 0.01, y: 0.35, size: 0.17 },
-    { src: "/stickers/heart.png", x: 0.82, y: 0.55, size: 0.13 },
-    { src: "/stickers/heart.png", x: 0.05, y: 0.70, size: 0.15 },
-  ]
-};
+
 
  /* DRAW RESULT */
 useEffect(() => {
