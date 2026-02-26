@@ -172,7 +172,8 @@ const height = video.videoHeight;
   const ctx = canvas.getContext("2d");
 
   const width = 260;
-  const height = 220;
+const photoRatio = 4 / 3;   // since your camera is 4:3
+const height = width / photoRatio;
   const padding = 20;
   const textSpace = 100;
 
@@ -231,49 +232,53 @@ if (borderType === "bluePlaid") {
 
     // 2️⃣ Draw photos
     for (let i = 0; i < photos.length; i++) {
-      const img = new Image();
-      img.src = photos[i];
+  const img = new Image();
+  img.src = photos[i];
 
-      await new Promise(resolve => {
-        img.onload = resolve;
-      });
+  await new Promise(resolve => {
+    img.onload = resolve;
+  });
 
-      if (layout === "strip4" || layout === "strip3") {
-        ctx.drawImage(
-          img,
-          padding,
-          padding + i * (height + padding),
-          width,
-          height
-        );
-      }
+  const ratio = img.width / img.height;
+  const drawWidth = width;
+  const drawHeight = drawWidth / ratio;
 
-      if (layout === "grid2x2") {
-        const row = Math.floor(i / 2);
-        const col = i % 2;
-        ctx.drawImage(
-          img,
-          padding + col * (width + padding),
-          padding + row * (height + padding),
-          width,
-          height
-        );
-      }
+  if (layout === "strip4" || layout === "strip3") {
+    ctx.drawImage(
+      img,
+      padding,
+      padding + i * (drawHeight + padding),
+      drawWidth,
+      drawHeight
+    );
+  }
 
-if (layout === "grid3x2") {
-  const row = Math.floor(i / 2);
-  const col = i % 2;
+  if (layout === "grid2x2") {
+    const row = Math.floor(i / 2);
+    const col = i % 2;
 
-  ctx.drawImage(
-    img,
-    padding + col * (width + padding),
-    padding + row * (height + padding),
-    width,
-    height
-  );
+    ctx.drawImage(
+      img,
+      padding + col * (drawWidth + padding),
+      padding + row * (drawHeight + padding),
+      drawWidth,
+      drawHeight
+    );
+  }
+
+  if (layout === "grid3x2") {
+    const row = Math.floor(i / 2);
+    const col = i % 2;
+
+    ctx.drawImage(
+      img,
+      padding + col * (drawWidth + padding),
+      padding + row * (drawHeight + padding),
+      drawWidth,
+      drawHeight
+    );
+  }
 }
-
-    }
 
     // 3️⃣ Draw caption last
     ctx.fillStyle = captionColor;
