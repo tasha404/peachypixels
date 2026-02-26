@@ -134,8 +134,9 @@ function App() {
   };
 
   const takePhoto = () => {
-    const width = 500;
-    const height = 350;
+    const video = videoRef.current;
+const width = video.videoWidth;
+const height = video.videoHeight;
 
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
