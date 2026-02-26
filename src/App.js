@@ -579,20 +579,20 @@ await drawSticker(ctx, canvas);
     />
 
     <div
-      onClick={() => setSelectedSticker("heart")}
-      style={{
-        width: "48px",
-        height: "48px",
-        borderRadius: "50%",
-        backgroundImage: "url('/stickers/heart.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        border: selectedSticker === "/stickers/heart.png"
-          ? "3px solid #ff4da6"
-          : "3px solid white",
-        cursor: "pointer"
-      }}
-    />
+  onClick={() => setSelectedSticker("heart")}
+  style={{
+    width: "48px",
+    height: "48px",
+    borderRadius: "50%",
+    backgroundImage: "url('/stickers/heart.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    border: selectedSticker === "heart"
+      ? "3px solid #ff4da6"
+      : "3px solid white",
+    cursor: "pointer"
+  }}
+/>
 
     <div
       onClick={() => setSelectedSticker("star")}
@@ -603,7 +603,7 @@ await drawSticker(ctx, canvas);
         backgroundImage: "url('/stickers/star.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
-        border: selectedSticker === "/stickers/star.png"
+        border: selectedSticker === "stars"
           ? "3px solid #ff4da6"
           : "3px solid white",
         cursor: "pointer"
@@ -618,7 +618,7 @@ await drawSticker(ctx, canvas);
         backgroundImage: "url('/stickers/nailong.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
-        border: selectedSticker === "/stickers/nailong.png"
+        border: selectedSticker === "nailong"
           ? "3px solid #ff4da6"
           : "3px solid white",
         cursor: "pointer"
