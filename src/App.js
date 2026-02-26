@@ -174,48 +174,58 @@ const height = video.videoHeight;
     link.click();
   };
 
-  /* DRAW RESULT */
-  useEffect(() => {
+ /* DRAW RESULT */
+useEffect(() => {
   if (screen !== "result" || photos.length === 0) return;
 
   const canvas = canvasRef.current;
   const ctx = canvas.getContext("2d");
 
   const width = 260;
-const photoRatio = 4 / 3;   // since your camera is 4:3
-const height = width / photoRatio;
   const padding = 20;
   const textSpace = 100;
 
-  const total =
-    layout === "strip3" ? 3 :
-    layout === "strip4" ? 4 :
-    4;
-
-  // ===== SET CANVAS SIZE =====
-  if (layout === "strip4" || layout === "strip3") {
-    canvas.width = width + padding * 2;
-canvas.height =
-  total * height +
-  padding * (total + 1) +
-  textSpace;
-  }
-
-  if (layout === "grid2x2") {
-    canvas.width = width * 2 + padding * 3;
-canvas.height =
-  height * 2 +
-  padding * 3 +
-  textSpace;
-  }
-if (layout === "grid3x2") {
-  canvas.width = width * 2 + padding * 3;
-canvas.height =
-  height * 3 +
-  padding * 4 +
-  textSpace;
-}
   const drawAll = async () => {
+
+    // ===== DETERMINE GRID STRUCTURE =====
+    const columns =
+      layout === "grid2x2" ? 2 :
+      layout === "grid3x2" ? 2 :
+      1;
+
+    const rows =
+      layout === "grid2x2" ? 2 :
+      layout === "grid3x2" ? 3 :
+      photos.length;
+
+    // ===== SET CANVAS WIDTH =====
+    canvas.width =
+      columns === 1
+        ? width + padding * 2
+        : width * columns + padding * (columns + 1);
+
+    // ===== GET REAL IMAGE RATIO =====
+    const firstImg = new Image();
+    firstImg.src = photos[0];
+
+    await new Promise(resolve => {
+      firstImg.onload = resolve;
+    });
+
+    const ratio = firstImg.width / firstImg.height;
+    const drawHeight = width / ratio;
+
+    // ===== SET CANVAS HEIGHT =====
+    canvas.height =
+      rows * drawHeight +
+      padding * (rows + 1) +
+      textSpace;
+
+    // ===== NOW YOU CAN CALL YOUR EXISTING DRAW CODE =====
+    await drawAllContent(drawHeight);
+  };
+
+  const drawAllContent = async (drawHeight) => {
 
     // 1️⃣ Draw border first
     if (borderType === "solid") {
@@ -249,8 +259,9 @@ if (borderType === "bluePlaid") {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-    // 2️⃣ Draw photos
-    for (let i = 0; i < photos.length; i++) {
+// 2️⃣ Draw photos
+
+for (let i = 0; i < photos.length; i++) {
   const img = new Image();
   img.src = photos[i];
 
@@ -262,6 +273,7 @@ if (borderType === "bluePlaid") {
   const drawWidth = width;
   const drawHeight = drawWidth / ratio;
 
+  // ===== STRIP LAYOUTS =====
   if (layout === "strip4" || layout === "strip3") {
     ctx.drawImage(
       img,
@@ -272,6 +284,7 @@ if (borderType === "bluePlaid") {
     );
   }
 
+  // ===== 2x2 GRID =====
   if (layout === "grid2x2") {
     const row = Math.floor(i / 2);
     const col = i % 2;
@@ -285,6 +298,7 @@ if (borderType === "bluePlaid") {
     );
   }
 
+  // ===== 3x2 GRID =====
   if (layout === "grid3x2") {
     const row = Math.floor(i / 2);
     const col = i % 2;
