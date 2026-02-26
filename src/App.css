@@ -342,17 +342,27 @@ button:disabled {
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
 
-  body {
+  /* Only center on home */
+    body.home-mode {
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100dvh;
+      min-height: 100vh;
+    }
+  
+    /* Allow scrolling on result */
+    body.result-mode {
+      display: block;
+      min-height: 100vh;
+      overflow-y: auto;
     }
 
   .container {
     width: 92%;
     max-width: 420px;
     margin: 0 auto;
+    max-height: none;
+    overflow: visible;
   }
 
   /* Layout stacking */
@@ -361,6 +371,7 @@ button:disabled {
       flex-direction: column !important;
       align-items: center !important;
       gap: 25px;
+      align-items: flex-start !important;
     }
   
     .preview-side {
