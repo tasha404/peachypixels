@@ -326,7 +326,7 @@ ctx.font = `${captionSize}px ${captionFont}`;
 ctx.textAlign = "center";
 ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
 
-// 4️⃣ Draw stickers ON TOP OF EVERYTHING
+// 4️⃣ Draw RANDOM stickers on top
 if (selectedSticker) {
   const stickerImg = new Image();
   stickerImg.src = selectedSticker;
@@ -335,27 +335,34 @@ if (selectedSticker) {
     stickerImg.onload = resolve;
   });
 
-  // responsive sizing
-  const size = canvas.width * 0.18;
-  const spacing = canvas.width * 0.28;
+  const stickerCount = 6; // 5 or 6 stickers only
 
-  for (let x = 0; x < canvas.width; x += spacing) {
-    for (let y = 0; y < canvas.height; y += spacing) {
-      ctx.save();
+  for (let i = 0; i < stickerCount; i++) {
 
-      ctx.translate(x + size / 2, y + size / 2);
-      ctx.rotate((Math.random() - 0.5) * 0.4);
+    // Random size (responsive)
+    const size = canvas.width * (0.12 + Math.random() * 0.08);
 
-      ctx.drawImage(
-        stickerImg,
-        -size / 2,
-        -size / 2,
-        size,
-        size
-      );
+    // Random position
+    const x = Math.random() * (canvas.width - size);
+    const y = Math.random() * (canvas.height - size);
 
-      ctx.restore();
-    }
+    // Random rotation
+    const rotation = (Math.random() - 0.5) * 1; 
+
+    ctx.save();
+
+    ctx.translate(x + size / 2, y + size / 2);
+    ctx.rotate(rotation);
+
+    ctx.drawImage(
+      stickerImg,
+      -size / 2,
+      -size / 2,
+      size,
+      size
+    );
+
+    ctx.restore();
   }
 }
   };
