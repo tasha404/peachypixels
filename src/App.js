@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { HexColorPicker } from "react-colorful";
 import "./App.css";
 
@@ -194,7 +194,7 @@ const height = video.videoHeight;
   };
 
 //sticker
-const drawSticker = async (ctx, canvas) => {
+const drawSticker = useCallback(async (ctx, canvas) => {
 
   if (!selectedSticker) return;
 
@@ -216,7 +216,8 @@ const drawSticker = async (ctx, canvas) => {
 
     ctx.drawImage(img, x, y, size, size);
   }
-};
+
+}, [selectedSticker]);
 
  /* DRAW RESULT */
 useEffect(() => {
@@ -379,7 +380,8 @@ await drawSticker(ctx, canvas);
   captionColor,
   captionSize,
   captionFont,
-  selectedSticker   // ADD THIS
+  selectedSticker,
+  drawSticker
 ]);
   return (
     <div className="container">
