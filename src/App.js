@@ -185,16 +185,25 @@ const height = width / photoRatio;
   // ===== SET CANVAS SIZE =====
   if (layout === "strip4" || layout === "strip3") {
     canvas.width = width + padding * 2;
-    canvas.height = total * height + padding * (total + 1) + textSpace;
+canvas.height =
+  total * height +
+  padding * (total + 1) +
+  textSpace;
   }
 
   if (layout === "grid2x2") {
     canvas.width = width * 2 + padding * 3;
-    canvas.height = height * 2 + padding * 3 + textSpace;
+canvas.height =
+  height * 2 +
+  padding * 3 +
+  textSpace;
   }
 if (layout === "grid3x2") {
   canvas.width = width * 2 + padding * 3;
-  canvas.height = height * 3 + padding * 4 + textSpace;
+canvas.height =
+  height * 3 +
+  padding * 4 +
+  textSpace;
 }
   const drawAll = async () => {
 
