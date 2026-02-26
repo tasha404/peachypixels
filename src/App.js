@@ -28,6 +28,16 @@ function App() {
   const [showTextPicker, setShowTextPicker] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
 
+  useEffect(() => {
+  if (screen === "home") {
+    document.body.classList.add("home-mode");
+    document.body.classList.remove("result-mode");
+  } else {
+    document.body.classList.remove("home-mode");
+    document.body.classList.add("result-mode");
+  }
+}, [screen]);
+
   /* CLOSE PICKERS */
   useEffect(() => {
   function handleClickOutside(event) {
