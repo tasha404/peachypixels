@@ -27,6 +27,7 @@ function App() {
   const [showBorderPicker, setShowBorderPicker] = useState(false);
   const [showTextPicker, setShowTextPicker] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [selectedSticker, setSelectedSticker] = useState(null);
 
   useEffect(() => {
   if (screen === "home") {
@@ -318,6 +319,45 @@ for (let i = 0; i < photos.length; i++) {
     ctx.font = `${captionSize}px ${captionFont}`;
     ctx.textAlign = "center";
     ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
+
+    // 3️⃣ Draw caption
+ctx.fillStyle = captionColor;
+ctx.font = `${captionSize}px ${captionFont}`;
+ctx.textAlign = "center";
+ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
+
+// 4️⃣ Draw stickers ON TOP OF EVERYTHING
+if (selectedSticker) {
+  const stickerImg = new Image();
+  stickerImg.src = selectedSticker;
+
+  await new Promise(resolve => {
+    stickerImg.onload = resolve;
+  });
+
+  // responsive sizing
+  const size = canvas.width * 0.18;
+  const spacing = canvas.width * 0.28;
+
+  for (let x = 0; x < canvas.width; x += spacing) {
+    for (let y = 0; y < canvas.height; y += spacing) {
+      ctx.save();
+
+      ctx.translate(x + size / 2, y + size / 2);
+      ctx.rotate((Math.random() - 0.5) * 0.4);
+
+      ctx.drawImage(
+        stickerImg,
+        -size / 2,
+        -size / 2,
+        size,
+        size
+      );
+
+      ctx.restore();
+    }
+  }
+}
   };
 
   drawAll();
@@ -331,7 +371,8 @@ for (let i = 0; i < photos.length; i++) {
   caption,
   captionColor,
   captionSize,
-  captionFont
+  captionFont,
+  selectedSticker   // ADD THIS
 ]);
   return (
     <div className="container">
@@ -480,7 +521,80 @@ for (let i = 0; i < photos.length; i++) {
     </div>
   )}
 </div>
+{/* STICKERS */}
+<div className="editor-card">
+  <p>Stickers</p>
 
+  <div
+    style={{
+      marginTop: "15px",
+      display: "flex",
+      gap: "12px",
+      overflowX: "auto"
+    }}
+  >
+    <div
+      onClick={() => setSelectedSticker(null)}
+      style={{
+        width: "48px",
+        height: "48px",
+        borderRadius: "50%",
+        background: "#fff",
+        border: selectedSticker === null
+          ? "3px solid #ff4da6"
+          : "3px solid white",
+        cursor: "pointer"
+      }}
+    />
+
+    <div
+      onClick={() => setSelectedSticker("/stickers/heart.png")}
+      style={{
+        width: "48px",
+        height: "48px",
+        borderRadius: "50%",
+        backgroundImage: "url('/stickers/heart.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        border: selectedSticker === "/stickers/heart.png"
+          ? "3px solid #ff4da6"
+          : "3px solid white",
+        cursor: "pointer"
+      }}
+    />
+
+    <div
+      onClick={() => setSelectedSticker("/stickers/star.png")}
+      style={{
+        width: "48px",
+        height: "48px",
+        borderRadius: "50%",
+        backgroundImage: "url('/stickers/star.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        border: selectedSticker === "/stickers/star.png"
+          ? "3px solid #ff4da6"
+          : "3px solid white",
+        cursor: "pointer"
+      }}
+    />
+    <div
+      onClick={() => setSelectedSticker("/stickers/nailong.png")}
+      style={{
+        width: "48px",
+        height: "48px",
+        borderRadius: "50%",
+        backgroundImage: "url('/stickers/nailong.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        border: selectedSticker === "/stickers/nailong.png"
+          ? "3px solid #ff4da6"
+          : "3px solid white",
+        cursor: "pointer"
+      }}
+    />
+  </div>
+</div>
             {/* TEXT */}
             <div className="editor-card">
               <p>Text</p>
