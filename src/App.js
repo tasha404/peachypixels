@@ -4,15 +4,15 @@ import "./App.css";
 
 const stickerLayouts = {
   heart: [
-    { src: "/stickers/heart.png", x: 250, y: 20, size: 60},
-    { src: "/stickers/heart.png", x: 70, y: 200, size: 57},
-    { src: "/stickers/heart.png", x:  80, y: 650, size: 60},
-    { src: "/stickers/heart.png", x:  50, y: 990, size: 50},
-    { src: "/stickers/heart.png", x:  90, y:  140, size: 70},
-    { src: "/stickers/heart.png", x: 1, y: 15, size: 78},
-    { src: "/stickers/heart.png", x: -18, y: 450, size: 78},
-    { src: "/stickers/heart.png", x: -8, y: 860, size: 60},
-    { src: "/stickers/heart.png", x: 25, y:  170, size: 70}
+    { src: "/stickers/heart.png", x: 0.75, y: 0.03, size: 0.15 },
+    { src: "/stickers/heart.png", x: 0.25, y: 0.20, size: 0.14 },
+    { src: "/stickers/heart.png", x: 0.30, y: 0.60, size: 0.15 },
+    { src: "/stickers/heart.png", x: 0.18, y: 0.85, size: 0.12 },
+    { src: "/stickers/heart.png", x: 0.35, y: 0.12, size: 0.18 },
+    { src: "/stickers/heart.png", x: 0.02, y: 0.02, size: 0.20 },
+    { src: "/stickers/heart.png", x: 0.00, y: 0.40, size: 0.20 },
+    { src: "/stickers/heart.png", x: 0.02, y: 0.75, size: 0.15 },
+    { src: "/stickers/heart.png", x: 0.12, y: 0.15, size: 0.18 }
   ],
   star: [
     { src: "/stickers/star.png", x: 0.05, y: 0.1, size: 0.18 },
