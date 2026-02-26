@@ -28,6 +28,7 @@ function App() {
   const [showTextPicker, setShowTextPicker] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
+  
 
   useEffect(() => {
   if (screen === "home") {
@@ -175,6 +176,17 @@ const height = video.videoHeight;
     link.click();
   };
 
+  const stickerTemplates = {
+  ribboncoquette: [
+    { src: "/stickers/heart.png", x: 0.02, y: 0.02, size: 0.18 },
+    { src: "/stickers/heart.png", x: 0.85, y: 0.03, size: 0.20 },
+    { src: "/stickers/heart.png", x: 0.90, y: 0.30, size: 0.16 },
+    { src: "/stickers/heart.png", x: 0.01, y: 0.35, size: 0.17 },
+    { src: "/stickers/heart.png", x: 0.82, y: 0.55, size: 0.13 },
+    { src: "/stickers/heart.png", x: 0.05, y: 0.70, size: 0.15 },
+  ]
+};
+
  /* DRAW RESULT */
 useEffect(() => {
   if (screen !== "result" || photos.length === 0) return;
@@ -314,48 +326,38 @@ for (let i = 0; i < photos.length; i++) {
   }
 }
 
-    // 3️⃣ Draw caption last
-    ctx.fillStyle = captionColor;
-    ctx.font = `${captionSize}px ${captionFont}`;
-    ctx.textAlign = "center";
-    ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
-
     // 3️⃣ Draw caption
 ctx.fillStyle = captionColor;
 ctx.font = `${captionSize}px ${captionFont}`;
 ctx.textAlign = "center";
 ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
 
-// 4️⃣ Draw RANDOM stickers on top
-if (selectedSticker) {
-  const stickerImg = new Image();
-  stickerImg.src = selectedSticker;
+// 4️⃣ Draw sticker theme (template system)
+if (selectedSticker && stickerTemplates[selectedSticker]) {
 
-  await new Promise(resolve => {
-    stickerImg.onload = resolve;
-  });
+  const template = stickerTemplates[selectedSticker];
 
-  const stickerCount = 6; // 5 or 6 stickers only
+  for (let sticker of template) {
 
-  for (let i = 0; i < stickerCount; i++) {
+    const img = new Image();
+    img.src = sticker.src;
 
-    // Random size (responsive)
-    const size = canvas.width * (0.12 + Math.random() * 0.08);
+    await new Promise(resolve => {
+      img.onload = resolve;
+    });
 
-    // Random position
-    const x = Math.random() * (canvas.width - size);
-    const y = Math.random() * (canvas.height - size);
-
-    // Random rotation
-    const rotation = (Math.random() - 0.5) * 1; 
+    const size = canvas.width * sticker.size;
+    const x = canvas.width * sticker.x;
+    const y = canvas.height * sticker.y;
 
     ctx.save();
 
+    // optional small random tilt
     ctx.translate(x + size / 2, y + size / 2);
-    ctx.rotate(rotation);
+    ctx.rotate((Math.random() - 0.5) * 0.3);
 
     ctx.drawImage(
-      stickerImg,
+      img,
       -size / 2,
       -size / 2,
       size,
