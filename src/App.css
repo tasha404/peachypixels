@@ -381,9 +381,19 @@ button:disabled {
     max-width: 100%;
   }
 
-  .video {
-    width: 100%;
-  }
+    .camera-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      border-radius: 20px;
+    }
+  
+    .video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
   .countdown-overlay {
     font-size: 60px;
