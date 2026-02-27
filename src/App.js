@@ -466,6 +466,11 @@ function App() {
               autoPlay
               playsInline
               className="video mirror"
+              // Apply filter style for preview on non-iOS devices
+              style={!isIOS ? { 
+                filter: getCanvasFilter(),
+                WebkitFilter: getCanvasFilter() 
+              } : {}}
             />
             {countdown && <div className="countdown-overlay">{countdown}</div>}
             {flash && <div className="flash"></div>}
@@ -516,7 +521,7 @@ function App() {
               color: '#ff4da6',
               fontSize: '14px'
             }}>
-              📱 Filters are not available on iOS
+              📱 Filters are not available on iOS preview, but will apply to your photos
             </div>
           )}
 
