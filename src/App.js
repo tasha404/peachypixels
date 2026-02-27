@@ -52,6 +52,19 @@ function App() {
   const [showTextPicker, setShowTextPicker] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (screen === "home") {
@@ -92,8 +105,19 @@ function App() {
   }, [screen]);
 
   const startCamera = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoRef.current.srcObject = stream;
+    try {
+      const constraints = {
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user"
+        }
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      videoRef.current.srcObject = stream;
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+    }
   };
 
   const stopCamera = () => {
@@ -164,6 +188,16 @@ function App() {
     }
   }, [filter]);
 
+  // For mobile: apply filter via CSS class instead of canvas filter
+  const getFilterClassName = useCallback(() => {
+    switch (filter) {
+      case "bw": return "filter-bw";
+      case "vintage": return "filter-vintage";
+      case "bright": return "filter-bright";
+      default: return "";
+    }
+  }, [filter]);
+
   const takePhoto = () => {
     const video = videoRef.current;
 
@@ -193,6 +227,8 @@ function App() {
     setTimeout(() => setFlash(false), 200);
 
     ctx.save();
+    
+    // Apply filter for all devices
     ctx.filter = getCanvasFilter();
 
     ctx.translate(cropWidth, 0);
@@ -226,9 +262,11 @@ function App() {
     for (let sticker of layout) {
       const img = new Image();
       img.src = sticker.src;
+      img.crossOrigin = "anonymous"; // Add this for CORS if needed
 
       await new Promise(resolve => {
         img.onload = resolve;
+        img.onerror = resolve; // Continue even if image fails to load
       });
 
       const size = canvas.width * sticker.size;
@@ -238,11 +276,9 @@ function App() {
       const rotation = (sticker.rotation || 0) * Math.PI / 180;
 
       ctx.save();
-
       ctx.translate(x + size / 2, y + size / 2);
       ctx.rotate(rotation);
       ctx.drawImage(img, -size / 2, -size / 2, size, size);
-
       ctx.restore();
     }
   }, [selectedSticker]);
@@ -280,9 +316,11 @@ function App() {
 
       const firstImg = new Image();
       firstImg.src = photos[0];
+      firstImg.crossOrigin = "anonymous";
 
       await new Promise(resolve => {
         firstImg.onload = resolve;
+        firstImg.onerror = resolve;
       });
 
       const ratio = firstImg.width / firstImg.height;
@@ -306,9 +344,11 @@ function App() {
       if (borderType === "redPlaid") {
         const bg = new Image();
         bg.src = "/redplaid.png";
+        bg.crossOrigin = "anonymous";
 
         await new Promise(resolve => {
           bg.onload = resolve;
+          bg.onerror = resolve;
         });
 
         const pattern = ctx.createPattern(bg, "repeat");
@@ -319,9 +359,11 @@ function App() {
       if (borderType === "bluePlaid") {
         const bg = new Image();
         bg.src = "/blueplaid.png";
+        bg.crossOrigin = "anonymous";
 
         await new Promise(resolve => {
           bg.onload = resolve;
+          bg.onerror = resolve;
         });
 
         const pattern = ctx.createPattern(bg, "repeat");
@@ -333,9 +375,11 @@ function App() {
       for (let i = 0; i < photos.length; i++) {
         const img = new Image();
         img.src = photos[i];
+        img.crossOrigin = "anonymous";
 
         await new Promise(resolve => {
           img.onload = resolve;
+          img.onerror = resolve;
         });
 
         const drawWidth = width;
@@ -364,6 +408,8 @@ function App() {
         }
 
         ctx.save();
+        
+        // Apply filter for all devices
         ctx.filter = getCanvasFilter();
 
         ctx.drawImage(
@@ -429,18 +475,44 @@ function App() {
               ref={videoRef}
               autoPlay
               playsInline
-              className="video mirror"
-              style={{ filter: getCanvasFilter() }}
+              className={`video mirror ${getFilterClassName()}`}
+              style={{ 
+                filter: isMobile ? 'none' : getCanvasFilter() // Only apply filter via CSS on mobile
+              }}
             />
             {countdown && <div className="countdown-overlay">{countdown}</div>}
             {flash && <div className="flash"></div>}
           </div>
 
           <div className="filter-group">
-            <button disabled={isCapturing} onClick={() => setFilter("none")}>Normal</button>
-            <button disabled={isCapturing} onClick={() => setFilter("bw")}>B&W</button>
-            <button disabled={isCapturing} onClick={() => setFilter("vintage")}>Vintage</button>
-            <button disabled={isCapturing} onClick={() => setFilter("bright")}>Bright</button>
+            <button 
+              disabled={isCapturing} 
+              onClick={() => setFilter("none")}
+              className={filter === "none" ? "active" : ""}
+            >
+              Normal
+            </button>
+            <button 
+              disabled={isCapturing} 
+              onClick={() => setFilter("bw")}
+              className={filter === "bw" ? "active" : ""}
+            >
+              B&W
+            </button>
+            <button 
+              disabled={isCapturing} 
+              onClick={() => setFilter("vintage")}
+              className={filter === "vintage" ? "active" : ""}
+            >
+              Vintage
+            </button>
+            <button 
+              disabled={isCapturing} 
+              onClick={() => setFilter("bright")}
+              className={filter === "bright" ? "active" : ""}
+            >
+              Bright
+            </button>
           </div>
 
           <div className="start-wrapper">
