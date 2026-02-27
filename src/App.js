@@ -188,28 +188,6 @@ function App() {
     }
   }, [filter]);
 
-  // Get filter style for video (works on iOS)
-  const getVideoFilterStyle = useCallback(() => {
-    if (filter === "none") return {};
-    
-    let filterValue = '';
-    switch (filter) {
-      case "bw": filterValue = "grayscale(100%)"; break;
-      case "vintage": filterValue = "sepia(60%) contrast(110%)"; break;
-      case "bright": filterValue = "brightness(130%)"; break;
-      default: return {};
-    }
-    
-    // For iOS, we need both standard and webkit prefix
-    // Also add a small translate to force hardware acceleration
-    return {
-      filter: filterValue,
-      WebkitFilter: filterValue,
-      transform: 'translateZ(0)', // Force hardware acceleration on iOS
-      WebkitTransform: 'translateZ(0)'
-    };
-  }, [filter]);
-
   const takePhoto = () => {
     const video = videoRef.current;
 
@@ -487,43 +465,60 @@ function App() {
               ref={videoRef}
               autoPlay
               playsInline
-              className={`video mirror ${isIOS ? 'ios-video' : ''}`}
-              style={getVideoFilterStyle()}
+              className="video mirror"
             />
             {countdown && <div className="countdown-overlay">{countdown}</div>}
             {flash && <div className="flash"></div>}
           </div>
 
-          <div className="filter-group">
-            <button 
-              disabled={isCapturing} 
-              onClick={() => setFilter("none")}
-              className={filter === "none" ? "active" : ""}
-            >
-              Normal
-            </button>
-            <button 
-              disabled={isCapturing} 
-              onClick={() => setFilter("bw")}
-              className={filter === "bw" ? "active" : ""}
-            >
-              B&W
-            </button>
-            <button 
-              disabled={isCapturing} 
-              onClick={() => setFilter("vintage")}
-              className={filter === "vintage" ? "active" : ""}
-            >
-              Vintage
-            </button>
-            <button 
-              disabled={isCapturing} 
-              onClick={() => setFilter("bright")}
-              className={filter === "bright" ? "active" : ""}
-            >
-              Bright
-            </button>
-          </div>
+          {/* Only show filter buttons if NOT iOS */}
+          {!isIOS && (
+            <div className="filter-group">
+              <button 
+                disabled={isCapturing} 
+                onClick={() => setFilter("none")}
+                className={filter === "none" ? "active" : ""}
+              >
+                Normal
+              </button>
+              <button 
+                disabled={isCapturing} 
+                onClick={() => setFilter("bw")}
+                className={filter === "bw" ? "active" : ""}
+              >
+                B&W
+              </button>
+              <button 
+                disabled={isCapturing} 
+                onClick={() => setFilter("vintage")}
+                className={filter === "vintage" ? "active" : ""}
+              >
+                Vintage
+              </button>
+              <button 
+                disabled={isCapturing} 
+                onClick={() => setFilter("bright")}
+                className={filter === "bright" ? "active" : ""}
+              >
+                Bright
+              </button>
+            </div>
+          )}
+
+          {/* Optional: Show a message on iOS that filters aren't available */}
+          {isIOS && (
+            <div style={{ 
+              textAlign: 'center', 
+              margin: '10px 0',
+              padding: '10px',
+              background: '#fff0f6',
+              borderRadius: '10px',
+              color: '#ff4da6',
+              fontSize: '14px'
+            }}>
+              📱 Filters are not available on iOS
+            </div>
+          )}
 
           <div className="start-wrapper">
             <button disabled={isCapturing} onClick={startCapture}>
