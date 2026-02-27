@@ -182,7 +182,6 @@ const takePhoto = () => {
 
   const targetRatio = 4 / 3;
 
-  // Calculate crop area (center crop to 4:3)
   let cropWidth = videoWidth;
   let cropHeight = videoWidth / targetRatio;
 
@@ -197,55 +196,13 @@ const takePhoto = () => {
   canvas.width = cropWidth;
   canvas.height = cropHeight;
 
-  // Flash effect
   setFlash(true);
   setTimeout(() => setFlash(false), 200);
 
-  // ✅ APPLY FILTER SAFELY
+  // 🔥 IMPORTANT: Apply filter RIGHT BEFORE drawImage
   ctx.save();
-// Mirror
-ctx.translate(cropWidth, 0);
-ctx.scale(-1, 1);
+  ctx.filter = getCanvasFilter();
 
-ctx.drawImage(
-  video,
-  sx, sy, cropWidth, cropHeight,
-  0, 0, cropWidth, cropHeight
-);
-
-ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-// ✅ APPLY FILTER MANUALLY
-const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-const data = imageData.data;
-
-const selected = filter; // your current filter state
-
-for (let i = 0; i < data.length; i += 4) {
-  let r = data[i];
-  let g = data[i + 1];
-  let b = data[i + 2];
-
-  if (selected === "bw") {
-    const avg = (r + g + b) / 3;
-    data[i] = data[i + 1] = data[i + 2] = avg;
-  }
-
-  if (selected === "bright") {
-    data[i] = Math.min(255, r * 1.3);
-    data[i + 1] = Math.min(255, g * 1.3);
-    data[i + 2] = Math.min(255, b * 1.3);
-  }
-
-  if (selected === "vintage") {
-    data[i] = (0.393 * r + 0.769 * g + 0.189 * b);
-    data[i + 1] = (0.349 * r + 0.686 * g + 0.168 * b);
-    data[i + 2] = (0.272 * r + 0.534 * g + 0.131 * b);
-  }
-}
-
-ctx.putImageData(imageData, 0, 0);
-  // Mirror (because preview is mirrored)
   ctx.translate(cropWidth, 0);
   ctx.scale(-1, 1);
 
@@ -255,7 +212,7 @@ ctx.putImageData(imageData, 0, 0);
     0, 0, cropWidth, cropHeight
   );
 
-  ctx.restore(); // reset transform + filter
+  ctx.restore();
 
   return canvas.toDataURL("image/png");
 };
@@ -360,102 +317,99 @@ const width =
     await drawAllContent(drawHeight);
   };
 
-  const drawAllContent = async (drawHeight) => {
+  const drawAllContent = async () => {
 
-    // 1️⃣ Draw border first
-    if (borderType === "solid") {
-      ctx.fillStyle = borderColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // 1️⃣ Draw border first
+  if (borderType === "solid") {
+    ctx.fillStyle = borderColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  if (borderType === "redPlaid") {
+    const bg = new Image();
+    bg.src = "/redplaid.png";
+
+    await new Promise(resolve => {
+      bg.onload = resolve;
+    });
+
+    const pattern = ctx.createPattern(bg, "repeat");
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  if (borderType === "bluePlaid") {
+    const bg = new Image();
+    bg.src = "/blueplaid.png";
+
+    await new Promise(resolve => {
+      bg.onload = resolve;
+    });
+
+    const pattern = ctx.createPattern(bg, "repeat");
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // 2️⃣ Draw photos
+  for (let i = 0; i < photos.length; i++) {
+
+    const img = new Image();
+    img.src = photos[i];
+
+    await new Promise(resolve => {
+      img.onload = resolve;
+    });
+
+    const drawWidth = width;
+    const drawHeight = width * 0.75;
+
+    let x = padding;
+    let y = padding;
+
+    if (layout === "strip4" || layout === "strip3") {
+      x = padding;
+      y = padding + i * (drawHeight + padding);
     }
 
-    if (borderType === "redPlaid") {
-  const bg = new Image();
-  bg.src = "/redplaid.png";
+    if (layout === "grid2x2") {
+      const row = Math.floor(i / 2);
+      const col = i % 2;
+      x = padding + col * (drawWidth + padding);
+      y = padding + row * (drawHeight + padding);
+    }
 
-  await new Promise(resolve => {
-    bg.onload = resolve;
-  });
+    if (layout === "grid3x2") {
+      const row = Math.floor(i / 2);
+      const col = i % 2;
+      x = padding + col * (drawWidth + padding);
+      y = padding + row * (drawHeight + padding);
+    }
 
-  const pattern = ctx.createPattern(bg, "repeat");
-  ctx.fillStyle = pattern;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-if (borderType === "bluePlaid") {
-  const bg = new Image();
-  bg.src = "/blueplaid.png";
-
-  await new Promise(resolve => {
-    bg.onload = resolve;
-  });
-
-  const pattern = ctx.createPattern(bg, "repeat");
-  ctx.fillStyle = pattern;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-// 2️⃣ Draw photos
-
-for (let i = 0; i < photos.length; i++) {
-  const img = new Image();
-  img.src = photos[i];
-
-  await new Promise(resolve => {
-    img.onload = resolve;
-  });
-
-  const drawWidth = width;
-  const drawHeight = width * 0.75;   
-
-  // ===== STRIP LAYOUTS =====
-  if (layout === "strip4" || layout === "strip3") {
-    ctx.drawImage(
-      img,
-      padding,
-      padding + i * (drawHeight + padding),
-      drawWidth,
-      drawHeight
-    );
-  }
-
-  // ===== 2x2 GRID =====
-  if (layout === "grid2x2") {
-    const row = Math.floor(i / 2);
-    const col = i % 2;
+    // ✅ Apply filter to final strip (mobile safe)
+    ctx.save();
+    ctx.filter = getCanvasFilter();
 
     ctx.drawImage(
       img,
-      padding + col * (drawWidth + padding),
-      padding + row * (drawHeight + padding),
+      x,
+      y,
       drawWidth,
       drawHeight
     );
+
+    ctx.restore();
   }
 
-  // ===== 3x2 GRID =====
-  if (layout === "grid3x2") {
-    const row = Math.floor(i / 2);
-    const col = i % 2;
+  // 3️⃣ Draw caption
+  ctx.fillStyle = captionColor;
+  ctx.font = `${captionSize}px ${captionFont}`;
+  ctx.textAlign = "center";
+  ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
 
-    ctx.drawImage(
-      img,
-      padding + col * (drawWidth + padding),
-      padding + row * (drawHeight + padding),
-      drawWidth,
-      drawHeight
-    );
-  }
-}
-
-    // 3️⃣ Draw caption
-ctx.fillStyle = captionColor;
-ctx.font = `${captionSize}px ${captionFont}`;
-ctx.textAlign = "center";
-ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
-
-await drawSticker(ctx, canvas);
-
-  };
+  // 4️⃣ Draw stickers
+  await drawSticker(ctx, canvas);
+};
 
   drawAll();
 
@@ -470,7 +424,8 @@ await drawSticker(ctx, canvas);
   captionSize,
   captionFont,
   selectedSticker,
-  drawSticker
+  drawSticker,
+  filter
 ]);
   return (
     <div className="container">
