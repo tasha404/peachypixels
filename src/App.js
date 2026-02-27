@@ -188,7 +188,7 @@ function App() {
     }
   }, [filter]);
 
-  // For mobile: apply filter via CSS class instead of canvas filter
+  // Get filter class name for mobile
   const getFilterClassName = useCallback(() => {
     switch (filter) {
       case "bw": return "filter-bw";
@@ -262,11 +262,11 @@ function App() {
     for (let sticker of layout) {
       const img = new Image();
       img.src = sticker.src;
-      img.crossOrigin = "anonymous"; // Add this for CORS if needed
+      img.crossOrigin = "anonymous";
 
       await new Promise(resolve => {
         img.onload = resolve;
-        img.onerror = resolve; // Continue even if image fails to load
+        img.onerror = resolve;
       });
 
       const size = canvas.width * sticker.size;
@@ -476,9 +476,7 @@ function App() {
               autoPlay
               playsInline
               className={`video mirror ${getFilterClassName()}`}
-              style={{ 
-                filter: isMobile ? 'none' : getCanvasFilter() // Only apply filter via CSS on mobile
-              }}
+              // Remove the inline style filter - let CSS handle it
             />
             {countdown && <div className="countdown-overlay">{countdown}</div>}
             {flash && <div className="flash"></div>}
@@ -549,7 +547,8 @@ function App() {
                   gap: "12px",
                   alignItems: "center",
                   overflowX: "auto",
-                  whiteSpace: "nowrap"
+                  whiteSpace: "nowrap",
+                  paddingBottom: "5px"
                 }}
               >
                 {/* Solid */}
@@ -633,7 +632,8 @@ function App() {
                   marginTop: "15px",
                   display: "flex",
                   gap: "12px",
-                  overflowX: "auto"
+                  overflowX: "auto",
+                  paddingBottom: "5px"
                 }}
               >
                 <div
@@ -646,7 +646,8 @@ function App() {
                     border: selectedSticker === null
                       ? "3px solid #ff4da6"
                       : "3px solid white",
-                    cursor: "pointer"
+                    cursor: "pointer",
+                    flexShrink: 0
                   }}
                 />
 
@@ -662,7 +663,8 @@ function App() {
                     border: selectedSticker === "heart"
                       ? "3px solid #ff4da6"
                       : "3px solid white",
-                    cursor: "pointer"
+                    cursor: "pointer",
+                    flexShrink: 0
                   }}
                 />
 
@@ -678,7 +680,8 @@ function App() {
                     border: selectedSticker === "star"
                       ? "3px solid #ff4da6"
                       : "3px solid white",
-                    cursor: "pointer"
+                    cursor: "pointer",
+                    flexShrink: 0
                   }}
                 />
 
@@ -694,7 +697,8 @@ function App() {
                     border: selectedSticker === "nailong"
                       ? "3px solid #ff4da6"
                       : "3px solid white",
-                    cursor: "pointer"
+                    cursor: "pointer",
+                    flexShrink: 0
                   }}
                 />
               </div>
@@ -761,7 +765,7 @@ function App() {
                     min="10"
                     max="120"
                     value={captionSize}
-                    onChange={(e) => setCaptionSize(e.target.value)}
+                    onChange={(e) => setCaptionSize(parseInt(e.target.value) || 30)}
                     className="size-input"
                   />
                 </div>
