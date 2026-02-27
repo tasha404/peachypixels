@@ -52,19 +52,6 @@ function App() {
   const [showTextPicker, setShowTextPicker] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
-  const [isIOS, setIsIOS] = useState(false);
-
-  // Detect if device is iOS
-  useEffect(() => {
-    const detectIOS = () => {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      const isIOS = /iphone|ipad|ipod/.test(userAgent);
-      setIsIOS(isIOS);
-      console.log("Is iOS:", isIOS);
-    };
-    
-    detectIOS();
-  }, []);
 
   useEffect(() => {
     if (screen === "home") {
@@ -218,7 +205,7 @@ function App() {
 
     ctx.save();
     
-    // Apply filter for all devices
+    // Apply filter
     ctx.filter = getCanvasFilter();
 
     ctx.translate(cropWidth, 0);
@@ -399,7 +386,7 @@ function App() {
 
         ctx.save();
         
-        // Apply filter for all devices
+        // Apply filter
         ctx.filter = getCanvasFilter();
 
         ctx.drawImage(
@@ -466,64 +453,45 @@ function App() {
               autoPlay
               playsInline
               className="video mirror"
-              // Apply filter style for preview on non-iOS devices
-              style={!isIOS ? { 
+              style={{ 
                 filter: getCanvasFilter(),
                 WebkitFilter: getCanvasFilter() 
-              } : {}}
+              }}
             />
             {countdown && <div className="countdown-overlay">{countdown}</div>}
             {flash && <div className="flash"></div>}
           </div>
 
-          {/* Only show filter buttons if NOT iOS */}
-          {!isIOS && (
-            <div className="filter-group">
-              <button 
-                disabled={isCapturing} 
-                onClick={() => setFilter("none")}
-                className={filter === "none" ? "active" : ""}
-              >
-                Normal
-              </button>
-              <button 
-                disabled={isCapturing} 
-                onClick={() => setFilter("bw")}
-                className={filter === "bw" ? "active" : ""}
-              >
-                B&W
-              </button>
-              <button 
-                disabled={isCapturing} 
-                onClick={() => setFilter("vintage")}
-                className={filter === "vintage" ? "active" : ""}
-              >
-                Vintage
-              </button>
-              <button 
-                disabled={isCapturing} 
-                onClick={() => setFilter("bright")}
-                className={filter === "bright" ? "active" : ""}
-              >
-                Bright
-              </button>
-            </div>
-          )}
-
-          {/* Optional: Show a message on iOS that filters aren't available */}
-          {isIOS && (
-            <div style={{ 
-              textAlign: 'center', 
-              margin: '10px 0',
-              padding: '10px',
-              background: '#fff0f6',
-              borderRadius: '10px',
-              color: '#ff4da6',
-              fontSize: '14px'
-            }}>
-              📱 Filters are not available on iOS preview, but will apply to your photos
-            </div>
-          )}
+          <div className="filter-group">
+            <button 
+              disabled={isCapturing} 
+              onClick={() => setFilter("none")}
+              className={filter === "none" ? "active" : ""}
+            >
+              Normal
+            </button>
+            <button 
+              disabled={isCapturing} 
+              onClick={() => setFilter("bw")}
+              className={filter === "bw" ? "active" : ""}
+            >
+              B&W
+            </button>
+            <button 
+              disabled={isCapturing} 
+              onClick={() => setFilter("vintage")}
+              className={filter === "vintage" ? "active" : ""}
+            >
+              Vintage
+            </button>
+            <button 
+              disabled={isCapturing} 
+              onClick={() => setFilter("bright")}
+              className={filter === "bright" ? "active" : ""}
+            >
+              Bright
+            </button>
+          </div>
 
           <div className="start-wrapper">
             <button disabled={isCapturing} onClick={startCapture}>
