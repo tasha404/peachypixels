@@ -57,7 +57,23 @@ body {
   z-index: -1;
   animation: floatBlob 8s ease-in-out infinite alternate;
 }
+/* iOS video fixes */
+.ios-video {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
 
+/* Ensure filters work on iOS */
+video[style*="grayscale"],
+video[style*="sepia"],
+video[style*="brightness"] {
+  -webkit-filter: inherit !important;
+  filter: inherit !important;
+}
 @keyframes floatBlob {
   0% {
     transform: translateX(-50%) translateY(0px);
