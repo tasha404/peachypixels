@@ -248,8 +248,11 @@ useEffect(() => {
   const canvas = canvasRef.current;
   const ctx = canvas.getContext("2d");
 
-  const width = 260;
-  const padding = 20;
+const maxMobileWidth = 380;   // good size for phones
+const width =
+  window.innerWidth < 768
+    ? Math.min(window.innerWidth * 0.85, maxMobileWidth)
+    : 260;  const padding = 20;
   const textSpace = 100;
 
   const drawAll = async () => {
