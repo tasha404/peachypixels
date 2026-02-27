@@ -52,18 +52,18 @@ function App() {
   const [showTextPicker, setShowTextPicker] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
-  // Detect if device is mobile
+  // Detect if device is iOS
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const detectIOS = () => {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isIOS = /iphone|ipad|ipod/.test(userAgent);
+      setIsIOS(isIOS);
+      console.log("Is iOS:", isIOS);
     };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    detectIOS();
   }, []);
 
   useEffect(() => {
@@ -188,14 +188,26 @@ function App() {
     }
   }, [filter]);
 
-  // Get filter class name for mobile
-  const getFilterClassName = useCallback(() => {
+  // Get filter style for video (works on iOS)
+  const getVideoFilterStyle = useCallback(() => {
+    if (filter === "none") return {};
+    
+    let filterValue = '';
     switch (filter) {
-      case "bw": return "filter-bw";
-      case "vintage": return "filter-vintage";
-      case "bright": return "filter-bright";
-      default: return "";
+      case "bw": filterValue = "grayscale(100%)"; break;
+      case "vintage": filterValue = "sepia(60%) contrast(110%)"; break;
+      case "bright": filterValue = "brightness(130%)"; break;
+      default: return {};
     }
+    
+    // For iOS, we need both standard and webkit prefix
+    // Also add a small translate to force hardware acceleration
+    return {
+      filter: filterValue,
+      WebkitFilter: filterValue,
+      transform: 'translateZ(0)', // Force hardware acceleration on iOS
+      WebkitTransform: 'translateZ(0)'
+    };
   }, [filter]);
 
   const takePhoto = () => {
@@ -475,8 +487,8 @@ function App() {
               ref={videoRef}
               autoPlay
               playsInline
-              className={`video mirror ${getFilterClassName()}`}
-              // Remove the inline style filter - let CSS handle it
+              className={`video mirror ${isIOS ? 'ios-video' : ''}`}
+              style={getVideoFilterStyle()}
             />
             {countdown && <div className="countdown-overlay">{countdown}</div>}
             {flash && <div className="flash"></div>}
