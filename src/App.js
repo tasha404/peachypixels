@@ -339,10 +339,9 @@ for (let i = 0; i < photos.length; i++) {
     img.onload = resolve;
   });
 
-  const ratio = img.width / img.height;
   const drawWidth = width;
-  const drawHeight = drawWidth / ratio;
-
+  const drawHeight = width * 0.75;   
+  
   // ===== STRIP LAYOUTS =====
   if (layout === "strip4" || layout === "strip3") {
     ctx.drawImage(
