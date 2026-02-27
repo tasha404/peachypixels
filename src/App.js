@@ -26,8 +26,6 @@ const stickerLayouts = {
   ]
 };
 
-
-
 function App() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -54,43 +52,39 @@ function App() {
   const [showTextPicker, setShowTextPicker] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
-  
 
   useEffect(() => {
-  if (screen === "home") {
-    document.body.classList.add("home-mode");
-    document.body.classList.remove("result-mode");
-  } else {
-    document.body.classList.remove("home-mode");
-    document.body.classList.add("result-mode");
-  }
-}, [screen]);
+    if (screen === "home") {
+      document.body.classList.add("home-mode");
+      document.body.classList.remove("result-mode");
+    } else {
+      document.body.classList.remove("home-mode");
+      document.body.classList.add("result-mode");
+    }
+  }, [screen]);
 
   /* CLOSE PICKERS */
   useEffect(() => {
-  function handleClickOutside(event) {
+    function handleClickOutside(event) {
+      if (
+        borderPickerRef.current &&
+        !borderPickerRef.current.contains(event.target)
+      ) {
+        setShowBorderPicker(false);
+      }
 
-    if (
-      borderPickerRef.current &&
-      !borderPickerRef.current.contains(event.target)
-    ) {
-      setShowBorderPicker(false);
+      if (
+        textPickerRef.current &&
+        !textPickerRef.current.contains(event.target)
+      ) {
+        setShowTextPicker(false);
+      }
     }
 
-    if (
-      textPickerRef.current &&
-      !textPickerRef.current.contains(event.target)
-    ) {
-      setShowTextPicker(false);
-    }
-
-  }
-
-  document.addEventListener("mousedown", handleClickOutside);
-  return () =>
-    document.removeEventListener("mousedown", handleClickOutside);
-
-}, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   /* CAMERA */
   useEffect(() => {
@@ -120,29 +114,28 @@ function App() {
   };
 
   const getPhotoCount = () => {
-  if (layout === "strip3") return 3;
-  if (layout === "grid3x2") return 6;
-  return 4;
-};
+    if (layout === "strip3") return 3;
+    if (layout === "grid3x2") return 6;
+    return 4;
+  };
 
   const startCapture = async () => {
-  if (isCapturing) return;   // prevent double click
-  setIsCapturing(true);
+    if (isCapturing) return;
+    setIsCapturing(true);
 
-  let newPhotos = [];
-  const total = getPhotoCount();
+    let newPhotos = [];
+    const total = getPhotoCount();
 
-  for (let i = 0; i < total; i++) {
-    await startCountdown();
-    newPhotos.push(takePhoto());
-  }
+    for (let i = 0; i < total; i++) {
+      await startCountdown();
+      newPhotos.push(takePhoto());
+    }
 
-  stopCamera();
-  setPhotos(newPhotos);
-  setScreen("result");
-
-  setIsCapturing(false);
-};
+    stopCamera();
+    setPhotos(newPhotos);
+    setScreen("result");
+    setIsCapturing(false);
+  };
 
   const startCountdown = () => {
     return new Promise((resolve) => {
@@ -162,60 +155,59 @@ function App() {
     });
   };
 
-  const getCanvasFilter = () => {
+  const getCanvasFilter = useCallback(() => {
     switch (filter) {
       case "bw": return "grayscale(100%)";
       case "vintage": return "sepia(60%) contrast(110%)";
       case "bright": return "brightness(130%)";
       default: return "none";
     }
+  }, [filter]);
+
+  const takePhoto = () => {
+    const video = videoRef.current;
+
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const targetRatio = 4 / 3;
+
+    let cropWidth = videoWidth;
+    let cropHeight = videoWidth / targetRatio;
+
+    if (cropHeight > videoHeight) {
+      cropHeight = videoHeight;
+      cropWidth = videoHeight * targetRatio;
+    }
+
+    const sx = (videoWidth - cropWidth) / 2;
+    const sy = (videoHeight - cropHeight) / 2;
+
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
+    setFlash(true);
+    setTimeout(() => setFlash(false), 200);
+
+    ctx.save();
+    ctx.filter = getCanvasFilter();
+
+    ctx.translate(cropWidth, 0);
+    ctx.scale(-1, 1);
+
+    ctx.drawImage(
+      video,
+      sx, sy, cropWidth, cropHeight,
+      0, 0, cropWidth, cropHeight
+    );
+
+    ctx.restore();
+
+    return canvas.toDataURL("image/png");
   };
-
-const takePhoto = () => {
-  const video = videoRef.current;
-
-  const videoWidth = video.videoWidth;
-  const videoHeight = video.videoHeight;
-
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-
-  const targetRatio = 4 / 3;
-
-  let cropWidth = videoWidth;
-  let cropHeight = videoWidth / targetRatio;
-
-  if (cropHeight > videoHeight) {
-    cropHeight = videoHeight;
-    cropWidth = videoHeight * targetRatio;
-  }
-
-  const sx = (videoWidth - cropWidth) / 2;
-  const sy = (videoHeight - cropHeight) / 2;
-
-  canvas.width = cropWidth;
-  canvas.height = cropHeight;
-
-  setFlash(true);
-  setTimeout(() => setFlash(false), 200);
-
-  // 🔥 IMPORTANT: Apply filter RIGHT BEFORE drawImage
-  ctx.save();
-  ctx.filter = getCanvasFilter();
-
-  ctx.translate(cropWidth, 0);
-  ctx.scale(-1, 1);
-
-  ctx.drawImage(
-    video,
-    sx, sy, cropWidth, cropHeight,
-    0, 0, cropWidth, cropHeight
-  );
-
-  ctx.restore();
-
-  return canvas.toDataURL("image/png");
-};
 
   const download = () => {
     const link = document.createElement("a");
@@ -224,212 +216,198 @@ const takePhoto = () => {
     link.click();
   };
 
-//sticker
-const drawSticker = useCallback(async (ctx, canvas) => {
+  // sticker
+  const drawSticker = useCallback(async (ctx, canvas) => {
+    if (!selectedSticker) return;
 
-  if (!selectedSticker) return;
+    const layout = stickerLayouts[selectedSticker];
+    if (!layout) return;
 
-  const layout = stickerLayouts[selectedSticker];
-  if (!layout) return;
+    for (let sticker of layout) {
+      const img = new Image();
+      img.src = sticker.src;
 
-  for (let sticker of layout) {
+      await new Promise(resolve => {
+        img.onload = resolve;
+      });
 
-    const img = new Image();
-    img.src = sticker.src;
+      const size = canvas.width * sticker.size;
+      const x = canvas.width * sticker.x;
+      const y = canvas.height * sticker.y;
 
-    await new Promise(resolve => {
-      img.onload = resolve;
-    });
+      const rotation = (sticker.rotation || 0) * Math.PI / 180;
 
-    const size = canvas.width * sticker.size;
-    const x = canvas.width * sticker.x;
-    const y = canvas.height * sticker.y;
+      ctx.save();
 
-    const rotation = (sticker.rotation || 0) * Math.PI / 180;
+      ctx.translate(x + size / 2, y + size / 2);
+      ctx.rotate(rotation);
+      ctx.drawImage(img, -size / 2, -size / 2, size, size);
 
-    ctx.save();
-
-    // Move to center of sticker
-    ctx.translate(x + size / 2, y + size / 2);
-
-    // Rotate
-    ctx.rotate(rotation);
-
-    // Draw from center
-    ctx.drawImage(img, -size / 2, -size / 2, size, size);
-
-    ctx.restore();
-  }
-
-}, [selectedSticker]);
-
- /* DRAW RESULT */
-useEffect(() => {
-  if (screen !== "result" || photos.length === 0) return;
-
-  const canvas = canvasRef.current;
-  const ctx = canvas.getContext("2d");
-
-const maxMobileWidth = 380;   // good size for phones
-const width =
-  window.innerWidth < 768
-    ? Math.min(window.innerWidth * 0.85, maxMobileWidth)
-    : 260;  const padding = 20;
-  const textSpace = 100;
-
-  const drawAll = async () => {
-
-    // ===== DETERMINE GRID STRUCTURE =====
-    const columns =
-      layout === "grid2x2" ? 2 :
-      layout === "grid3x2" ? 2 :
-      1;
-
-    const rows =
-      layout === "grid2x2" ? 2 :
-      layout === "grid3x2" ? 3 :
-      photos.length;
-
-    // ===== SET CANVAS WIDTH =====
-    canvas.width =
-      columns === 1
-        ? width + padding * 2
-        : width * columns + padding * (columns + 1);
-
-    // ===== GET REAL IMAGE RATIO =====
-    const firstImg = new Image();
-    firstImg.src = photos[0];
-
-    await new Promise(resolve => {
-      firstImg.onload = resolve;
-    });
-
-    const ratio = firstImg.width / firstImg.height;
-    const drawHeight = width / ratio;
-
-    // ===== SET CANVAS HEIGHT =====
-    canvas.height =
-      rows * drawHeight +
-      padding * (rows + 1) +
-      textSpace;
-
-    // ===== NOW YOU CAN CALL YOUR EXISTING DRAW CODE =====
-    await drawAllContent(drawHeight);
-  };
-
-  const drawAllContent = async () => {
-
-  // 1️⃣ Draw border first
-  if (borderType === "solid") {
-    ctx.fillStyle = borderColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  if (borderType === "redPlaid") {
-    const bg = new Image();
-    bg.src = "/redplaid.png";
-
-    await new Promise(resolve => {
-      bg.onload = resolve;
-    });
-
-    const pattern = ctx.createPattern(bg, "repeat");
-    ctx.fillStyle = pattern;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  if (borderType === "bluePlaid") {
-    const bg = new Image();
-    bg.src = "/blueplaid.png";
-
-    await new Promise(resolve => {
-      bg.onload = resolve;
-    });
-
-    const pattern = ctx.createPattern(bg, "repeat");
-    ctx.fillStyle = pattern;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  // 2️⃣ Draw photos
-  for (let i = 0; i < photos.length; i++) {
-
-    const img = new Image();
-    img.src = photos[i];
-
-    await new Promise(resolve => {
-      img.onload = resolve;
-    });
-
-    const drawWidth = width;
-    const drawHeight = width * 0.75;
-
-    let x = padding;
-    let y = padding;
-
-    if (layout === "strip4" || layout === "strip3") {
-      x = padding;
-      y = padding + i * (drawHeight + padding);
+      ctx.restore();
     }
+  }, [selectedSticker]);
 
-    if (layout === "grid2x2") {
-      const row = Math.floor(i / 2);
-      const col = i % 2;
-      x = padding + col * (drawWidth + padding);
-      y = padding + row * (drawHeight + padding);
-    }
+  /* DRAW RESULT */
+  useEffect(() => {
+    if (screen !== "result" || photos.length === 0) return;
 
-    if (layout === "grid3x2") {
-      const row = Math.floor(i / 2);
-      const col = i % 2;
-      x = padding + col * (drawWidth + padding);
-      y = padding + row * (drawHeight + padding);
-    }
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
 
-    // ✅ Apply filter to final strip (mobile safe)
-    ctx.save();
-    ctx.filter = getCanvasFilter();
+    const maxMobileWidth = 380;
+    const width =
+      window.innerWidth < 768
+        ? Math.min(window.innerWidth * 0.85, maxMobileWidth)
+        : 260;
+    const padding = 20;
+    const textSpace = 100;
 
-    ctx.drawImage(
-      img,
-      x,
-      y,
-      drawWidth,
-      drawHeight
-    );
+    const drawAll = async () => {
+      const columns =
+        layout === "grid2x2" ? 2 :
+        layout === "grid3x2" ? 2 :
+        1;
 
-    ctx.restore();
-  }
+      const rows =
+        layout === "grid2x2" ? 2 :
+        layout === "grid3x2" ? 3 :
+        photos.length;
 
-  // 3️⃣ Draw caption
-  ctx.fillStyle = captionColor;
-  ctx.font = `${captionSize}px ${captionFont}`;
-  ctx.textAlign = "center";
-  ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
+      canvas.width =
+        columns === 1
+          ? width + padding * 2
+          : width * columns + padding * (columns + 1);
 
-  // 4️⃣ Draw stickers
-  await drawSticker(ctx, canvas);
-};
+      const firstImg = new Image();
+      firstImg.src = photos[0];
 
-  drawAll();
+      await new Promise(resolve => {
+        firstImg.onload = resolve;
+      });
 
-}, [
-  screen,
-  photos,
-  layout,
-  borderColor,
-  borderType,
-  caption,
-  captionColor,
-  captionSize,
-  captionFont,
-  selectedSticker,
-  drawSticker,
-  filter
-]);
+      const ratio = firstImg.width / firstImg.height;
+      const drawHeight = width / ratio;
+
+      canvas.height =
+        rows * drawHeight +
+        padding * (rows + 1) +
+        textSpace;
+
+      await drawAllContent();
+    };
+
+    const drawAllContent = async () => {
+      // 1️⃣ Draw border first
+      if (borderType === "solid") {
+        ctx.fillStyle = borderColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      if (borderType === "redPlaid") {
+        const bg = new Image();
+        bg.src = "/redplaid.png";
+
+        await new Promise(resolve => {
+          bg.onload = resolve;
+        });
+
+        const pattern = ctx.createPattern(bg, "repeat");
+        ctx.fillStyle = pattern;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      if (borderType === "bluePlaid") {
+        const bg = new Image();
+        bg.src = "/blueplaid.png";
+
+        await new Promise(resolve => {
+          bg.onload = resolve;
+        });
+
+        const pattern = ctx.createPattern(bg, "repeat");
+        ctx.fillStyle = pattern;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // 2️⃣ Draw photos
+      for (let i = 0; i < photos.length; i++) {
+        const img = new Image();
+        img.src = photos[i];
+
+        await new Promise(resolve => {
+          img.onload = resolve;
+        });
+
+        const drawWidth = width;
+        const drawHeight = width * 0.75;
+
+        let x = padding;
+        let y = padding;
+
+        if (layout === "strip4" || layout === "strip3") {
+          x = padding;
+          y = padding + i * (drawHeight + padding);
+        }
+
+        if (layout === "grid2x2") {
+          const row = Math.floor(i / 2);
+          const col = i % 2;
+          x = padding + col * (drawWidth + padding);
+          y = padding + row * (drawHeight + padding);
+        }
+
+        if (layout === "grid3x2") {
+          const row = Math.floor(i / 2);
+          const col = i % 2;
+          x = padding + col * (drawWidth + padding);
+          y = padding + row * (drawHeight + padding);
+        }
+
+        ctx.save();
+        ctx.filter = getCanvasFilter();
+
+        ctx.drawImage(
+          img,
+          x,
+          y,
+          drawWidth,
+          drawHeight
+        );
+
+        ctx.restore();
+      }
+
+      // 3️⃣ Draw caption
+      ctx.fillStyle = captionColor;
+      ctx.font = `${captionSize}px ${captionFont}`;
+      ctx.textAlign = "center";
+      ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
+
+      // 4️⃣ Draw stickers
+      await drawSticker(ctx, canvas);
+    };
+
+    drawAll();
+
+  }, [
+    screen,
+    photos,
+    layout,
+    borderColor,
+    borderType,
+    caption,
+    captionColor,
+    captionSize,
+    captionFont,
+    selectedSticker,
+    drawSticker,
+    filter,
+    getCanvasFilter
+  ]);
+
   return (
     <div className="container">
-      <h1> Peachy Pixels</h1>
+      <h1>Peachy Pixels</h1>
 
       {screen !== "home" && (
         <div className="home-icon" onClick={goHome}>🏠</div>
@@ -459,23 +437,22 @@ const width =
           </div>
 
           <div className="filter-group">
-  <button disabled={isCapturing} onClick={() => setFilter("none")}>Normal</button>
-  <button disabled={isCapturing} onClick={() => setFilter("bw")}>B&W</button>
-  <button disabled={isCapturing} onClick={() => setFilter("vintage")}>Vintage</button>
-  <button disabled={isCapturing} onClick={() => setFilter("bright")}>Bright</button>
-</div>
+            <button disabled={isCapturing} onClick={() => setFilter("none")}>Normal</button>
+            <button disabled={isCapturing} onClick={() => setFilter("bw")}>B&W</button>
+            <button disabled={isCapturing} onClick={() => setFilter("vintage")}>Vintage</button>
+            <button disabled={isCapturing} onClick={() => setFilter("bright")}>Bright</button>
+          </div>
 
           <div className="start-wrapper">
-  <button disabled={isCapturing} onClick={startCapture}>
-    {isCapturing ? "Capturing..." : "Start"}
-  </button>
-</div>
+            <button disabled={isCapturing} onClick={startCapture}>
+              {isCapturing ? "Capturing..." : "Start"}
+            </button>
+          </div>
         </>
       )}
 
       {screen === "result" && (
         <div className="result-layout">
-
           {/* LEFT */}
           <div className="preview-side">
             <canvas ref={canvasRef} className="canvas" />
@@ -491,163 +468,166 @@ const width =
 
             {/* BORDER */}
             <div className="editor-card">
-  <p>Border</p>
+              <p>Border</p>
 
-  <div
-    style={{
-      marginTop: "15px",
-      display: "flex",
-      gap: "12px",
-      alignItems: "center",
-      overflowX: "auto",
-      whiteSpace: "nowrap"
-    }}
-  >
-    {/* Solid */}
-    <div
-      className="color-circle-btn"
-      style={{
-        background: borderColor,
-        border:
-          borderType === "solid"
-            ? "3px solid #ff4da6"
-            : "3px solid white"
-      }}
-      onClick={() => {
-        setBorderType("solid");
-        setShowBorderPicker(!showBorderPicker);
-        setShowTextPicker(false);
-      }}
-    />
+              <div
+                style={{
+                  marginTop: "15px",
+                  display: "flex",
+                  gap: "12px",
+                  alignItems: "center",
+                  overflowX: "auto",
+                  whiteSpace: "nowrap"
+                }}
+              >
+                {/* Solid */}
+                <div
+                  className="color-circle-btn"
+                  style={{
+                    background: borderColor,
+                    border:
+                      borderType === "solid"
+                        ? "3px solid #ff4da6"
+                        : "3px solid white"
+                  }}
+                  onClick={() => {
+                    setBorderType("solid");
+                    setShowBorderPicker(!showBorderPicker);
+                    setShowTextPicker(false);
+                  }}
+                />
 
-    {/* Red Plaid */}
-    <div
-      onClick={() => {
-        setBorderType("redPlaid");
-        setShowBorderPicker(false);
-      }}
-      style={{
-        width: "48px",
-        height: "48px",
-        borderRadius: "50%",
-        backgroundImage: "url('/redplaid.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        cursor: "pointer",
-        border:
-          borderType === "redPlaid"
-            ? "3px solid #ff4da6"
-            : "3px solid white",
-        boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
-      }}
-    />
+                {/* Red Plaid */}
+                <div
+                  onClick={() => {
+                    setBorderType("redPlaid");
+                    setShowBorderPicker(false);
+                  }}
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    backgroundImage: "url('/redplaid.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    cursor: "pointer",
+                    border:
+                      borderType === "redPlaid"
+                        ? "3px solid #ff4da6"
+                        : "3px solid white",
+                    boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+                  }}
+                />
 
-    {/* Blue Plaid */}
-    <div
-      onClick={() => {
-        setBorderType("bluePlaid");
-        setShowBorderPicker(false);
-      }}
-      style={{
-        width: "48px",
-        height: "48px",
-        borderRadius: "50%",
-        backgroundImage: "url('/blueplaid.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        cursor: "pointer",
-        border:
-          borderType === "bluePlaid"
-            ? "3px solid #ff4da6"
-            : "3px solid white",
-        boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
-      }}
-    />
-  </div>
+                {/* Blue Plaid */}
+                <div
+                  onClick={() => {
+                    setBorderType("bluePlaid");
+                    setShowBorderPicker(false);
+                  }}
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    backgroundImage: "url('/blueplaid.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    cursor: "pointer",
+                    border:
+                      borderType === "bluePlaid"
+                        ? "3px solid #ff4da6"
+                        : "3px solid white",
+                    boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+                  }}
+                />
+              </div>
 
-  {showBorderPicker && (
-    <div className="picker-popup" ref={borderPickerRef}>
-      <HexColorPicker
-        color={borderColor}
-        onChange={setBorderColor}
-      />
-    </div>
-  )}
-</div>
-{/* STICKERS */}
-<div className="editor-card">
-  <p>Stickers</p>
+              {showBorderPicker && (
+                <div className="picker-popup" ref={borderPickerRef}>
+                  <HexColorPicker
+                    color={borderColor}
+                    onChange={setBorderColor}
+                  />
+                </div>
+              )}
+            </div>
 
-  <div
-    style={{
-      marginTop: "15px",
-      display: "flex",
-      gap: "12px",
-      overflowX: "auto"
-    }}
-  >
-    <div
-      onClick={() => setSelectedSticker(null)}
-      style={{
-        width: "48px",
-        height: "48px",
-        borderRadius: "50%",
-        background: "#fff",
-        border: selectedSticker === null
-          ? "3px solid #ff4da6"
-          : "3px solid white",
-        cursor: "pointer"
-      }}
-    />
+            {/* STICKERS */}
+            <div className="editor-card">
+              <p>Stickers</p>
 
-    <div
-  onClick={() => setSelectedSticker("heart")}
-  style={{
-    width: "48px",
-    height: "48px",
-    borderRadius: "50%",
-    backgroundImage: "url('/stickers/heart.png')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    border: selectedSticker === "heart"
-      ? "3px solid #ff4da6"
-      : "3px solid white",
-    cursor: "pointer"
-  }}
-/>
+              <div
+                style={{
+                  marginTop: "15px",
+                  display: "flex",
+                  gap: "12px",
+                  overflowX: "auto"
+                }}
+              >
+                <div
+                  onClick={() => setSelectedSticker(null)}
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    background: "#fff",
+                    border: selectedSticker === null
+                      ? "3px solid #ff4da6"
+                      : "3px solid white",
+                    cursor: "pointer"
+                  }}
+                />
 
-    <div
-      onClick={() => setSelectedSticker("star")}
-      style={{
-        width: "48px",
-        height: "48px",
-        borderRadius: "50%",
-        backgroundImage: "url('/stickers/star.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        border: selectedSticker === "stars"
-          ? "3px solid #ff4da6"
-          : "3px solid white",
-        cursor: "pointer"
-      }}
-    />
-    <div
-      onClick={() => setSelectedSticker("nailong")}
-      style={{
-        width: "48px",
-        height: "48px",
-        borderRadius: "50%",
-        backgroundImage: "url('/stickers/nailong.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        border: selectedSticker === "nailong"
-          ? "3px solid #ff4da6"
-          : "3px solid white",
-        cursor: "pointer"
-      }}
-    />
-  </div>
-</div>
+                <div
+                  onClick={() => setSelectedSticker("heart")}
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    backgroundImage: "url('/stickers/heart.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    border: selectedSticker === "heart"
+                      ? "3px solid #ff4da6"
+                      : "3px solid white",
+                    cursor: "pointer"
+                  }}
+                />
+
+                <div
+                  onClick={() => setSelectedSticker("star")}
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    backgroundImage: "url('/stickers/star.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    border: selectedSticker === "star"
+                      ? "3px solid #ff4da6"
+                      : "3px solid white",
+                    cursor: "pointer"
+                  }}
+                />
+
+                <div
+                  onClick={() => setSelectedSticker("nailong")}
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    backgroundImage: "url('/stickers/nailong.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    border: selectedSticker === "nailong"
+                      ? "3px solid #ff4da6"
+                      : "3px solid white",
+                    cursor: "pointer"
+                  }}
+                />
+              </div>
+            </div>
+
             {/* TEXT */}
             <div className="editor-card">
               <p>Text</p>
@@ -663,64 +643,58 @@ const width =
             <div className="editor-card">
               <p>Text Settings</p>
 
-
-
               <div className="text-settings-row">
+                {/* Colour */}
+                <div className="text-setting-item">
+                  <div
+                    className="color-circle-btn"
+                    style={{ background: captionColor }}
+                    onClick={() => {
+                      setShowTextPicker(!showTextPicker);
+                      setShowBorderPicker(false);
+                    }}
+                  />
+                  {showTextPicker && (
+                    <div className="picker-popup" ref={textPickerRef}>
+                      <HexColorPicker
+                        color={captionColor}
+                        onChange={setCaptionColor}
+                      />
+                    </div>
+                  )}
+                </div>
 
-  {/* Colour */}
-  <div className="text-setting-item">
-    <div
-      className="color-circle-btn"
-      style={{ background: captionColor }}
-      onClick={() => {
-        setShowTextPicker(!showTextPicker);
-        setShowBorderPicker(false);
-      }}
-    />
-    {  showTextPicker && (
-      <div className="picker-popup" ref={textPickerRef}>
+                {/* Font Dropdown */}
+                <div className="text-setting-item">
+                  <select
+                    value={captionFont}
+                    onChange={(e) => setCaptionFont(e.target.value)}
+                    className="font-dropdown"
+                  >
+                    <option value="Quicksand">Quicksand</option>
+                    <option value="Pacifico">Pacifico</option>
+                    <option value="Playfair Display">Playfair Display</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Anton">Anton</option>
+                    <option value="Indie Flower">Indie Flower</option>
+                    <option value="Dancing Script">Dancing Script</option>
+                    <option value="Poppins">Poppins</option>
+                  </select>
+                </div>
 
-        <HexColorPicker
-          color={captionColor}
-          onChange={setCaptionColor}
-        />
-      </div>
-    )}
-  </div>
-
-  {/* Font Dropdown */}
-  <div className="text-setting-item">
-    <select
-      value={captionFont}
-      onChange={(e) => setCaptionFont(e.target.value)}
-      className="font-dropdown"
-    >
-      <option value="Quicksand">Quicksand</option>
-      <option value="Pacifico">Pacifico</option>
-      <option value="Playfair Display">Playfair Display</option>
-      <option value="Montserrat">Montserrat</option>
-      <option value="Anton">Anton</option>
-      <option value="Indie Flower">Indie Flower</option>
-      <option value="Dancing Script">Dancing Script</option>
-      <option value="Poppins">Poppins</option>
-    </select>
-  </div>
-
-  {/* Size */}
-  <div className="text-setting-item">
-    <input
-      type="number"
-      min="10"
-      max="120"
-      value={captionSize}
-      onChange={(e) => setCaptionSize(e.target.value)}
-      className="size-input"
-    />
-  </div>
-
-</div>
+                {/* Size */}
+                <div className="text-setting-item">
+                  <input
+                    type="number"
+                    min="10"
+                    max="120"
+                    value={captionSize}
+                    onChange={(e) => setCaptionSize(e.target.value)}
+                    className="size-input"
+                  />
+                </div>
+              </div>
             </div>
-
           </div>
         </div>
       )}
