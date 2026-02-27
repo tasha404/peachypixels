@@ -397,13 +397,13 @@ button:disabled {
     max-width: 100%;
   }
 
-        .camera-wrapper {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 3 / 4;
-          overflow: hidden;
-          border-radius: 20px;
-        }
+    .camera-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      border-radius: 20px;
+    }
   
     .video {
       width: 100%;
