@@ -465,7 +465,7 @@ await drawSticker(ctx, canvas);
 
           {/* RIGHT */}
           <div className="editor-side" ref={pickerRef}>
-            <h3 className="editor-title">Edit</h3>
+            <h3 className="editor-title"> </h3>
 
             {/* BORDER */}
             <div className="editor-card">
