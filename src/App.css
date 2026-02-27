@@ -19,17 +19,9 @@ body {
 }
 
 @keyframes floatGlow {
-  0% {
-    background-position: 0% 0%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 50% 100%;
-  }
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 50% 100%; }
 }
 
 /* ===== MAIN CONTAINER ===== */
@@ -57,28 +49,11 @@ body {
   z-index: -1;
   animation: floatBlob 8s ease-in-out infinite alternate;
 }
-/* iOS video fixes */
-.ios-video {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  -webkit-perspective: 1000;
-  perspective: 1000;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-}
 
-/* Ensure filters work on iOS */
-video[style*="grayscale"],
-video[style*="sepia"],
-video[style*="brightness"] {
-  -webkit-filter: inherit !important;
-  filter: inherit !important;
-}
 @keyframes floatBlob {
   0% {
     transform: translateX(-50%) translateY(0px);
   }
-
   100% {
     transform: translateX(-50%) translateY(20px);
   }
@@ -124,19 +99,6 @@ h1 {
   transform: scaleX(-1);
 }
 
-/* ===== FILTER CLASSES FOR MOBILE ===== */
-.filter-bw {
-  filter: grayscale(100%) !important;
-}
-
-.filter-vintage {
-  filter: sepia(60%) contrast(110%) !important;
-}
-
-.filter-bright {
-  filter: brightness(130%) !important;
-}
-
 /* Active filter button */
 .filter-group button.active {
   background: #ff4da6 !important;
@@ -161,13 +123,8 @@ h1 {
 }
 
 @keyframes flashAnim {
-  0% {
-    opacity: 0.9;
-  }
-
-  100% {
-    opacity: 0;
-  }
+  0% { opacity: 0.9; }
+  100% { opacity: 0; }
 }
 
 .countdown-overlay {
@@ -178,20 +135,15 @@ h1 {
   font-size: 90px;
   font-weight: bold;
   color: white;
-  text-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 25px rgba(0,0,0,0.6);
   z-index: 30;
   pointer-events: none;
   animation: pop 0.3s ease;
 }
 
 @keyframes pop {
-  0% {
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-  }
+  0% { transform: translate(-50%, -50%) scale(0.5); }
+  100% { transform: translate(-50%, -50%) scale(1); }
 }
 
 /* ===== BUTTONS ===== */
@@ -280,7 +232,6 @@ button:disabled {
 .preview-side {
   flex: 1;
   min-width: 0;
-  /* Prevents flex overflow */
 }
 
 .editor-side {
@@ -448,7 +399,6 @@ button:disabled {
     transform: scaleY(1.8);
   }
 
-  /* Ensure video has proper size on desktop */
   .video {
     max-height: 500px;
     object-fit: cover;
@@ -457,7 +407,6 @@ button:disabled {
 
 /* ===== MOBILE ===== */
 @media (max-width: 767px) {
-
   /* Only center on home */
   body.home-mode {
     display: flex;
@@ -516,7 +465,6 @@ button:disabled {
     object-fit: cover;
   }
 
-  /* Ensure canvas scales properly */
   .canvas {
     width: 100%;
     height: auto;
@@ -540,7 +488,7 @@ button:disabled {
     max-width: 300px;
   }
 
-  /* Filter buttons - make them scrollable horizontally if needed */
+  /* Filter buttons */
   .filter-group {
     display: flex;
     flex-wrap: wrap;
@@ -563,7 +511,6 @@ button:disabled {
     font-size: 22px;
   }
 
-  /* General button sizing */
   button {
     font-size: 14px;
     padding: 12px 24px;
@@ -582,7 +529,6 @@ button:disabled {
     min-width: 120px;
   }
 
-  /* Adjust color picker popup position on mobile */
   .picker-popup {
     bottom: 70px;
     left: 50%;
@@ -590,7 +536,6 @@ button:disabled {
     width: 280px;
   }
 
-  /* Text settings on mobile */
   .text-settings-row {
     gap: 10px;
   }
@@ -604,13 +549,11 @@ button:disabled {
     width: 60px;
   }
 
-  /* Sticker selector scrollable on mobile */
   .editor-card div[style*="overflowX"] {
     padding-bottom: 10px;
     margin-bottom: -10px;
   }
 
-  /* Home icon positioning */
   .home-icon {
     top: 10px;
     left: 10px;
