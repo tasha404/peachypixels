@@ -171,7 +171,7 @@ function App() {
     }
   };
 
- const takePhoto = () => {
+const takePhoto = () => {
   const video = videoRef.current;
 
   const videoWidth = video.videoWidth;
@@ -201,7 +201,8 @@ function App() {
   setFlash(true);
   setTimeout(() => setFlash(false), 200);
 
-  // Apply filter
+  // ✅ APPLY FILTER SAFELY
+  ctx.save();
   ctx.filter = getCanvasFilter();
 
   // Mirror (because preview is mirrored)
@@ -214,8 +215,7 @@ function App() {
     0, 0, cropWidth, cropHeight
   );
 
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.filter = "none";
+  ctx.restore(); // reset transform + filter
 
   return canvas.toDataURL("image/png");
 };
