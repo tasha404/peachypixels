@@ -171,29 +171,54 @@ function App() {
     }
   };
 
-  const takePhoto = () => {
-    const video = videoRef.current;
-const width = video.videoWidth;
-const height = video.videoHeight;
+ const takePhoto = () => {
+  const video = videoRef.current;
 
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
+  const videoWidth = video.videoWidth;
+  const videoHeight = video.videoHeight;
 
-    canvas.width = width;
-    canvas.height = height;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
 
-    setFlash(true);
-    setTimeout(() => setFlash(false), 200);
+  const targetRatio = 4 / 3;
 
-    ctx.filter = getCanvasFilter();
-    ctx.translate(width, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(videoRef.current, 0, 0, width, height);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.filter = "none";
+  // Calculate crop area (center crop to 4:3)
+  let cropWidth = videoWidth;
+  let cropHeight = videoWidth / targetRatio;
 
-    return canvas.toDataURL("image/png");
-  };
+  if (cropHeight > videoHeight) {
+    cropHeight = videoHeight;
+    cropWidth = videoHeight * targetRatio;
+  }
+
+  const sx = (videoWidth - cropWidth) / 2;
+  const sy = (videoHeight - cropHeight) / 2;
+
+  canvas.width = cropWidth;
+  canvas.height = cropHeight;
+
+  // Flash effect
+  setFlash(true);
+  setTimeout(() => setFlash(false), 200);
+
+  // Apply filter
+  ctx.filter = getCanvasFilter();
+
+  // Mirror (because preview is mirrored)
+  ctx.translate(cropWidth, 0);
+  ctx.scale(-1, 1);
+
+  ctx.drawImage(
+    video,
+    sx, sy, cropWidth, cropHeight,
+    0, 0, cropWidth, cropHeight
+  );
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.filter = "none";
+
+  return canvas.toDataURL("image/png");
+};
 
   const download = () => {
     const link = document.createElement("a");
@@ -341,7 +366,7 @@ for (let i = 0; i < photos.length; i++) {
 
   const drawWidth = width;
   const drawHeight = width * 0.75;   
-  
+
   // ===== STRIP LAYOUTS =====
   if (layout === "strip4" || layout === "strip3") {
     ctx.drawImage(
