@@ -343,6 +343,9 @@ button:disabled {
       width: 100%;
     }
 
+    h1 {
+      transform: scaleY(1.8);
+    }
 }
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
