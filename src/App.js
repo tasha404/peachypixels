@@ -203,8 +203,48 @@ const takePhoto = () => {
 
   // ✅ APPLY FILTER SAFELY
   ctx.save();
-  ctx.filter = getCanvasFilter();
+// Mirror
+ctx.translate(cropWidth, 0);
+ctx.scale(-1, 1);
 
+ctx.drawImage(
+  video,
+  sx, sy, cropWidth, cropHeight,
+  0, 0, cropWidth, cropHeight
+);
+
+ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+// ✅ APPLY FILTER MANUALLY
+const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+const data = imageData.data;
+
+const selected = filter; // your current filter state
+
+for (let i = 0; i < data.length; i += 4) {
+  let r = data[i];
+  let g = data[i + 1];
+  let b = data[i + 2];
+
+  if (selected === "bw") {
+    const avg = (r + g + b) / 3;
+    data[i] = data[i + 1] = data[i + 2] = avg;
+  }
+
+  if (selected === "bright") {
+    data[i] = Math.min(255, r * 1.3);
+    data[i + 1] = Math.min(255, g * 1.3);
+    data[i + 2] = Math.min(255, b * 1.3);
+  }
+
+  if (selected === "vintage") {
+    data[i] = (0.393 * r + 0.769 * g + 0.189 * b);
+    data[i + 1] = (0.349 * r + 0.686 * g + 0.168 * b);
+    data[i + 2] = (0.272 * r + 0.534 * g + 0.131 * b);
+  }
+}
+
+ctx.putImageData(imageData, 0, 0);
   // Mirror (because preview is mirrored)
   ctx.translate(cropWidth, 0);
   ctx.scale(-1, 1);
