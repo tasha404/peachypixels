@@ -43,7 +43,6 @@ body {
   padding: 20px;
   width: 100%;
   max-width: 700px;
-  /* Reduced from 900px to eliminate empty space */
   margin: 0 auto;
   border-radius: 25px;
   box-shadow: 0 10px 40px rgba(255, 105, 180, 0.2);
@@ -250,7 +249,7 @@ button:disabled {
   min-width: 160px;
 }
 
-/* ===== RESULT SIDE-BY-SIDE LAYOUT - COMPACT ===== */
+/* ===== RESULT SIDE-BY-SIDE LAYOUT ===== */
 .result-layout {
   display: flex;
   gap: 15px;
@@ -332,7 +331,7 @@ button:disabled {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
 }
 
-/* ===== TEXT SETTINGS - COMPACT ===== */
+/* ===== TEXT SETTINGS ===== */
 .text-settings-row {
   display: flex;
   justify-content: space-between;
@@ -409,7 +408,6 @@ button:disabled {
 @media (min-width: 768px) {
   .container {
     max-width: 650px;
-    /* Even smaller container */
     padding: 20px;
   }
 
@@ -419,12 +417,10 @@ button:disabled {
 
   .preview-side {
     max-width: 170px;
-    /* Smaller preview */
   }
 
   .editor-side {
     width: 210px;
-    /* Narrower editor */
   }
 
   .font-dropdown {
@@ -534,21 +530,23 @@ button:disabled {
   .layout-group button {
     width: 90%;
     max-width: 300px;
+    padding: 12px 24px;
+    font-size: 16px;
   }
 
   .filter-group {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     padding: 5px;
   }
 
   .filter-group button {
     flex: 0 1 auto;
-    min-width: 70px;
-    padding: 8px 12px;
-    font-size: 12px;
+    min-width: 80px;
+    padding: 10px 16px;
+    font-size: 14px;
   }
 
   h1 {
@@ -558,21 +556,23 @@ button:disabled {
   }
 
   button {
-    font-size: 14px;
-    padding: 12px 24px;
+    font-size: 16px;
+    padding: 14px 28px;
   }
 
   .result-buttons {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 15px;
+    gap: 20px;
     width: 100%;
   }
 
   .result-buttons button {
     flex: 0 1 auto;
-    min-width: 120px;
+    min-width: 140px;
+    padding: 14px 20px;
+    font-size: 16px;
   }
 
   .picker-popup {
@@ -582,55 +582,104 @@ button:disabled {
     width: 280px;
   }
 
+  /* ===== MOBILE TEXT SETTINGS - FULLER & LARGER ===== */
+  .editor-card {
+    padding: 18px;
+  }
+
+  .editor-card p {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+
   .text-settings-row {
-    gap: 10px;
-    flex-wrap: wrap;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  .text-setting-item {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex: 1;
+  }
+
+  .color-circle-btn {
+    width: 48px;
+    height: 48px;
+    border-width: 3px;
   }
 
   .font-dropdown {
-    max-width: 120px;
-    font-size: 14px;
+    width: 100%;
+    max-width: none;
+    padding: 14px 12px;
+    font-size: 16px;
+    border-radius: 12px;
+    height: 52px;
   }
 
   .size-input {
-    width: 60px;
+    width: 80px;
+    padding: 14px 8px;
+    font-size: 16px;
+    border-radius: 12px;
+    height: 52px;
   }
 
-  .editor-card div[style*="overflowX"] {
-    padding-bottom: 10px;
-    margin-bottom: -10px;
+  .editor-card input[type="text"] {
+    padding: 14px 16px;
+    font-size: 16px;
+    border-radius: 20px;
   }
 
   .home-icon {
     top: 10px;
     left: 10px;
-    padding: 6px 10px;
+    padding: 8px 12px;
+    font-size: 18px;
   }
 }
 
 /* Small mobile devices */
 @media (max-width: 380px) {
   .filter-group button {
-    min-width: 60px;
-    padding: 6px 8px;
-    font-size: 11px;
+    min-width: 70px;
+    padding: 8px 12px;
+    font-size: 13px;
   }
 
   .text-settings-row {
-    flex-direction: column;
-    align-items: stretch;
+    gap: 10px;
   }
 
-  .text-setting-item {
-    justify-content: center;
+  .color-circle-btn {
+    width: 44px;
+    height: 44px;
   }
 
   .font-dropdown {
-    max-width: 100%;
-    width: 100%;
+    padding: 12px 10px;
+    font-size: 15px;
+    height: 48px;
   }
 
   .size-input {
-    width: 100%;
+    width: 70px;
+    padding: 12px 6px;
+    font-size: 15px;
+    height: 48px;
+  }
+
+  .result-buttons button {
+    min-width: 120px;
+    padding: 12px 16px;
+    font-size: 15px;
   }
 }
