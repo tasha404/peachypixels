@@ -592,31 +592,38 @@ button:disabled {
     margin-bottom: 15px;
   }
 
-.text-settings-row {
-  display: flex;
-  justify-content: flex-start; /* Changed from space-between */
-  align-items: center;
-  gap: 0; /* Force no gap */
-  margin: 0;
-  padding: 0;
-  flex-wrap: nowrap;
-  width: 100%;
-}
+  .text-settings-row {
+    display: flex;
+    justify-content: flex-start;
+    /* Changed from space-between */
+    align-items: center;
+    gap: 0;
+    /* Force no gap */
+    margin: 0;
+    padding: 0;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
 
-.text-setting-item {
-  display: flex;
-  align-items: center;
-  position: relative;
-  flex: 1; /* Make items take equal width */
-  margin: 0;
-  padding: 0;
-}
+    .text-settings-row {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 8px;
+      /* ← CHANGE THIS to add gap between items */
+      margin: 0;
+      padding: 0;
+      flex-wrap: nowrap;
+      width: 100%;
+    }s
 
-/* Remove any default spacing on the actual elements */
-.font-dropdown, .size-input {
-  margin: 0;
-  width: 100%;
-}
+  /* Remove any default spacing on the actual elements */
+  .font-dropdown,
+  .size-input {
+    margin: 0;
+    width: 100%;
+  }
+
   .color-circle-btn {
     width: 48px;
     height: 48px;
