@@ -268,10 +268,12 @@ function App() {
     const ctx = canvas.getContext("2d");
 
     const maxMobileWidth = 380;
+    // Smaller width for desktop - 220px instead of 260px
     const width =
       window.innerWidth < 768
         ? Math.min(window.innerWidth * 0.85, maxMobileWidth)
-        : 260;
+        : 220; // REDUCED FROM 260 TO 220
+    
     const padding = 20;
     const textSpace = 100;
 
@@ -555,8 +557,8 @@ function App() {
                     setShowBorderPicker(false);
                   }}
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "40px",
+                    height: "40px",
                     borderRadius: "50%",
                     backgroundImage: "url('/redplaid.png')",
                     backgroundSize: "cover",
@@ -566,7 +568,8 @@ function App() {
                       borderType === "redPlaid"
                         ? "3px solid #ff4da6"
                         : "3px solid white",
-                    boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+                    boxShadow: "0 5px 15px rgba(0,0,0,0.15)",
+                    flexShrink: 0
                   }}
                 />
 
@@ -577,8 +580,8 @@ function App() {
                     setShowBorderPicker(false);
                   }}
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "40px",
+                    height: "40px",
                     borderRadius: "50%",
                     backgroundImage: "url('/blueplaid.png')",
                     backgroundSize: "cover",
@@ -588,7 +591,8 @@ function App() {
                       borderType === "bluePlaid"
                         ? "3px solid #ff4da6"
                         : "3px solid white",
-                    boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
+                    boxShadow: "0 5px 15px rgba(0,0,0,0.15)",
+                    flexShrink: 0
                   }}
                 />
               </div>
@@ -619,8 +623,8 @@ function App() {
                 <div
                   onClick={() => setSelectedSticker(null)}
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "40px",
+                    height: "40px",
                     borderRadius: "50%",
                     background: "#fff",
                     border: selectedSticker === null
@@ -634,8 +638,8 @@ function App() {
                 <div
                   onClick={() => setSelectedSticker("heart")}
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "40px",
+                    height: "40px",
                     borderRadius: "50%",
                     backgroundImage: "url('/stickers/heart.png')",
                     backgroundSize: "cover",
@@ -651,8 +655,8 @@ function App() {
                 <div
                   onClick={() => setSelectedSticker("star")}
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "40px",
+                    height: "40px",
                     borderRadius: "50%",
                     backgroundImage: "url('/stickers/star.png')",
                     backgroundSize: "cover",
@@ -668,8 +672,8 @@ function App() {
                 <div
                   onClick={() => setSelectedSticker("nailong")}
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "40px",
+                    height: "40px",
                     borderRadius: "50%",
                     backgroundImage: "url('/stickers/nailong.png')",
                     backgroundSize: "cover",
