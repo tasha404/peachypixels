@@ -23,9 +23,17 @@ body {
 }
 
 @keyframes floatGlow {
-  0% { background-position: 0% 0%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 50% 100%; }
+  0% {
+    background-position: 0% 0%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 50% 100%;
+  }
 }
 
 /* ===== MAIN CONTAINER ===== */
@@ -58,6 +66,7 @@ body {
   0% {
     transform: translateX(-50%) translateY(0px);
   }
+
   100% {
     transform: translateX(-50%) translateY(20px);
   }
@@ -131,8 +140,13 @@ h1 {
 }
 
 @keyframes flashAnim {
-  0% { opacity: 0.9; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 .countdown-overlay {
@@ -143,15 +157,20 @@ h1 {
   font-size: 90px;
   font-weight: bold;
   color: white;
-  text-shadow: 0 0 25px rgba(0,0,0,0.6);
+  text-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
   z-index: 30;
   pointer-events: none;
   animation: pop 0.3s ease;
 }
 
 @keyframes pop {
-  0% { transform: translate(-50%, -50%) scale(0.5); }
-  100% { transform: translate(-50%, -50%) scale(1); }
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 /* ===== BUTTONS ===== */
@@ -232,21 +251,21 @@ button:disabled {
 /* ===== RESULT SIDE-BY-SIDE LAYOUT ===== */
 .result-layout {
   display: flex;
-  gap: 40px;
+  gap: 30px;
   align-items: flex-start;
   margin-top: 20px;
 }
 
 .preview-side {
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 auto;
+  max-width: 260px;
 }
 
 .editor-side {
-  width: 300px;
+  width: 350px;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 20px;
 }
 
 .editor-title {
@@ -290,13 +309,14 @@ button:disabled {
 
 /* ===== COLOR BUTTON ===== */
 .color-circle-btn {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   cursor: pointer;
   border: 3px solid white;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 .color-circle-btn:hover {
@@ -315,20 +335,22 @@ button:disabled {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
 }
 
-/* ===== TEXT SETTINGS SIDE-BY-SIDE ===== */
+/* ===== TEXT SETTINGS - FIXED FOR DESKTOP ===== */
 .text-settings-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
   margin-top: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  width: 100%;
 }
 
 .text-setting-item {
   display: flex;
   align-items: center;
   position: relative;
+  flex: 0 1 auto;
 }
 
 .font-dropdown {
@@ -339,6 +361,7 @@ button:disabled {
   font-family: 'Quicksand', sans-serif;
   cursor: pointer;
   outline: none;
+  width: 140px;
 }
 
 .font-dropdown:focus {
@@ -347,7 +370,7 @@ button:disabled {
 }
 
 .size-input {
-  width: 70px;
+  width: 60px;
   padding: 8px 12px;
   border-radius: 10px;
   border: 2px solid #ffd6e8;
@@ -382,24 +405,50 @@ button:disabled {
   .container {
     width: 900px;
     max-width: 900px;
-    padding: 50px;
+    padding: 40px;
+  }
+
+  .result-layout {
+    gap: 30px;
+  }
+
+  .preview-side {
+    max-width: 240px;
+  }
+
+  .editor-side {
+    width: 360px;
+  }
+
+  .text-settings-row {
+    gap: 8px;
+  }
+
+  .font-dropdown {
+    width: 130px;
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .size-input {
+    width: 55px;
+    padding: 8px 8px;
   }
 
   .layout-group {
     flex-direction: row;
     justify-content: center;
-    gap: 40px;
+    gap: 30px;
   }
 
-  .start-wrapper {
-    display: flex;
-    justify-content: center;
-    width: 100%;
+  .start-wrapper button {
+    min-width: 180px;
   }
 
   h1 {
     transform: scaleY(1.8);
-    font-size: 28px;
+    font-size: 26px;
+    margin-bottom: 25px;
   }
 
   .video {
@@ -434,6 +483,7 @@ button:disabled {
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 100%;
   }
 
   .editor-side {
@@ -528,6 +578,7 @@ button:disabled {
 
   .text-settings-row {
     gap: 10px;
+    flex-wrap: wrap;
   }
 
   .font-dropdown {
