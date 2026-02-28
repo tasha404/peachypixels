@@ -608,7 +608,7 @@ button:disabled {
     align-items: center;
     position: relative;
     flex: 1;
-    gap : 0;
+    gap: 50;
   }
 
   .color-circle-btn {
