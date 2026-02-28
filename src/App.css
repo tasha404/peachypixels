@@ -582,7 +582,7 @@ button:disabled {
     width: 280px;
   }
 
-  /* ===== MOBILE TEXT SETTINGS - FULLER & LARGER ===== */
+  /* ===== MOBILE TEXT SETTINGS - STACKED VERTICAL WITH NO GAPS ===== */
   .editor-card {
     padding: 18px;
   }
@@ -594,12 +594,10 @@ button:disabled {
 
   .text-settings-row {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    margin-top: 10px;
-    flex-wrap: nowrap;
+    flex-direction: column;
+    gap: 0;
+    /* NO GAPS between items */
+    margin-top: 5px;
     width: 100%;
   }
 
@@ -607,34 +605,104 @@ button:disabled {
     display: flex;
     align-items: center;
     position: relative;
-    flex: 1;
+    width: 100%;
+    margin-bottom: 0;
+    /* No margin */
   }
 
+  /* Make each item take full width and stack */
+  .text-setting-item:first-child {
+    margin-bottom: 0;
+  }
+
+  .text-setting-item:nth-child(2) {
+    width: 100%;
+    margin: 0;
+  }
+
+  .text-setting-item:last-child {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Color picker circle - positioned absolutely to not disrupt flow */
   .color-circle-btn {
     width: 48px;
     height: 48px;
     border-width: 3px;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
   }
 
+  /* Font dropdown - full width */
   .font-dropdown {
     width: 100%;
     max-width: none;
-    padding: 14px 12px;
+    padding: 16px 16px;
+    padding-left: 60px;
     font-size: 16px;
     border-radius: 12px;
-    height: 52px;
+    height: 60px;
+    margin: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23ff4da6%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
   }
 
+  /* Size input - full width */
   .size-input {
-    width: 80px;
-    padding: 14px 8px;
+    width: 100%;
+    padding: 16px 16px;
+    padding-left: 60px;
     font-size: 16px;
     border-radius: 12px;
-    height: 52px;
+    height: 60px;
+    text-align: left;
+    /* Left align text */
+    margin: 0;
+  }
+
+  /* Remove spinner arrows */
+  .size-input::-webkit-inner-spin-button,
+  .size-input::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 24px;
+    position: absolute;
+    right: 10px;
+  }
+
+  /* Add labels for better UX */
+  .text-setting-item {
+    position: relative;
+  }
+
+  .text-setting-item::before {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #ff4da6;
+    font-weight: 600;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .text-setting-item:nth-child(2)::before {
+    content: "Font:";
+  }
+
+  .text-setting-item:last-child::before {
+    content: "Size:";
   }
 
   .editor-card input[type="text"] {
-    padding: 14px 16px;
+    padding: 16px 16px;
     font-size: 16px;
     border-radius: 20px;
   }
@@ -655,31 +723,34 @@ button:disabled {
     font-size: 13px;
   }
 
-  .text-settings-row {
-    gap: 10px;
-  }
-
   .color-circle-btn {
     width: 44px;
     height: 44px;
   }
 
   .font-dropdown {
-    padding: 12px 10px;
+    padding: 14px 14px;
+    padding-left: 55px;
     font-size: 15px;
-    height: 48px;
+    height: 55px;
+    background-position: right 12px center;
   }
 
   .size-input {
-    width: 70px;
-    padding: 12px 6px;
+    padding: 14px 14px;
+    padding-left: 55px;
     font-size: 15px;
-    height: 48px;
+    height: 55px;
   }
 
   .result-buttons button {
     min-width: 120px;
     padding: 12px 16px;
     font-size: 15px;
+  }
+
+  .text-setting-item::before {
+    font-size: 13px;
+    left: 14px;
   }
 }
