@@ -4,47 +4,25 @@ import "./App.css";
 
 const stickerLayouts = {
   heart: [
-    { src: "/stickers/heart.png", x: 0.05, y: 0.05, size: 0.15 },
-    { src: "/stickers/heart.png", x: 0.15, y: 0.18, size: 0.12 },
-    { src: "/stickers/heart.png", x: 0.02, y: 0.25, size: 0.10 },
-    { src: "/stickers/heart.png", x: 0.82, y: 0.08, size: 0.14 },
-    { src: "/stickers/heart.png", x: 0.72, y: 0.20, size: 0.11 },
-    { src: "/stickers/heart.png", x: 0.35, y: 0.35, size: 0.13 },
-    { src: "/stickers/heart.png", x: 0.55, y: 0.45, size: 0.16 },
-    { src: "/stickers/heart.png", x: 0.25, y: 0.60, size: 0.12 },
-    { src: "/stickers/heart.png", x: 0.68, y: 0.65, size: 0.13 },
-    { src: "/stickers/heart.png", x: 0.08, y: 0.82, size: 0.14 },
-    { src: "/stickers/heart.png", x: 0.45, y: 0.78, size: 0.11 },
-    { src: "/stickers/heart.png", x: 0.80, y: 0.85, size: 0.12 },
-    { src: "/stickers/heart.png", x: 0.20, y: 0.92, size: 0.09 },
-    { src: "/stickers/heart.png", x: 0.92, y: 0.92, size: 0.10 },
-    { src: "/stickers/heart.png", x: 0.88, y: 0.02, size: 0.08 },
-    { src: "/stickers/heart.png", x: 0.01, y: 0.95, size: 0.09 }
+    { src: "/stickers/heart.png", x: 0.75, y: 0.03, size: 0.15 },
+    { src: "/stickers/heart.png", x: 0.25, y: 0.20, size: 0.14 },
+    { src: "/stickers/heart.png", x: 0.30, y: 0.60, size: 0.15 },
+    { src: "/stickers/heart.png", x: 0.18, y: 0.85, size: 0.12 },
+    { src: "/stickers/heart.png", x: 0.35, y: 0.12, size: 0.18 },
+    { src: "/stickers/heart.png", x: 0.02, y: 0.02, size: 0.20 },
+    { src: "/stickers/heart.png", x: 0.00, y: 0.40, size: 0.20 },
+    { src: "/stickers/heart.png", x: 0.02, y: 0.75, size: 0.15 },
+    { src: "/stickers/heart.png", x: 0.12, y: 0.15, size: 0.18 }
   ],
-  
   star: [
-    { src: "/stickers/star.png", x: 0.10, y: 0.12, size: 0.15 },
-    { src: "/stickers/star.png", x: 0.80, y: 0.15, size: 0.16 },
-    { src: "/stickers/star.png", x: 0.20, y: 0.40, size: 0.14 },
-    { src: "/stickers/star.png", x: 0.70, y: 0.45, size: 0.15 },
-    { src: "/stickers/star.png", x: 0.35, y: 0.70, size: 0.17 },
-    { src: "/stickers/star.png", x: 0.60, y: 0.80, size: 0.14 },
-    { src: "/stickers/star.png", x: 0.05, y: 0.88, size: 0.13 },
-    { src: "/stickers/star.png", x: 0.90, y: 0.92, size: 0.12 },
-    { src: "/stickers/star.png", x: 0.45, y: 0.25, size: 0.11 },
-    { src: "/stickers/star.png", x: 0.50, y: 0.55, size: 0.13 }
+    { src: "/stickers/star.png", x: 0.05, y: 0.1, size: 0.18 },
+    { src: "/stickers/star.png", x: 0.75, y: 0.4, size: 0.18 },
+    { src: "/stickers/star.png", x: 0.08, y: 0.75, size: 0.18 }
   ],
-  
   nailong: [
-    { src: "/stickers/nailong.png", x: 0.08, y: 0.08, size: 0.22 },
-    { src: "/stickers/nailong.png", x: 0.75, y: 0.12, size: 0.18 },
-    { src: "/stickers/nailong.png", x: 0.15, y: 0.45, size: 0.20 },
-    { src: "/stickers/nailong.png", x: 0.70, y: 0.50, size: 0.19 },
-    { src: "/stickers/nailong.png", x: 0.25, y: 0.78, size: 0.21 },
-    { src: "/stickers/nailong.png", x: 0.80, y: 0.82, size: 0.17 },
-    { src: "/stickers/nailong.png", x: 0.45, y: 0.30, size: 0.15 },
-    { src: "/stickers/nailong.png", x: 0.50, y: 0.65, size: 0.16 },
-    { src: "/stickers/nailong.png", x: 0.92, y: 0.92, size: 0.14 }
+    { src: "/stickers/nailong.png", x: 0.05, y: 0.1, size: 0.18 },
+    { src: "/stickers/nailong.png", x: 0.75, y: 0.55, size: 0.20 },
+    { src: "/stickers/nailong.png", x: 0.05, y: 0.65, size: 0.18 }
   ]
 };
 
@@ -74,39 +52,6 @@ function App() {
   const [showTextPicker, setShowTextPicker] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
-
-  // Store loaded sticker images in cache
-  const [stickerCache, setStickerCache] = useState({});
-
-  // Preload and cache stickers for better performance
-  useEffect(() => {
-    const preloadStickers = async () => {
-      const cache = {};
-      const allStickers = [
-        ...stickerLayouts.heart,
-        ...stickerLayouts.star,
-        ...stickerLayouts.nailong
-      ];
-      
-      for (let sticker of allStickers) {
-        if (!cache[sticker.src]) {
-          const img = new Image();
-          img.src = sticker.src;
-          img.crossOrigin = "anonymous";
-          await new Promise(resolve => {
-            img.onload = () => {
-              cache[sticker.src] = img;
-              resolve();
-            };
-            img.onerror = resolve;
-          });
-        }
-      }
-      setStickerCache(cache);
-    };
-    
-    preloadStickers();
-  }, []);
 
   useEffect(() => {
     if (screen === "home") {
@@ -258,35 +203,21 @@ function App() {
     setFlash(true);
     setTimeout(() => setFlash(false), 200);
 
-    // First, draw the mirrored image without filter
     ctx.save();
+    
+    // Apply filter
+    ctx.filter = getCanvasFilter();
+
     ctx.translate(cropWidth, 0);
     ctx.scale(-1, 1);
+
     ctx.drawImage(
       video,
       sx, sy, cropWidth, cropHeight,
       0, 0, cropWidth, cropHeight
     );
-    ctx.restore();
 
-    // Then apply filter by creating a temporary canvas and compositing
-    if (filter !== "none") {
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = canvas.width;
-      tempCanvas.height = canvas.height;
-      const tempCtx = tempCanvas.getContext("2d");
-      
-      // Copy the original image to temp canvas
-      tempCtx.drawImage(canvas, 0, 0);
-      
-      // Clear original canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Apply filter and draw back
-      ctx.filter = getCanvasFilter();
-      ctx.drawImage(tempCanvas, 0, 0);
-      ctx.filter = "none"; // Reset filter
-    }
+    ctx.restore();
 
     return canvas.toDataURL("image/png");
   };
@@ -298,72 +229,36 @@ function App() {
     link.click();
   };
 
-  // HD sticker drawing function with caching
+  // sticker
   const drawSticker = useCallback(async (ctx, canvas) => {
     if (!selectedSticker) return;
 
     const layout = stickerLayouts[selectedSticker];
     if (!layout) return;
 
-    // Enable high-quality image rendering
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-
-    // Get device pixel ratio for retina displays
-    const dpr = window.devicePixelRatio || 1;
-    
     for (let sticker of layout) {
-      // Use cached image if available
-      let img = stickerCache[sticker.src];
-      
-      if (!img) {
-        img = new Image();
-        img.src = sticker.src;
-        img.crossOrigin = "anonymous";
-        await new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
-      }
+      const img = new Image();
+      img.src = sticker.src;
+      img.crossOrigin = "anonymous";
 
-      // Calculate size based on canvas dimensions
-      const baseSize = Math.min(canvas.width, canvas.height) * sticker.size;
-      
-      // Use the full resolution of the sticker image
-      // Maintain aspect ratio
-      const aspectRatio = img.width / img.height;
-      
-      let drawWidth = baseSize;
-      let drawHeight = baseSize / aspectRatio;
-      
-      // Adjust if too tall
-      if (drawHeight > baseSize) {
-        drawHeight = baseSize;
-        drawWidth = baseSize * aspectRatio;
-      }
+      await new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
 
-      // Position the sticker
+      const size = canvas.width * sticker.size;
       const x = canvas.width * sticker.x;
       const y = canvas.height * sticker.y;
 
       const rotation = (sticker.rotation || 0) * Math.PI / 180;
 
-      // For extremely high DPI screens, we might want to draw larger
-      if (dpr >= 3) {
-        drawWidth *= 1.2;
-        drawHeight *= 1.2;
-      } else if (dpr >= 2) {
-        drawWidth *= 1.1;
-        drawHeight *= 1.1;
-      }
-
       ctx.save();
-      ctx.translate(x + drawWidth / 2, y + drawHeight / 2);
+      ctx.translate(x + size / 2, y + size / 2);
       ctx.rotate(rotation);
-      ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      ctx.drawImage(img, -size / 2, -size / 2, size, size);
       ctx.restore();
     }
-  }, [selectedSticker, stickerCache]);
+  }, [selectedSticker]);
 
   /* DRAW RESULT */
   useEffect(() => {
@@ -372,15 +267,12 @@ function App() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    // Get device pixel ratio for retina displays
-    const dpr = window.devicePixelRatio || 1;
-    
     const maxMobileWidth = 380;
     // Even smaller width for desktop - 200px
     const width =
       window.innerWidth < 768
         ? Math.min(window.innerWidth * 0.85, maxMobileWidth)
-        : 200;
+        : 200; // REDUCED FROM 220 TO 200
     
     const padding = 20;
     const textSpace = 100;
@@ -396,39 +288,27 @@ function App() {
         layout === "grid3x2" ? 3 :
         photos.length;
 
-      // Set canvas dimensions accounting for device pixel ratio
-      const displayWidth = columns === 1
-        ? width + padding * 2
-        : width * columns + padding * (columns + 1);
-      
-      const displayHeight = await new Promise(async (resolve) => {
-        const firstImg = new Image();
-        firstImg.src = photos[0];
-        firstImg.crossOrigin = "anonymous";
+      canvas.width =
+        columns === 1
+          ? width + padding * 2
+          : width * columns + padding * (columns + 1);
 
-        await new Promise(resolveImg => {
-          firstImg.onload = resolveImg;
-          firstImg.onerror = resolveImg;
-        });
+      const firstImg = new Image();
+      firstImg.src = photos[0];
+      firstImg.crossOrigin = "anonymous";
 
-        const ratio = firstImg.width / firstImg.height;
-        const drawHeight = width / ratio;
-        
-        resolve(rows * drawHeight + padding * (rows + 1) + textSpace);
+      await new Promise(resolve => {
+        firstImg.onload = resolve;
+        firstImg.onerror = resolve;
       });
 
-      // Set canvas size for high DPI
-      canvas.width = displayWidth * dpr;
-      canvas.height = displayHeight * dpr;
-      canvas.style.width = displayWidth + 'px';
-      canvas.style.height = displayHeight + 'px';
-      
-      // Scale context for high DPI
-      ctx.scale(dpr, dpr);
+      const ratio = firstImg.width / firstImg.height;
+      const drawHeight = width / ratio;
 
-      // Enable high-quality image rendering for all drawings
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
+      canvas.height =
+        rows * drawHeight +
+        padding * (rows + 1) +
+        textSpace;
 
       await drawAllContent();
     };
@@ -437,7 +317,7 @@ function App() {
       // 1️⃣ Draw border first
       if (borderType === "solid") {
         ctx.fillStyle = borderColor;
-        ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
       if (borderType === "redPlaid") {
@@ -452,7 +332,7 @@ function App() {
 
         const pattern = ctx.createPattern(bg, "repeat");
         ctx.fillStyle = pattern;
-        ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
       if (borderType === "bluePlaid") {
@@ -467,7 +347,7 @@ function App() {
 
         const pattern = ctx.createPattern(bg, "repeat");
         ctx.fillStyle = pattern;
-        ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
       // 2️⃣ Draw photos
@@ -510,8 +390,15 @@ function App() {
         
         // Apply filter
         ctx.filter = getCanvasFilter();
-        ctx.drawImage(img, x, y, drawWidth, drawHeight);
-        ctx.filter = "none"; // Reset filter for next operations
+
+        ctx.drawImage(
+          img,
+          x,
+          y,
+          drawWidth,
+          drawHeight
+        );
+
         ctx.restore();
       }
 
@@ -519,10 +406,10 @@ function App() {
       ctx.fillStyle = captionColor;
       ctx.font = `${captionSize}px ${captionFont}`;
       ctx.textAlign = "center";
-      ctx.fillText(caption, (canvas.width / dpr) / 2, (canvas.height / dpr) - 50);
+      ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
 
       // 4️⃣ Draw stickers
-      await drawSticker(ctx, { width: canvas.width / dpr, height: canvas.height / dpr });
+      await drawSticker(ctx, canvas);
     };
 
     drawAll();
@@ -563,19 +450,19 @@ function App() {
       {screen === "camera" && (
         <>
           <div
-            className="camera-wrapper"
-            style={{
-              filter: getCanvasFilter(),
-              WebkitFilter: getCanvasFilter()
-            }}
-          >
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="video mirror"
-            />
+  className="camera-wrapper"
+  style={{
+    filter: getCanvasFilter(),
+    WebkitFilter: getCanvasFilter()
+  }}
+>
+  <video
+    ref={videoRef}
+    autoPlay
+    playsInline
+    muted
+    className="video mirror"
+  />
             {countdown && <div className="countdown-overlay">{countdown}</div>}
             {flash && <div className="flash"></div>}
           </div>
