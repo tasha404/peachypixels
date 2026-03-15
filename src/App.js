@@ -75,9 +75,13 @@ function App() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
 
-  // Preload stickers for better performance
+  // Store loaded sticker images in cache
+  const [stickerCache, setStickerCache] = useState({});
+
+  // Preload and cache stickers for better performance
   useEffect(() => {
     const preloadStickers = async () => {
+      const cache = {};
       const allStickers = [
         ...stickerLayouts.heart,
         ...stickerLayouts.star,
@@ -85,13 +89,20 @@ function App() {
       ];
       
       for (let sticker of allStickers) {
-        const img = new Image();
-        img.src = sticker.src;
-        await new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
+        if (!cache[sticker.src]) {
+          const img = new Image();
+          img.src = sticker.src;
+          img.crossOrigin = "anonymous";
+          await new Promise(resolve => {
+            img.onload = () => {
+              cache[sticker.src] = img;
+              resolve();
+            };
+            img.onerror = resolve;
+          });
+        }
       }
+      setStickerCache(cache);
     };
     
     preloadStickers();
@@ -287,7 +298,7 @@ function App() {
     link.click();
   };
 
-  // HD sticker drawing function
+  // HD sticker drawing function with caching
   const drawSticker = useCallback(async (ctx, canvas) => {
     if (!selectedSticker) return;
 
@@ -302,14 +313,18 @@ function App() {
     const dpr = window.devicePixelRatio || 1;
     
     for (let sticker of layout) {
-      const img = new Image();
-      img.src = sticker.src;
-      img.crossOrigin = "anonymous";
-
-      await new Promise(resolve => {
-        img.onload = resolve;
-        img.onerror = resolve;
-      });
+      // Use cached image if available
+      let img = stickerCache[sticker.src];
+      
+      if (!img) {
+        img = new Image();
+        img.src = sticker.src;
+        img.crossOrigin = "anonymous";
+        await new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }
 
       // Calculate size based on canvas dimensions
       const baseSize = Math.min(canvas.width, canvas.height) * sticker.size;
@@ -348,7 +363,7 @@ function App() {
       ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
       ctx.restore();
     }
-  }, [selectedSticker]);
+  }, [selectedSticker, stickerCache]);
 
   /* DRAW RESULT */
   useEffect(() => {
@@ -410,6 +425,10 @@ function App() {
       
       // Scale context for high DPI
       ctx.scale(dpr, dpr);
+
+      // Enable high-quality image rendering for all drawings
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
 
       await drawAllContent();
     };
@@ -488,10 +507,6 @@ function App() {
         }
 
         ctx.save();
-        
-        // Enable image smoothing for photos too
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
         
         // Apply filter
         ctx.filter = getCanvasFilter();
