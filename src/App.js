@@ -4,28 +4,60 @@ import "./App.css";
 
 const stickerLayouts = {
   heart: [
-    { src: "/stickers/heart.png", x: 0.75, y: 0.03, size: 0.15 },
-    { src: "/stickers/heart.png", x: 0.25, y: 0.20, size: 0.14 },
-    { src: "/stickers/heart.png", x: 0.30, y: 0.60, size: 0.15 },
-    { src: "/stickers/heart.png", x: 0.18, y: 0.85, size: 0.12 },
-    { src: "/stickers/heart.png", x: 0.35, y: 0.12, size: 0.18 },
-    { src: "/stickers/heart.png", x: 0.02, y: 0.02, size: 0.20 },
-    { src: "/stickers/heart.png", x: 0.00, y: 0.40, size: 0.20 },
-    { src: "/stickers/heart.png", x: 0.02, y: 0.75, size: 0.15 },
-    { src: "/stickers/heart.png", x: 0.12, y: 0.15, size: 0.18 }
+    // Top left area
+    { src: "/stickers/heart.png", x: 0.05, y: 0.05, size: 0.15 },
+    { src: "/stickers/heart.png", x: 0.15, y: 0.18, size: 0.12 },
+    { src: "/stickers/heart.png", x: 0.02, y: 0.25, size: 0.10 },
+    
+    // Top right area
+    { src: "/stickers/heart.png", x: 0.82, y: 0.08, size: 0.14 },
+    { src: "/stickers/heart.png", x: 0.72, y: 0.20, size: 0.11 },
+    
+    // Middle scattered
+    { src: "/stickers/heart.png", x: 0.35, y: 0.35, size: 0.13 },
+    { src: "/stickers/heart.png", x: 0.55, y: 0.45, size: 0.16 },
+    { src: "/stickers/heart.png", x: 0.25, y: 0.60, size: 0.12 },
+    { src: "/stickers/heart.png", x: 0.68, y: 0.65, size: 0.13 },
+    
+    // Bottom area
+    { src: "/stickers/heart.png", x: 0.08, y: 0.82, size: 0.14 },
+    { src: "/stickers/heart.png", x: 0.45, y: 0.78, size: 0.11 },
+    { src: "/stickers/heart.png", x: 0.80, y: 0.85, size: 0.12 },
+    { src: "/stickers/heart.png", x: 0.20, y: 0.92, size: 0.09 },
+    
+    // Corner accents
+    { src: "/stickers/heart.png", x: 0.92, y: 0.92, size: 0.10 },
+    { src: "/stickers/heart.png", x: 0.88, y: 0.02, size: 0.08 },
+    { src: "/stickers/heart.png", x: 0.01, y: 0.95, size: 0.09 }
   ],
+  
   star: [
-    { src: "/stickers/star.png", x: 0.05, y: 0.1, size: 0.18 },
-    { src: "/stickers/star.png", x: 0.75, y: 0.4, size: 0.18 },
-    { src: "/stickers/star.png", x: 0.08, y: 0.75, size: 0.18 }
+    // Stars look better spaced out and slightly larger
+    { src: "/stickers/star.png", x: 0.10, y: 0.12, size: 0.15 },
+    { src: "/stickers/star.png", x: 0.80, y: 0.15, size: 0.16 },
+    { src: "/stickers/star.png", x: 0.20, y: 0.40, size: 0.14 },
+    { src: "/stickers/star.png", x: 0.70, y: 0.45, size: 0.15 },
+    { src: "/stickers/star.png", x: 0.35, y: 0.70, size: 0.17 },
+    { src: "/stickers/star.png", x: 0.60, y: 0.80, size: 0.14 },
+    { src: "/stickers/star.png", x: 0.05, y: 0.88, size: 0.13 },
+    { src: "/stickers/star.png", x: 0.90, y: 0.92, size: 0.12 },
+    { src: "/stickers/star.png", x: 0.45, y: 0.25, size: 0.11 },
+    { src: "/stickers/star.png", x: 0.50, y: 0.55, size: 0.13 }
   ],
+  
   nailong: [
-    { src: "/stickers/nailong.png", x: 0.05, y: 0.1, size: 0.18 },
-    { src: "/stickers/nailong.png", x: 0.75, y: 0.55, size: 0.20 },
-    { src: "/stickers/nailong.png", x: 0.05, y: 0.65, size: 0.18 }
+    // Nailong (character) - fewer, more intentional placements
+    { src: "/stickers/nailong.png", x: 0.08, y: 0.08, size: 0.22 }, // Top left corner
+    { src: "/stickers/nailong.png", x: 0.75, y: 0.12, size: 0.18 }, // Top right
+    { src: "/stickers/nailong.png", x: 0.15, y: 0.45, size: 0.20 }, // Left middle
+    { src: "/stickers/nailong.png", x: 0.70, y: 0.50, size: 0.19 }, // Right middle
+    { src: "/stickers/nailong.png", x: 0.25, y: 0.78, size: 0.21 }, // Bottom left
+    { src: "/stickers/nailong.png", x: 0.80, y: 0.82, size: 0.17 }, // Bottom right
+    { src: "/stickers/nailong.png", x: 0.45, y: 0.30, size: 0.15 }, // Center area (smaller)
+    { src: "/stickers/nailong.png", x: 0.50, y: 0.65, size: 0.16 }, // Center area
+    { src: "/stickers/nailong.png", x: 0.92, y: 0.92, size: 0.14 }  // Bottom corner
   ]
 };
-
 function App() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
