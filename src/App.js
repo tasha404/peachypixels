@@ -449,17 +449,20 @@ function App() {
 
       {screen === "camera" && (
         <>
-          <div className="camera-wrapper">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="video mirror"
-              style={{ 
-                filter: getCanvasFilter(),
-                WebkitFilter: getCanvasFilter() 
-              }}
-            />
+          <div
+  className="camera-wrapper"
+  style={{
+    filter: getCanvasFilter(),
+    WebkitFilter: getCanvasFilter()
+  }}
+>
+  <video
+    ref={videoRef}
+    autoPlay
+    playsInline
+    muted
+    className="video mirror"
+  />
             {countdown && <div className="countdown-overlay">{countdown}</div>}
             {flash && <div className="flash"></div>}
           </div>
