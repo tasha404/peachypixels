@@ -203,21 +203,35 @@ function App() {
     setFlash(true);
     setTimeout(() => setFlash(false), 200);
 
+    // First, draw the mirrored image without filter
     ctx.save();
-    
-    // Apply filter
-    ctx.filter = getCanvasFilter();
-
     ctx.translate(cropWidth, 0);
     ctx.scale(-1, 1);
-
     ctx.drawImage(
       video,
       sx, sy, cropWidth, cropHeight,
       0, 0, cropWidth, cropHeight
     );
-
     ctx.restore();
+
+    // Then apply filter by creating a temporary canvas and compositing
+    if (filter !== "none") {
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      const tempCtx = tempCanvas.getContext("2d");
+      
+      // Copy the original image to temp canvas
+      tempCtx.drawImage(canvas, 0, 0);
+      
+      // Clear original canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Apply filter and draw back
+      ctx.filter = getCanvasFilter();
+      ctx.drawImage(tempCanvas, 0, 0);
+      ctx.filter = "none"; // Reset filter
+    }
 
     return canvas.toDataURL("image/png");
   };
@@ -390,15 +404,8 @@ function App() {
         
         // Apply filter
         ctx.filter = getCanvasFilter();
-
-        ctx.drawImage(
-          img,
-          x,
-          y,
-          drawWidth,
-          drawHeight
-        );
-
+        ctx.drawImage(img, x, y, drawWidth, drawHeight);
+        ctx.filter = "none"; // Reset filter for next operations
         ctx.restore();
       }
 
