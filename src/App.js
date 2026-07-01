@@ -67,6 +67,57 @@ function seededRand(seed, salt = 0) {
   return (x - Math.floor(x)) * 2 - 1; // remap to [-1, 1]
 }
 
+// Applies a filter directly to pixel data in a canvas region.
+// Works identically on iOS/Android/desktop, unlike ctx.filter (which is
+// unreliable/silently ignored on iOS Safari, especially with drawImage).
+function applyPixelFilter(ctx, x, y, w, h, filterType) {
+  if (!filterType || filterType === "none" || w <= 0 || h <= 0) return;
+
+  const imageData = ctx.getImageData(x, y, w, h);
+  const data = imageData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    let r = data[i];
+    let g = data[i + 1];
+    let b = data[i + 2];
+
+    switch (filterType) {
+      case "bw": {
+        const avg = 0.299 * r + 0.587 * g + 0.114 * b;
+        r = g = b = avg;
+        break;
+      }
+      case "vintage": {
+        // approximates sepia(60%) contrast(110%)
+        const sr = r * 0.393 + g * 0.769 + b * 0.189;
+        const sg = r * 0.349 + g * 0.686 + b * 0.168;
+        const sb = r * 0.272 + g * 0.534 + b * 0.131;
+        r = r * 0.4 + sr * 0.6;
+        g = g * 0.4 + sg * 0.6;
+        b = b * 0.4 + sb * 0.6;
+        r = (r - 128) * 1.1 + 128;
+        g = (g - 128) * 1.1 + 128;
+        b = (b - 128) * 1.1 + 128;
+        break;
+      }
+      case "bright": {
+        r *= 1.3;
+        g *= 1.3;
+        b *= 1.3;
+        break;
+      }
+      default:
+        break;
+    }
+
+    data[i]     = Math.max(0, Math.min(255, r));
+    data[i + 1] = Math.max(0, Math.min(255, g));
+    data[i + 2] = Math.max(0, Math.min(255, b));
+  }
+
+  ctx.putImageData(imageData, x, y);
+}
+
 function App() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -189,6 +240,8 @@ function App() {
     });
   };
 
+  // Used for the LIVE PREVIEW only (CSS filter on camera-wrapper).
+  // CSS filter works fine on iOS Safari — it's ctx.filter (canvas) that's unreliable.
   const getCanvasFilter = useCallback(() => {
     switch (filter) {
       case "bw":      return "grayscale(100%)";
@@ -217,12 +270,16 @@ function App() {
     canvas.height = cropHeight;
     setFlash(true);
     setTimeout(() => setFlash(false), 200);
+
     ctx.save();
-    ctx.filter = getCanvasFilter();
     ctx.translate(cropWidth, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, sx, sy, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
     ctx.restore();
+
+    // Bake the filter into pixel data instead of ctx.filter (iOS-safe)
+    applyPixelFilter(ctx, 0, 0, cropWidth, cropHeight, filter);
+
     return canvas.toDataURL("image/png");
   };
 
@@ -339,6 +396,9 @@ function App() {
       }
 
       // 2. Draw photos — collect slot positions as we go
+      // NOTE: photos already have the filter baked in from takePhoto(), so we
+      // do NOT re-apply a filter here. Re-applying would double up the effect
+      // and was also the ctx.filter call that broke on iOS.
       const photoSlots = [];
 
       for (let i = 0; i < photos.length; i++) {
@@ -362,10 +422,7 @@ function App() {
           y = padding + row * (drawH + padding);
         }
 
-        ctx.save();
-        ctx.filter = getCanvasFilter();
         ctx.drawImage(img, x, y, drawWidth, drawH);
-        ctx.restore();
 
         // Record this slot so drawSticker can place stickers relative to it
         photoSlots.push({ x, y, w: drawWidth, h: drawH });
@@ -385,7 +442,7 @@ function App() {
   }, [
     screen, photos, layout, borderColor, borderType,
     caption, captionColor, captionSize, captionFont,
-    selectedSticker, drawSticker, loadStickerImg, filter, getCanvasFilter
+    selectedSticker, drawSticker, loadStickerImg
   ]);
 
   // ─── helper: swatch style for border & sticker selectors ───────────────────
