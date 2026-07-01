@@ -77,6 +77,18 @@ const stickerLayouts = {
   ],
 };
 
+// Single source of truth for every selectable sticker set — both the
+// camera-screen side menu and the result-screen sticker row read from
+// this, so they can't drift out of sync. Thumbnail is just the first
+// (hero) image from that sticker's layout.
+const stickerOptions = [
+  { key: null,       label: "None" },
+  { key: "heart",    label: "Heart",    thumb: stickerLayouts.heart[0].src },
+  { key: "star",     label: "Star",     thumb: stickerLayouts.star[0].src },
+  { key: "nailong",  label: "Nailong",  thumb: stickerLayouts.nailong[0].src },
+  { key: "bubbles",  label: "Bubbles",  thumb: stickerLayouts.bubbles[0].src },
+];
+
 // ─── BORDER PATTERNS ─────────────────────────────────────────────────────
 // Every non-solid border option lives here as a single source of truth:
 // key -> { src, label }. Add a new border by adding one line here — the
@@ -513,13 +525,55 @@ function App() {
       {/* ── CAMERA SCREEN ──────────────────────────────────────────── */}
       {screen === "camera" && (
         <>
-          <div
-            className="camera-wrapper"
-            style={{ filter: getCanvasFilter(), WebkitFilter: getCanvasFilter() }}
-          >
-            <video ref={videoRef} autoPlay playsInline muted className="video mirror" />
-            {countdown && <div className="countdown-overlay">{countdown}</div>}
-            {flash && <div className="flash" />}
+          <div className="camera-stage">
+            <div
+              className="camera-wrapper"
+              style={{ filter: getCanvasFilter(), WebkitFilter: getCanvasFilter() }}
+            >
+              <video ref={videoRef} autoPlay playsInline muted className="video mirror" />
+
+              {/* Live preview of where the selected sticker will land.
+                  Approximate only — actual placement (with jitter/rotation
+                  wobble) is baked in on the result screen. */}
+              {selectedSticker && stickerLayouts[selectedSticker] && (
+                <div className="sticker-live-overlay">
+                  {stickerLayouts[selectedSticker].map((s, i) => (
+                    <img
+                      key={i}
+                      src={s.src}
+                      alt=""
+                      className="sticker-live-overlay-img"
+                      style={{
+                        left: `${s.x * 100}%`,
+                        top: `${s.y * 100}%`,
+                        width: `${s.size * 100}%`,
+                        transform: `rotate(${s.rotation || 0}deg)`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {countdown && <div className="countdown-overlay">{countdown}</div>}
+              {flash && <div className="flash" />}
+            </div>
+
+            {/* Sticker picker — pick before you shoot, see it live above */}
+            <div className="camera-sticker-menu">
+              {stickerOptions.map(({ key, label, thumb }) => (
+                <div
+                  key={label}
+                  title={label}
+                  onClick={() => setSelectedSticker(key)}
+                  className={selectedSticker === key ? "camera-sticker-btn active" : "camera-sticker-btn"}
+                  style={
+                    thumb
+                      ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
+                      : { background: "#fff0f5" }
+                  }
+                />
+              ))}
+            </div>
           </div>
 
           <div className="filter-group">
@@ -610,52 +664,19 @@ function App() {
             <div className="editor-card">
               <p>Stickers</p>
               <div className="sticker-row">
-
-                {/* None */}
-                <div
-                  onClick={() => setSelectedSticker(null)}
-                  style={swatchStyle(selectedSticker === null, { background: "#fff0f5" })}
-                />
-
-                {/* Heart */}
-                <div
-                  onClick={() => setSelectedSticker("heart")}
-                  style={swatchStyle(selectedSticker === "heart", {
-                    backgroundImage: "url('/stickers/heart.png')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center"
-                  })}
-                />
-
-                {/* Star */}
-                <div
-                  onClick={() => setSelectedSticker("star")}
-                  style={swatchStyle(selectedSticker === "star", {
-                    backgroundImage: "url('/stickers/star.png')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center"
-                  })}
-                />
-
-                {/* Nailong */}
-                <div
-                  onClick={() => setSelectedSticker("nailong")}
-                  style={swatchStyle(selectedSticker === "nailong", {
-                    backgroundImage: "url('/stickers/nailong.png')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center"
-                  })}
-                />
-
-                {/* Bubbles */}
-                <div
-                  onClick={() => setSelectedSticker("bubbles")}
-                  style={swatchStyle(selectedSticker === "bubbles", {
-                    backgroundImage: "url('/stickers/bubbletrio.png')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center"
-                  })}
-                />
+                {stickerOptions.map(({ key, label, thumb }) => (
+                  <div
+                    key={label}
+                    title={label}
+                    onClick={() => setSelectedSticker(key)}
+                    style={swatchStyle(
+                      selectedSticker === key,
+                      thumb
+                        ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
+                        : { background: "#fff0f5" }
+                    )}
+                  />
+                ))}
               </div>
             </div>
 
