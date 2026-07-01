@@ -11,51 +11,54 @@ import "./App.css";
 // Each entry has a small seeded jitter applied at draw time (see seededRand) so
 // nothing looks grid-snapped, but the arrangement stays stable across re-renders.
 
+// Each layout follows a hero → anchor → accent hierarchy rather than
+// uniform corner repetition — one large "lead" sticker, one mid-size
+// sticker on the opposite diagonal, and 2–3 small trailing accents.
+// This size variation is what reads as hand-placed instead of
+// copy-pasted into all four corners at once. All values are fractions
+// of the photo slot, so composition scales identically on any screen.
 const stickerLayouts = {
   heart: [
-    // bleeds off top-left, tilted
-    { src: "/stickers/heart.png", x: -0.06, y: -0.05, size: 0.22, rotation: -18, seed: 11 },
-    // top edge, slightly right of center, small
-    { src: "/stickers/heart.png", x:  0.42, y: -0.04, size: 0.13, rotation:   8, seed: 12 },
-    // top-right, half off
-    { src: "/stickers/heart.png", x:  0.84, y: -0.07, size: 0.20, rotation:  20, seed: 13 },
-    // right edge mid, half off
-    { src: "/stickers/heart.png", x:  0.88, y:  0.38, size: 0.15, rotation: -12, seed: 14 },
-    // bottom-right, bleeds off corner
-    { src: "/stickers/heart.png", x:  0.82, y:  0.80, size: 0.21, rotation:  25, seed: 15 },
-    // bottom-left, bleeds off corner
-    { src: "/stickers/heart.png", x: -0.05, y:  0.82, size: 0.18, rotation: -22, seed: 16 },
-    // left edge mid, slightly off
-    { src: "/stickers/heart.png", x: -0.04, y:  0.40, size: 0.13, rotation:  14, seed: 17 },
-    // inner accent — bottom center, fully visible, small
-    { src: "/stickers/heart.png", x:  0.44, y:  0.84, size: 0.11, rotation:  -5, seed: 18 },
+    // HERO — top-left, largest, sets the anchor point for the eye
+    { src: "/stickers/heart.png", x: -0.09, y: -0.08, size: 0.27, rotation: -16, seed: 11 },
+    // ANCHOR — bottom-right, opposite diagonal, medium size
+    { src: "/stickers/heart.png", x:  0.80, y:  0.76, size: 0.20, rotation:  22, seed: 15 },
+    // small accent, top-right, trailing off the hero's energy
+    { src: "/stickers/heart.png", x:  0.86, y: -0.05, size: 0.13, rotation:  16, seed: 13 },
+    // small accent, left edge, upper third — breaks up empty left side
+    { src: "/stickers/heart.png", x: -0.05, y:  0.30, size: 0.11, rotation: -20, seed: 17 },
+    // tiny accent, bottom-left — balances the bottom-right anchor
+    { src: "/stickers/heart.png", x: -0.04, y:  0.80, size: 0.10, rotation: -10, seed: 16 },
+    // tiny accent, fully inside near top-center — keeps composition from feeling edge-only
+    { src: "/stickers/heart.png", x:  0.52, y:  0.04, size: 0.08, rotation:   6, seed: 18 },
   ],
 
   star: [
-    // top-left bleed, big
-    { src: "/stickers/star.png", x: -0.08, y: -0.08, size: 0.24, rotation: -15, seed: 21 },
-    // top-right bleed
-    { src: "/stickers/star.png", x:  0.85, y: -0.06, size: 0.20, rotation:  20, seed: 22 },
-    // left edge, upper third
-    { src: "/stickers/star.png", x: -0.05, y:  0.22, size: 0.14, rotation: -30, seed: 23 },
-    // right edge, lower third
-    { src: "/stickers/star.png", x:  0.90, y:  0.55, size: 0.14, rotation:  35, seed: 24 },
-    // bottom-left bleed
-    { src: "/stickers/star.png", x: -0.06, y:  0.78, size: 0.21, rotation:  18, seed: 25 },
-    // bottom-right bleed
-    { src: "/stickers/star.png", x:  0.84, y:  0.82, size: 0.18, rotation: -22, seed: 26 },
-    // inner accent top-center, small
-    { src: "/stickers/star.png", x:  0.40, y:  0.02, size: 0.10, rotation:  10, seed: 27 },
+    // HERO — top-right, largest, diagonal sweep down to bottom-left
+    { src: "/stickers/star.png", x:  0.84, y: -0.10, size: 0.27, rotation:  18, seed: 21 },
+    // ANCHOR — bottom-left, opposite diagonal, medium size
+    { src: "/stickers/star.png", x: -0.10, y:  0.75, size: 0.21, rotation: -20, seed: 25 },
+    // small accent, top-left, balances the hero
+    { src: "/stickers/star.png", x: -0.06, y: -0.05, size: 0.12, rotation: -15, seed: 22 },
+    // small accent, right edge, upper third
+    { src: "/stickers/star.png", x:  0.89, y:  0.22, size: 0.11, rotation:  30, seed: 24 },
+    // tiny accent, bottom-right — closes the loop without matching the anchor's size
+    { src: "/stickers/star.png", x:  0.84, y:  0.82, size: 0.10, rotation: -14, seed: 26 },
+    // tiny accent, fully visible top-center
+    { src: "/stickers/star.png", x:  0.44, y:  0.02, size: 0.08, rotation:  10, seed: 27 },
   ],
 
   nailong: [
-    // all four corners bleeding off, slightly different sizes for life
-    { src: "/stickers/nailong.png", x: -0.10, y: -0.10, size: 0.28, rotation: -12, seed: 31 },
-    { src: "/stickers/nailong.png", x:  0.82, y: -0.08, size: 0.25, rotation:  15, seed: 32 },
-    { src: "/stickers/nailong.png", x: -0.08, y:  0.76, size: 0.26, rotation:  10, seed: 33 },
-    { src: "/stickers/nailong.png", x:  0.84, y:  0.78, size: 0.24, rotation: -18, seed: 34 },
-    // one small one near top-center for asymmetry
-    { src: "/stickers/nailong.png", x:  0.38, y: -0.06, size: 0.15, rotation:   6, seed: 35 },
+    // HERO — top-left, largest
+    { src: "/stickers/nailong.png", x: -0.11, y: -0.10, size: 0.29, rotation: -12, seed: 31 },
+    // ANCHOR — bottom-right, opposite diagonal, clearly secondary in size
+    { src: "/stickers/nailong.png", x:  0.80, y:  0.74, size: 0.22, rotation: -16, seed: 34 },
+    // small accent, top-right
+    { src: "/stickers/nailong.png", x:  0.84, y: -0.07, size: 0.16, rotation:  14, seed: 32 },
+    // small accent, bottom-left — deliberately smaller than the anchor to avoid a 4-corner grid feel
+    { src: "/stickers/nailong.png", x: -0.08, y:  0.78, size: 0.15, rotation:  10, seed: 33 },
+    // tiny accent near top-center for asymmetry
+    { src: "/stickers/nailong.png", x:  0.40, y: -0.05, size: 0.12, rotation:   6, seed: 35 },
   ],
 };
 
@@ -550,7 +553,7 @@ function App() {
             {/* BORDER */}
             <div className="editor-card">
               <p>Border</p>
-              <div className="sticker-row">
+              <div className="border-row">
 
                 {/* Solid colour swatch */}
                 <div
