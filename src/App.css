@@ -44,6 +44,8 @@
 /* ===== BODY ===== */
 body {
   min-height: 100vh;
+  min-height: 100dvh;
+  /* iOS-safe: adjusts when Safari's address bar shows/hides */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -823,9 +825,11 @@ button:disabled::after {
     margin-bottom: 12px;
   }
 
+  /* iOS Safari zooms the page on focus if font-size is under 16px.
+     Bumped to 16px here to prevent that. */
   .editor-card input[type="text"] {
     padding: 12px 16px;
-    font-size: 15px;
+    font-size: 16px;
     border-radius: 14px;
   }
 
@@ -839,19 +843,21 @@ button:disabled::after {
     border-width: 3px;
   }
 
+  /* iOS Safari zoom fix: 16px minimum on focusable form controls */
   .font-dropdown {
     width: 100%;
     flex: 1;
     padding: 12px 12px;
-    font-size: 14px;
+    font-size: 16px;
     border-radius: 12px;
     height: 48px;
   }
 
+  /* iOS Safari zoom fix: 16px minimum on focusable form controls */
   .size-input {
     width: 70px;
     padding: 12px 8px;
-    font-size: 14px;
+    font-size: 16px;
     border-radius: 12px;
     height: 48px;
   }
@@ -888,15 +894,17 @@ button:disabled::after {
     font-size: 10px;
   }
 
+  /* Keep at 16px to avoid iOS zoom-on-focus even on small screens */
   .font-dropdown {
     height: 44px;
-    font-size: 13px;
+    font-size: 16px;
   }
 
+  /* Keep at 16px to avoid iOS zoom-on-focus even on small screens */
   .size-input {
     width: 62px;
     height: 44px;
-    font-size: 13px;
+    font-size: 16px;
   }
 
   .color-circle-btn {

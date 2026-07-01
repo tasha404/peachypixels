@@ -59,6 +59,24 @@ const stickerLayouts = {
   ],
 };
 
+// ─── BORDER PATTERNS ─────────────────────────────────────────────────────
+// Every non-solid border option lives here as a single source of truth:
+// key -> { src, label }. Add a new border by adding one line here — the
+// swatch row and the canvas draw logic both read from this automatically.
+const borderPatterns = {
+  redPlaid:      { src: "/redplaid.png",      label: "Red Plaid" },
+  bluePlaid:     { src: "/blueplaid.png",     label: "Blue Plaid" },
+  pinkDots:      { src: "/pinkdots.jpg",      label: "Pink Dots" },
+  pinkPiano:     { src: "/pinkpiano.jpg",     label: "Pink Piano" },
+  pinkStar:      { src: "/pinkstar.jpg",      label: "Pink Star" },
+  plaidMix:      { src: "/plaidmix.jpg",      label: "Plaid Mix" },
+  plaidPinkSide: { src: "/plaidpinkside.jpg", label: "Plaid Pink Side" },
+  sky:           { src: "/sky.jpg",           label: "Sky" },
+  spiralGreen:   { src: "/spiralgreen.jpg",   label: "Spiral Green" },
+  starWhimsy:    { src: "/starwhimsy.jpg",    label: "Star Whimsy" },
+  tilePink:      { src: "/tilepink.jpg",      label: "Tile Pink" },
+};
+
 // Stable pseudo-random: same seed+salt always returns the same float in [-1, 1].
 // Used to add a small natural jitter to position and rotation without re-scrambling
 // on every re-render.
@@ -135,6 +153,7 @@ function App() {
 
   const [borderColor, setBorderColor] = useState("#ffe4ef");
   const [caption, setCaption] = useState("");
+  // borderType is either "solid" or one of the keys in borderPatterns
   const [borderType, setBorderType] = useState("solid");
   const [captionColor, setCaptionColor] = useState("#000000");
   const [captionSize, setCaptionSize] = useState(30);
@@ -290,15 +309,15 @@ function App() {
     link.click();
   };
 
-  // Preload all sticker images once so drawSticker doesn't reload them every render
-  const stickerImgCache = useRef({});
+  // Preload all sticker/pattern images once so we don't reload them every render
+  const imgCache = useRef({});
 
-  const loadStickerImg = useCallback((src) => {
-    if (stickerImgCache.current[src]) return Promise.resolve(stickerImgCache.current[src]);
+  const loadImg = useCallback((src) => {
+    if (imgCache.current[src]) return Promise.resolve(imgCache.current[src]);
     return new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = "anonymous";
-      img.onload = () => { stickerImgCache.current[src] = img; resolve(img); };
+      img.onload = () => { imgCache.current[src] = img; resolve(img); };
       img.onerror = () => resolve(null);
       img.src = src;
     });
@@ -316,7 +335,7 @@ function App() {
     for (const slot of photoSlots) {
       for (let i = 0; i < stickerDefs.length; i++) {
         const sticker = stickerDefs[i];
-        const img = await loadStickerImg(sticker.src);
+        const img = await loadImg(sticker.src);
         if (!img) continue;
 
         const stickerSize = slot.w * sticker.size;
@@ -343,7 +362,7 @@ function App() {
         ctx.restore();
       }
     }
-  }, [selectedSticker, loadStickerImg]);
+  }, [selectedSticker, loadImg]);
 
   /* DRAW RESULT CANVAS */
   useEffect(() => {
@@ -385,20 +404,18 @@ function App() {
       if (borderType === "solid") {
         ctx.fillStyle = borderColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-      } else if (borderType === "redPlaid" || borderType === "bluePlaid") {
-        const bg = new Image();
-        bg.src = borderType === "redPlaid" ? "/redplaid.png" : "/blueplaid.png";
-        bg.crossOrigin = "anonymous";
-        await new Promise(resolve => { bg.onload = resolve; bg.onerror = resolve; });
-        const pattern = ctx.createPattern(bg, "repeat");
-        ctx.fillStyle = pattern;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      } else if (borderPatterns[borderType]) {
+        const bg = await loadImg(borderPatterns[borderType].src);
+        if (bg) {
+          const pattern = ctx.createPattern(bg, "repeat");
+          ctx.fillStyle = pattern;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
       }
 
       // 2. Draw photos — collect slot positions as we go
       // NOTE: photos already have the filter baked in from takePhoto(), so we
-      // do NOT re-apply a filter here. Re-applying would double up the effect
-      // and was also the ctx.filter call that broke on iOS.
+      // do NOT re-apply a filter here.
       const photoSlots = [];
 
       for (let i = 0; i < photos.length; i++) {
@@ -442,7 +459,7 @@ function App() {
   }, [
     screen, photos, layout, borderColor, borderType,
     caption, captionColor, captionSize, captionFont,
-    selectedSticker, drawSticker, loadStickerImg
+    selectedSticker, drawSticker, loadImg
   ]);
 
   // ─── helper: swatch style for border & sticker selectors ───────────────────
@@ -538,6 +555,7 @@ function App() {
                 {/* Solid colour swatch */}
                 <div
                   className="color-circle-btn"
+                  title="Solid Color"
                   style={{
                     background: borderColor,
                     border: borderType === "solid" ? "3px solid #ff4d7e" : "3px solid white"
@@ -549,25 +567,19 @@ function App() {
                   }}
                 />
 
-                {/* Red Plaid */}
-                <div
-                  onClick={() => { setBorderType("redPlaid"); setShowBorderPicker(false); }}
-                  style={swatchStyle(borderType === "redPlaid", {
-                    backgroundImage: "url('/redplaid.png')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center"
-                  })}
-                />
-
-                {/* Blue Plaid */}
-                <div
-                  onClick={() => { setBorderType("bluePlaid"); setShowBorderPicker(false); }}
-                  style={swatchStyle(borderType === "bluePlaid", {
-                    backgroundImage: "url('/blueplaid.png')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center"
-                  })}
-                />
+                {/* All pattern borders, generated from borderPatterns */}
+                {Object.entries(borderPatterns).map(([key, { src, label }]) => (
+                  <div
+                    key={key}
+                    title={label}
+                    onClick={() => { setBorderType(key); setShowBorderPicker(false); }}
+                    style={swatchStyle(borderType === key, {
+                      backgroundImage: `url('${src}')`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center"
+                    })}
+                  />
+                ))}
               </div>
 
               {showBorderPicker && (
