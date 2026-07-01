@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { HexColorPicker } from "react-colorful";
 import "./App.css";
 
@@ -88,6 +88,37 @@ const stickerOptions = [
   { key: "nailong",  label: "Nailong",  thumb: stickerLayouts.nailong[0].src },
   { key: "bubbles",  label: "Bubbles",  thumb: stickerLayouts.bubbles[0].src },
 ];
+
+// Live-only "float from bottom to top" animation shown on the result
+// screen when Bubbles is selected. left/size are percentages of the
+// Bubble source images and the pool of possible visual variety. Actual
+// positions/timing/drift are generated fresh each time Bubbles is
+// selected — see the useMemo below in App() — so the pattern never
+// looks identical twice.
+const bubbleSrcs = [
+  "/stickers/bubbletrio.png",
+  "/stickers/bubblehollow.png",
+  "/stickers/bubbleaespa.png",
+];
+
+function generateBubbleParticles(count = 12) {
+  // Stratified sampling: split the full width into `count` equal slices
+  // and place one bubble randomly within each slice. Guarantees coverage
+  // across the entire frame every time, instead of plain random positions
+  // that can (by chance) cluster and leave a whole side empty.
+  const sliceWidth = 100 / count;
+  return Array.from({ length: count }).map((_, i) => {
+    const sliceStart = i * sliceWidth;
+    const left = sliceStart + Math.random() * sliceWidth * 0.9 + sliceWidth * 0.05;
+    return {
+      src: bubbleSrcs[Math.floor(Math.random() * bubbleSrcs.length)],
+      left,                                  // spread across the full 0%–100%
+      size: Math.random() * 10 + 6,          // 6%–16% of frame width
+      duration: Math.random() * 4 + 3,       // 3s–7s per rise — wide variance so they don't move in lock-step
+      delay: Math.random() * 3.5,            // 0s–3.5s stagger
+    };
+  });
+}
 
 // ─── BORDER PATTERNS ─────────────────────────────────────────────────────
 // Every non-solid border option lives here as a single source of truth:
@@ -192,6 +223,49 @@ function App() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
 
+  // Fresh random float pattern (position/speed/drift) every time bubbles
+  // is turned on — recomputes whenever selectedSticker flips to "bubbles",
+  // not on every render, so it stays stable while you're framing the shot.
+  const bubbleParticles = useMemo(() => {
+    if (selectedSticker !== "bubbles") return [];
+    return generateBubbleParticles();
+  }, [selectedSticker]);
+
+  // Timestamp the float animation actually started (matches when
+  // bubbleParticles was generated) — takePhoto() uses this to work out
+  // exactly where each bubble is at the moment a shot is taken.
+  const bubbleStartRef = useRef(Date.now());
+  useEffect(() => {
+    bubbleStartRef.current = Date.now();
+  }, [bubbleParticles]);
+
+  // Computes each bubble's live position/opacity right now, using the same
+  // math as the CSS @keyframes floatUp (linear bottom -15%→115%, with the
+  // matching opacity fade-in/out envelope). Used to bake a frozen snapshot
+  // of "whatever was on screen" into the photo at capture time.
+  const getBubbleSnapshotNow = useCallback(() => {
+    if (selectedSticker !== "bubbles" || bubbleParticles.length === 0) return [];
+    const elapsedSinceStart = (Date.now() - bubbleStartRef.current) / 1000;
+
+    return bubbleParticles
+      .map((b) => {
+        if (elapsedSinceStart < b.delay) return null; // hasn't risen yet
+
+        const cycleTime = (elapsedSinceStart - b.delay) % b.duration;
+        const progress = cycleTime / b.duration; // 0 → 1 over one rise
+
+        const bottomPercent = -15 + progress * 130; // matches keyframe 0%→100%
+
+        let opacity;
+        if (progress < 0.10) opacity = (progress / 0.10) * 0.9;
+        else if (progress < 0.85) opacity = 0.9 - ((progress - 0.10) / 0.75) * 0.05;
+        else opacity = 0.85 * (1 - (progress - 0.85) / 0.15);
+
+        return { src: b.src, left: b.left, size: b.size, bottomPercent, opacity };
+      })
+      .filter((b) => b && b.opacity > 0.05);
+  }, [selectedSticker, bubbleParticles]);
+
   useEffect(() => {
     if (screen === "home") {
       document.body.classList.add("home-mode");
@@ -262,7 +336,7 @@ function App() {
     const total = getPhotoCount();
     for (let i = 0; i < total; i++) {
       await startCountdown();
-      newPhotos.push(takePhoto());
+      newPhotos.push(await takePhoto());
     }
     stopCamera();
     setPhotos(newPhotos);
@@ -298,7 +372,7 @@ function App() {
     }
   }, [filter]);
 
-  const takePhoto = () => {
+  const takePhoto = async () => {
     const video = videoRef.current;
     const videoWidth = video.videoWidth;
     const videoHeight = video.videoHeight;
@@ -326,6 +400,26 @@ function App() {
 
     // Bake the filter into pixel data instead of ctx.filter (iOS-safe)
     applyPixelFilter(ctx, 0, 0, cropWidth, cropHeight, filter);
+
+    // Bake whichever bubbles were on screen at this exact instant —
+    // each photo in a strip/grid gets its own frozen moment.
+    if (selectedSticker === "bubbles") {
+      const snapshot = getBubbleSnapshotNow();
+      for (const b of snapshot) {
+        const img = await loadImg(b.src);
+        if (!img) continue;
+
+        const size = cropWidth * (b.size / 100);
+        const x = cropWidth * (b.left / 100);
+        const bottomOffset = cropHeight * (b.bottomPercent / 100);
+        const y = cropHeight - bottomOffset - size;
+
+        ctx.save();
+        ctx.globalAlpha = b.opacity;
+        ctx.drawImage(img, x, y, size, size);
+        ctx.restore();
+      }
+    }
 
     return canvas.toDataURL("image/png");
   };
@@ -357,6 +451,11 @@ function App() {
   // looks grid-snapped, but the composition stays stable across re-renders.
   const drawSticker = useCallback(async (ctx, photoSlots) => {
     if (!selectedSticker || !photoSlots?.length) return;
+
+    // Bubbles are already baked into each individual photo at capture
+    // time (see takePhoto/getBubbleSnapshotNow) — drawing the generic
+    // stickerLayouts.bubbles composition here on top would double them up.
+    if (selectedSticker === "bubbles") return;
 
     const stickerDefs = stickerLayouts[selectedSticker];
     if (!stickerDefs) return;
@@ -526,16 +625,42 @@ function App() {
       {screen === "camera" && (
         <>
           <div className="camera-stage">
-            <div
-              className="camera-wrapper"
-              style={{ filter: getCanvasFilter(), WebkitFilter: getCanvasFilter() }}
-            >
-              <video ref={videoRef} autoPlay playsInline muted className="video mirror" />
+            <div className="camera-wrapper">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="video mirror"
+                style={{ filter: getCanvasFilter(), WebkitFilter: getCanvasFilter() }}
+              />
 
-              {/* Live preview of where the selected sticker will land.
-                  Approximate only — actual placement (with jitter/rotation
-                  wobble) is baked in on the result screen. */}
-              {selectedSticker && stickerLayouts[selectedSticker] && (
+              {/* Live sticker preview. Deliberately NOT inside the filtered
+                  element — stickers should keep their own colors regardless
+                  of B&W/Vintage/Bright, so the filter is applied to the
+                  video only, above. Bubbles get the actual floating
+                  animation here (same as the result screen); other
+                  stickers just show a static placement preview. */}
+              {selectedSticker === "bubbles" && (
+                <div className="floating-bubbles-overlay">
+                  {bubbleParticles.map((b, i) => (
+                    <img
+                      key={i}
+                      src={b.src}
+                      alt=""
+                      className="floating-bubble-particle"
+                      style={{
+                        left: `${b.left}%`,
+                        width: `${b.size}%`,
+                        animationDuration: `${b.duration}s`,
+                        animationDelay: `${b.delay}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {selectedSticker && selectedSticker !== "bubbles" && stickerLayouts[selectedSticker] && (
                 <div className="sticker-live-overlay">
                   {stickerLayouts[selectedSticker].map((s, i) => (
                     <img
@@ -558,21 +683,25 @@ function App() {
               {flash && <div className="flash" />}
             </div>
 
-            {/* Sticker picker — pick before you shoot, see it live above */}
+            {/* Sticker picker — only Bubbles (plus None) is offered here.
+                The full set (Heart/Star/Nailong/Bubbles) is still available
+                afterward on the result screen. */}
             <div className="camera-sticker-menu">
-              {stickerOptions.map(({ key, label, thumb }) => (
-                <div
-                  key={label}
-                  title={label}
-                  onClick={() => setSelectedSticker(key)}
-                  className={selectedSticker === key ? "camera-sticker-btn active" : "camera-sticker-btn"}
-                  style={
-                    thumb
-                      ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
-                      : { background: "#fff0f5" }
-                  }
-                />
-              ))}
+              {stickerOptions
+                .filter(({ key }) => key === "bubbles")
+                .map(({ key, label, thumb }) => (
+                  <div
+                    key={label}
+                    title={label}
+                    onClick={() => setSelectedSticker(selectedSticker === key ? null : key)}
+                    className={selectedSticker === key ? "camera-sticker-btn active" : "camera-sticker-btn"}
+                    style={
+                      thumb
+                        ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
+                        : { background: "#fff0f5" }
+                    }
+                  />
+                ))}
             </div>
           </div>
 
@@ -608,7 +737,9 @@ function App() {
 
           {/* PREVIEW + ACTION BUTTONS */}
           <div className="preview-side">
-            <canvas ref={canvasRef} className="canvas" />
+            <div className="canvas-frame">
+              <canvas ref={canvasRef} className="canvas" />
+            </div>
             <div className="result-buttons">
               <button onClick={download}>Download</button>
               <button onClick={retake}>Retake</button>
@@ -664,7 +795,9 @@ function App() {
             <div className="editor-card">
               <p>Stickers</p>
               <div className="sticker-row">
-                {stickerOptions.map(({ key, label, thumb }) => (
+                {stickerOptions
+                  .filter(({ key }) => key !== "bubbles")
+                  .map(({ key, label, thumb }) => (
                   <div
                     key={label}
                     title={label}

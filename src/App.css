@@ -208,8 +208,60 @@ h1 {
   box-shadow: var(--shadow-md);
 }
 
+/* ===== CANVAS FRAME (wraps the result canvas + floating bubble overlay) ===== */
+.canvas-frame {
+  position: relative;
+  width: 100%;
+}
+
+/* ===== FLOATING BUBBLES (live preview only — not baked into the download) ===== */
+.floating-bubbles-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.floating-bubble-particle {
+  position: absolute;
+  bottom: -15%;
+  opacity: 0;
+  animation-name: floatUp;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
+}
+
+/* Vertical travel uses the `bottom` property (percentages resolve against
+   the container's height) rather than transform: translateY (percentages
+   there resolve against the element's OWN small size, which would cap
+   bubbles to only rising a fraction of the frame). Straight bottom-to-top
+   float only — no horizontal drift or rotation. */
+@keyframes floatUp {
+  0% {
+    bottom: -15%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.9;
+  }
+
+  85% {
+    opacity: 0.85;
+  }
+
+  100% {
+    bottom: 115%;
+    opacity: 0;
+  }
+}
+
 .mirror {
   transform: scaleX(-1);
+  transition: filter 0.3s ease;
 }
 
 /* ===== CAMERA WRAPPER ===== */
@@ -219,7 +271,6 @@ h1 {
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
-  transition: filter 0.3s ease;
 }
 
 /* ===== CAMERA STAGE (wraps camera-wrapper + side sticker menu) ===== */
