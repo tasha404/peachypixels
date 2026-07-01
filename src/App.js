@@ -87,6 +87,7 @@ const stickerOptions = [
   { key: "star",     label: "Star",     thumb: stickerLayouts.star[0].src },
   { key: "nailong",  label: "Nailong",  thumb: stickerLayouts.nailong[0].src },
   { key: "bubbles",  label: "Bubbles",  thumb: stickerLayouts.bubbles[0].src },
+  { key: "guinzly",  label: "Guinzly",  thumb: "/stickers/guinzly.png" },
 ];
 
 // Live-only "float from bottom to top" animation shown on the result
@@ -119,6 +120,19 @@ function generateBubbleParticles(count = 12) {
     };
   });
 }
+
+// GUINZLY — a fixed-position 3-frame sprite cycle (not floating). Frames
+// play in this exact order, looping. Position/size are fractions of the
+// camera/photo frame so the anchor point is the same on any screen size.
+const guinzlyFrames = [
+  "/stickers/guinzly.png",
+  "/stickers/guinzlyhandsside.png",
+  "/stickers/guinzlyhandsup.png",
+];
+const GUINZLY_FRAME_MS = 450;     // how long each frame is shown
+const GUINZLY_WIDTH_FRAC = 0.26;  // width as a fraction of frame width (height follows the image's own aspect ratio)
+const GUINZLY_RIGHT_FRAC = 0.05;  // inset from the right edge
+const GUINZLY_CENTER_Y_FRAC = 0.52; // vertical center point
 
 // ─── BORDER PATTERNS ─────────────────────────────────────────────────────
 // Every non-solid border option lives here as a single source of truth:
@@ -265,6 +279,31 @@ function App() {
       })
       .filter((b) => b && b.opacity > 0.05);
   }, [selectedSticker, bubbleParticles]);
+
+  // GUINZLY — fixed-position 3-frame sprite cycle. Same start-time-based
+  // approach as bubbles: a ref timestamps when it was selected, and both
+  // the live display and the capture-time bake compute "which frame right
+  // now" from elapsed time, so they always agree.
+  const guinzlyStartRef = useRef(Date.now());
+  useEffect(() => {
+    if (selectedSticker === "guinzly") guinzlyStartRef.current = Date.now();
+  }, [selectedSticker]);
+
+  const getGuinzlyFrameIndexNow = useCallback(() => {
+    const elapsed = Date.now() - guinzlyStartRef.current;
+    return Math.floor(elapsed / GUINZLY_FRAME_MS) % guinzlyFrames.length;
+  }, []);
+
+  // Drives the visible <img> on the camera screen — ticks every
+  // GUINZLY_FRAME_MS while guinzly is selected, otherwise sits idle.
+  const [guinzlyFrameIndex, setGuinzlyFrameIndex] = useState(0);
+  useEffect(() => {
+    if (selectedSticker !== "guinzly" || screen !== "camera") return;
+    const id = setInterval(() => {
+      setGuinzlyFrameIndex(getGuinzlyFrameIndexNow());
+    }, GUINZLY_FRAME_MS);
+    return () => clearInterval(id);
+  }, [selectedSticker, screen, getGuinzlyFrameIndexNow]);
 
   useEffect(() => {
     if (screen === "home") {
@@ -418,6 +457,20 @@ function App() {
         ctx.globalAlpha = b.opacity;
         ctx.drawImage(img, x, y, size, size);
         ctx.restore();
+      }
+    }
+
+    // Guinzly — bake whichever of the 3 frames was showing right now,
+    // at the same fixed anchor point used by the live preview.
+    if (selectedSticker === "guinzly") {
+      const frameSrc = guinzlyFrames[getGuinzlyFrameIndexNow()];
+      const img = await loadImg(frameSrc);
+      if (img) {
+        const w = cropWidth * GUINZLY_WIDTH_FRAC;
+        const h = w * (img.naturalHeight / img.naturalWidth); // preserve aspect ratio
+        const x = cropWidth * (1 - GUINZLY_RIGHT_FRAC) - w;
+        const y = cropHeight * GUINZLY_CENTER_Y_FRAC - h / 2;
+        ctx.drawImage(img, x, y, w, h);
       }
     }
 
@@ -660,6 +713,21 @@ function App() {
                 </div>
               )}
 
+              {/* Guinzly — fixed position, cycles through 3 frames in
+                  place (no floating/movement). */}
+              {selectedSticker === "guinzly" && (
+                <img
+                  src={guinzlyFrames[guinzlyFrameIndex]}
+                  alt=""
+                  className="guinzly-live-preview"
+                  style={{
+                    right: `${GUINZLY_RIGHT_FRAC * 100}%`,
+                    top: `${GUINZLY_CENTER_Y_FRAC * 100}%`,
+                    width: `${GUINZLY_WIDTH_FRAC * 100}%`,
+                  }}
+                />
+              )}
+
               {selectedSticker && selectedSticker !== "bubbles" && stickerLayouts[selectedSticker] && (
                 <div className="sticker-live-overlay">
                   {stickerLayouts[selectedSticker].map((s, i) => (
@@ -683,12 +751,12 @@ function App() {
               {flash && <div className="flash" />}
             </div>
 
-            {/* Sticker picker — only Bubbles (plus None) is offered here.
-                The full set (Heart/Star/Nailong/Bubbles) is still available
+            {/* Sticker picker — only Bubbles and Guinzly are offered here.
+                The full set (Heart/Star/Nailong) is still available
                 afterward on the result screen. */}
             <div className="camera-sticker-menu">
               {stickerOptions
-                .filter(({ key }) => key === "bubbles")
+                .filter(({ key }) => key === "bubbles" || key === "guinzly")
                 .map(({ key, label, thumb }) => (
                   <div
                     key={label}
@@ -796,7 +864,7 @@ function App() {
               <p>Stickers</p>
               <div className="sticker-row">
                 {stickerOptions
-                  .filter(({ key }) => key !== "bubbles")
+                  .filter(({ key }) => key !== "bubbles" && key !== "guinzly")
                   .map(({ key, label, thumb }) => (
                   <div
                     key={label}

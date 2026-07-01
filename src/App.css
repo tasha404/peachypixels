@@ -295,6 +295,17 @@ h1 {
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
+/* ===== GUINZLY (fixed-position 3-frame sprite cycle — no movement,
+   just frame swapping driven by React state) ===== */
+.guinzly-live-preview {
+  position: absolute;
+  transform: translateY(-50%);
+  pointer-events: none;
+  user-select: none;
+  z-index: 9;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.2));
+}
+
 /* ===== CAMERA STICKER MENU (side picker, visible while framing the shot) ===== */
 .camera-sticker-menu {
   position: absolute;
