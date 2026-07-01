@@ -60,6 +60,21 @@ const stickerLayouts = {
     // tiny accent near top-center for asymmetry
     { src: "/stickers/nailong.png", x:  0.40, y: -0.05, size: 0.12, rotation:   6, seed: 35 },
   ],
+
+  bubbles: [
+    // HERO — bubbletrio (already a clustered group), bottom-left, bleeding off the edge
+    { src: "/stickers/bubbletrio.png", x: -0.08, y:  0.58, size: 0.27, rotation:  -4, seed: 51 },
+    // ANCHOR — bubblehollow, top-right, opposite diagonal
+    { src: "/stickers/bubblehollow.png", x:  0.76, y: -0.08, size: 0.17, rotation:   6, seed: 52 },
+    // small accent drifting near center-right
+    { src: "/stickers/bubbleaespa.png", x:  0.58, y:  0.34, size: 0.10, rotation:  -8, seed: 53 },
+    // small accent, top-left
+    { src: "/stickers/bubblehollow.png", x: -0.05, y:  0.03, size: 0.09, rotation:   5, seed: 54 },
+    // tiny accent, bottom-right
+    { src: "/stickers/bubbletrio.png", x:  0.84, y:  0.80, size: 0.11, rotation:  10, seed: 55 },
+    // tiny accent, top-center
+    { src: "/stickers/bubbleaespa.png", x:  0.40, y:  0.01, size: 0.07, rotation:   0, seed: 56 },
+  ],
 };
 
 // ─── BORDER PATTERNS ─────────────────────────────────────────────────────
@@ -81,8 +96,6 @@ const borderPatterns = {
 };
 
 // Stable pseudo-random: same seed+salt always returns the same float in [-1, 1].
-// Used to add a small natural jitter to position and rotation without re-scrambling
-// on every re-render.
 function seededRand(seed, salt = 0) {
   const x = Math.sin(seed * 9301 + salt * 49297 + 233) * 93458;
   return (x - Math.floor(x)) * 2 - 1; // remap to [-1, 1]
@@ -332,6 +345,7 @@ function App() {
   // looks grid-snapped, but the composition stays stable across re-renders.
   const drawSticker = useCallback(async (ctx, photoSlots) => {
     if (!selectedSticker || !photoSlots?.length) return;
+
     const stickerDefs = stickerLayouts[selectedSticker];
     if (!stickerDefs) return;
 
@@ -628,6 +642,16 @@ function App() {
                   onClick={() => setSelectedSticker("nailong")}
                   style={swatchStyle(selectedSticker === "nailong", {
                     backgroundImage: "url('/stickers/nailong.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center"
+                  })}
+                />
+
+                {/* Bubbles */}
+                <div
+                  onClick={() => setSelectedSticker("bubbles")}
+                  style={swatchStyle(selectedSticker === "bubbles", {
+                    backgroundImage: "url('/stickers/bubbletrio.png')",
                     backgroundSize: "cover",
                     backgroundPosition: "center"
                   })}
