@@ -75,6 +75,39 @@ const stickerLayouts = {
     // tiny accent, top-center
     { src: "/stickers/bubbleaespa.png", x:  0.40, y:  0.01, size: 0.07, rotation:   0, seed: 56 },
   ],
+
+  guinzlyLeft: [
+    // HERO — bottom-left, largest
+    { src: "/stickers/guinzlyleft.png", x: -0.10, y:  0.56, size: 0.30, rotation:  -6, seed: 61 },
+    // ANCHOR — top-right, opposite diagonal, medium
+    { src: "/stickers/guinzlyleft.png", x:  0.78, y: -0.09, size: 0.20, rotation:   8, seed: 64 },
+    // small accent, top-left
+    { src: "/stickers/guinzlyleft.png", x: -0.06, y: -0.06, size: 0.13, rotation:  -4, seed: 62 },
+    // tiny accent, bottom-right
+    { src: "/stickers/guinzlyleft.png", x:  0.84, y:  0.82, size: 0.12, rotation:  10, seed: 63 },
+  ],
+
+  guinzlyRight: [
+    // HERO — top-right, largest
+    { src: "/stickers/guinzlyright.png", x:  0.76, y: -0.10, size: 0.30, rotation:   6, seed: 71 },
+    // ANCHOR — bottom-left, opposite diagonal, medium
+    { src: "/stickers/guinzlyright.png", x: -0.11, y:  0.55, size: 0.20, rotation:  -8, seed: 74 },
+    // small accent, bottom-right
+    { src: "/stickers/guinzlyright.png", x:  0.85, y:  0.80, size: 0.13, rotation:   5, seed: 72 },
+    // tiny accent, top-left
+    { src: "/stickers/guinzlyright.png", x: -0.05, y: -0.05, size: 0.12, rotation: -10, seed: 73 },
+  ],
+
+  guinzlySit: [
+    // HERO — bottom-center-left, largest, grounded feel fits "sitting"
+    { src: "/stickers/guinzlysit.png", x:  0.05, y:  0.62, size: 0.30, rotation:  -3, seed: 81 },
+    // ANCHOR — top-right, medium
+    { src: "/stickers/guinzlysit.png", x:  0.72, y: -0.08, size: 0.19, rotation:   5, seed: 84 },
+    // small accent, top-left
+    { src: "/stickers/guinzlysit.png", x: -0.08, y: -0.06, size: 0.13, rotation:  -6, seed: 82 },
+    // tiny accent, bottom-right
+    { src: "/stickers/guinzlysit.png", x:  0.86, y:  0.82, size: 0.11, rotation:   8, seed: 83 },
+  ],
 };
 
 // Single source of truth for every selectable sticker set — both the
@@ -82,12 +115,15 @@ const stickerLayouts = {
 // this, so they can't drift out of sync. Thumbnail is just the first
 // (hero) image from that sticker's layout.
 const stickerOptions = [
-  { key: null,       label: "None" },
-  { key: "heart",    label: "Heart",    thumb: stickerLayouts.heart[0].src },
-  { key: "star",     label: "Star",     thumb: stickerLayouts.star[0].src },
-  { key: "nailong",  label: "Nailong",  thumb: stickerLayouts.nailong[0].src },
-  { key: "bubbles",  label: "Bubbles",  thumb: stickerLayouts.bubbles[0].src },
-  { key: "guinzly",  label: "Guinzly",  thumb: "/stickers/guinzly.png" },
+  { key: null,           label: "None" },
+  { key: "heart",        label: "Heart",        thumb: stickerLayouts.heart[0].src },
+  { key: "star",         label: "Star",         thumb: stickerLayouts.star[0].src },
+  { key: "nailong",      label: "Nailong",      thumb: stickerLayouts.nailong[0].src },
+  { key: "guinzlyLeft",  label: "Guinzly Left",  thumb: stickerLayouts.guinzlyLeft[0].src },
+  { key: "guinzlyRight", label: "Guinzly Right", thumb: stickerLayouts.guinzlyRight[0].src },
+  { key: "guinzlySit",   label: "Guinzly Sit",   thumb: stickerLayouts.guinzlySit[0].src },
+  { key: "bubbles",      label: "Bubbles",      thumb: stickerLayouts.bubbles[0].src },
+  { key: "guinzly",      label: "Guinzly",      thumb: "/stickers/guinzly.png" },
 ];
 
 // Live-only "float from bottom to top" animation shown on the result
