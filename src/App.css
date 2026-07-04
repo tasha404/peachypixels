@@ -2,6 +2,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
 
+/* ===== CUSTOM LOCAL FONTS =====
+   These live in /public/fonts/ and are loaded on demand. The names below
+   are what the JS refers to (they'll appear in the font dropdown and get
+   passed to canvas ctx.font as-is), so they need to match exactly. */
+@font-face {
+  font-family: "ButterflyDaffodil";
+  src: url("./assets/fonts/AButterflyOnaDaffodil.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Bigdey Demo";
+  src: url("./assets/fonts/BigdeyDemo.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Bubble Street Fill";
+  src: url("./assets/fonts/BubbleStreetFill.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Bubble Street Outline";
+  src: url("./assets/fonts/BubbleStreetOutline.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Hooey DEMO";
+  src: url("./assets/fonts/HooeyDEMO.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "KiwiSoda";
+  src: url("./assets/fonts/KiwiSoda.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Magic Sound";
+  src: url("./assets/fonts/MagicSound.ttf") format("truetype");
+}
+
 /* ===== CSS VARIABLES ===== */
 :root {
   --rose-50: #fff1f5;
@@ -481,31 +518,121 @@ button:disabled::after {
   display: none;
 }
 
-/* ===== LAYOUT GROUP (home screen) ===== */
-.layout-group {
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-  margin-top: 24px;
-  flex-wrap: wrap;
+/* ===== LAYOUT PICKER (home screen — paper photo-strip preview cards) ===== */
+.layout-picker {
+  margin-top: 20px;
+  width: 100%;
   animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
-.layout-group button {
-  min-width: 130px;
-  padding: 14px 22px;
+.layout-picker-title {
+  text-align: center;
+  font-family: 'Quicksand', sans-serif;
   font-size: 13px;
-  background: var(--white);
+  font-weight: 700;
+  letter-spacing: 2px;
   color: var(--rose-500);
-  border: 1.5px solid var(--rose-200);
-  box-shadow: var(--shadow-sm);
+  text-transform: uppercase;
+  margin: 0 0 24px 0;
 }
 
-.layout-group button:hover {
-  background: linear-gradient(135deg, var(--rose-400), var(--rose-500));
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 10px 28px rgba(255, 77, 126, 0.35);
+.layout-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-items: end;
+  width: 100%;
+}
+
+.layout-card {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Quicksand', sans-serif;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: none;
+  min-width: 0;
+  width: 100%;
+}
+
+.layout-card::after {
+  display: none;
+  /* kill the base button shimmer */
+}
+
+.layout-card:hover {
+  transform: translateY(-4px);
+  box-shadow: none;
+}
+
+.layout-card:hover .layout-card-preview {
+  border-color: var(--rose-300);
+  box-shadow: 0 10px 24px rgba(200, 60, 100, 0.15);
+}
+
+.layout-card:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+/* Paper photo-strip card — matches MEI's dimensions: 224w × 564h ≈ 1:2.5.
+   White background, soft gray border, small brand mark in bottom-right.
+   Padding-based inset (~3.3%) gives a real polaroid-margin feel. */
+.layout-card-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 2.5;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 3.33%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Grid-based photos are wider than strips — use the same tall paper
+   proportion but let CSS grid handle rows/cols dynamically. */
+.layout-card-preview[data-cols="2"] {
+  aspect-ratio: 1 / 1.5;
+}
+
+.layout-card-preview-inner {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  gap: 6px;
+}
+
+.layout-card-slot {
+  background: #d1d5db;
+  border-radius: 2px;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Small brand mark tucked in bottom-right, like MEI's ¥ character */
+.layout-card-brand {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 8px;
+  color: var(--rose-400);
+  letter-spacing: 0;
+}
+
+.layout-card-label {
+  font-size: clamp(9px, 1.5vw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: center;
 }
 
 @keyframes fadeUp {
@@ -845,8 +972,8 @@ button:disabled::after {
     flex: 0 0 210px;
   }
 
-  .layout-group button {
-    min-width: 128px;
+  .layout-picker-grid {
+    gap: 20px;
   }
 }
 
@@ -922,18 +1049,23 @@ button:disabled::after {
     flex: 1;
   }
 
-  .layout-group {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    margin-top: 20px;
+  .layout-picker {
+    margin-top: 14px;
   }
 
-  .layout-group button {
-    width: 88%;
-    max-width: 300px;
-    padding: 15px 28px;
-    font-size: 14px;
+  .layout-picker-title {
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* 2 columns on mobile — 4 cards side-by-side would be too cramped */
+  .layout-picker-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .layout-card-label {
+    font-size: 11px;
   }
 
   .filter-group {

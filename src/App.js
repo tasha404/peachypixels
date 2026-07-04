@@ -752,8 +752,17 @@ function App() {
 
       // 3. Draw caption — scaled by EXPORT_SCALE so it renders at the
       // right visual size on the high-resolution export canvas.
+      // Force-load the font first: canvas silently falls back to the
+      // default sans-serif if the @font-face font isn't loaded yet, so
+      // we explicitly wait for it before setting ctx.font.
+      const canvasFontSize = captionSize * EXPORT_SCALE;
+      try {
+        if (document.fonts && document.fonts.load) {
+          await document.fonts.load(`${canvasFontSize}px "${captionFont}"`);
+        }
+      } catch (e) { /* if it fails, fall back gracefully */ }
       ctx.fillStyle = captionColor;
-      ctx.font = `${captionSize * EXPORT_SCALE}px ${captionFont}`;
+      ctx.font = `${canvasFontSize}px "${captionFont}"`;
       ctx.textAlign = "center";
       ctx.fillText(caption, canvas.width / 2, canvas.height - 50 * EXPORT_SCALE);
 
@@ -791,11 +800,39 @@ function App() {
 
       {/* ── HOME SCREEN ────────────────────────────────────────────── */}
       {screen === "home" && (
-        <div className="layout-group">
-          <button onClick={() => { setLayout("strip4"); setScreen("camera"); }}>4 Strip</button>
-          <button onClick={() => { setLayout("strip3"); setScreen("camera"); }}>3 Strip</button>
-          <button onClick={() => { setLayout("grid2x2"); setScreen("camera"); }}>2×2 Grid</button>
-          <button onClick={() => { setLayout("grid3x2"); setScreen("camera"); }}>3×2 Grid</button>
+        <div className="layout-picker">
+          <p className="layout-picker-title">Pick your format</p>
+          <div className="layout-picker-grid">
+            {[
+              { key: "strip4",  label: "4 Strip",   rows: 4, cols: 1 },
+              { key: "strip3",  label: "3 Strip",   rows: 3, cols: 1 },
+              { key: "grid2x2", label: "2×2 Grid",  rows: 2, cols: 2 },
+              { key: "grid3x2", label: "3×2 Grid",  rows: 3, cols: 2 },
+            ].map(({ key, label, rows, cols }) => (
+              <button
+                key={key}
+                className="layout-card"
+                onClick={() => { setLayout(key); setScreen("camera"); }}
+                aria-label={label}
+              >
+                <div className="layout-card-preview" data-cols={cols}>
+                  <div
+                    className="layout-card-preview-inner"
+                    style={{
+                      gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                      gridTemplateRows: `repeat(${rows}, 1fr)`,
+                    }}
+                  >
+                    {Array.from({ length: rows * cols }).map((_, i) => (
+                      <div key={i} className="layout-card-slot" />
+                    ))}
+                  </div>
+                  <span className="layout-card-brand">P</span>
+                </div>
+                <span className="layout-card-label">{label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -1073,6 +1110,13 @@ function App() {
                     <option value="Indie Flower">Indie Flower</option>
                     <option value="Dancing Script">Dancing Script</option>
                     <option value="Poppins">Poppins</option>
+                    <option value="ButterflyDaffodil">Butterfly Daffodil</option>
+                    <option value="Bigdey Demo">Bigdey</option>
+                    <option value="Bubble Street Fill">Bubble Fill</option>
+                    <option value="Bubble Street Outline">Bubble Outline</option>
+                    <option value="Hooey DEMO">Hooey</option>
+                    <option value="KiwiSoda">Kiwi Soda</option>
+                    <option value="Magic Sound">Magic Sound</option>
                   </select>
                 </div>
 
