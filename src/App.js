@@ -75,39 +75,53 @@ const stickerLayouts = {
     // tiny accent, top-center
     { src: "/stickers/bubbleaespa.png", x:  0.40, y:  0.01, size: 0.07, rotation:   0, seed: 56 },
   ],
+};
 
-  guinzlyLeft: [
-    // HERO — bottom-left, largest
-    { src: "/stickers/guinzlyleft.png", x: -0.10, y:  0.56, size: 0.30, rotation:  -6, seed: 61 },
-    // ANCHOR — top-right, opposite diagonal, medium
-    { src: "/stickers/guinzlyleft.png", x:  0.78, y: -0.09, size: 0.20, rotation:   8, seed: 64 },
-    // small accent, top-left
-    { src: "/stickers/guinzlyleft.png", x: -0.06, y: -0.06, size: 0.13, rotation:  -4, seed: 62 },
-    // tiny accent, bottom-right
-    { src: "/stickers/guinzlyleft.png", x:  0.84, y:  0.82, size: 0.12, rotation:  10, seed: 63 },
-  ],
+// FIXED-POSITION CAMERA STICKER SETS — each key maps to a list of parts
+// that all render together simultaneously. Currently just Guinzly: one
+// animated cycling sprite plus static poses, each at its own anchor
+// point so they don't overlap. Selecting "guinzly" draws every part
+// listed here at once (both live preview AND baked into the photo).
+//
+// Each part has:
+//   frames[]   — cycled if length > 1 (animation), single static if 1
+//   widthFrac  — width as a fraction of the frame width
+//   left/right — horizontal anchor (use ONE, not both)
+//   VERTICAL ANCHOR — use ONE of:
+//     centerY  — sticker's center at this fraction of frame height
+//     bottom   — sticker's BOTTOM edge inset from the frame bottom
+//                (0 = feet touch floor, negative = bleeds off bottom).
+//                Use this for tall stickers so they can grow upward
+//                without ever clipping the feet.
+const GUINZLY_FRAME_MS = 450; // how long each animation frame is shown
 
-  guinzlyRight: [
-    // HERO — top-right, largest
-    { src: "/stickers/guinzlyright.png", x:  0.76, y: -0.10, size: 0.30, rotation:   6, seed: 71 },
-    // ANCHOR — bottom-left, opposite diagonal, medium
-    { src: "/stickers/guinzlyright.png", x: -0.11, y:  0.55, size: 0.20, rotation:  -8, seed: 74 },
-    // small accent, bottom-right
-    { src: "/stickers/guinzlyright.png", x:  0.85, y:  0.80, size: 0.13, rotation:   5, seed: 72 },
-    // tiny accent, top-left
-    { src: "/stickers/guinzlyright.png", x: -0.05, y: -0.05, size: 0.12, rotation: -10, seed: 73 },
-  ],
-
-  guinzlySit: [
-    // HERO — bottom-center-left, largest, grounded feel fits "sitting"
-    { src: "/stickers/guinzlysit.png", x:  0.05, y:  0.62, size: 0.30, rotation:  -3, seed: 81 },
-    // ANCHOR — top-right, medium
-    { src: "/stickers/guinzlysit.png", x:  0.72, y: -0.08, size: 0.19, rotation:   5, seed: 84 },
-    // small accent, top-left
-    { src: "/stickers/guinzlysit.png", x: -0.08, y: -0.06, size: 0.13, rotation:  -6, seed: 82 },
-    // tiny accent, bottom-right
-    { src: "/stickers/guinzlysit.png", x:  0.86, y:  0.82, size: 0.11, rotation:   8, seed: 83 },
-  ],
+const fixedStickerSets = {
+  guinzly: {
+    label: "Guinzly",
+    thumb: "/stickers/guinzly.png",
+    parts: [
+      // ⭐ STAR — anchored by his FEET (bottom: 0) so we can grow him as
+      // big as we want without ever losing his feet off the bottom.
+      {
+        frames: [
+          "/stickers/guinzly.png",
+          "/stickers/guinzlyhandsside.png",
+          "/stickers/guinzlyhandsup.png",
+        ],
+        widthFrac: 0.48,
+        right: 0.02,
+        centerY: 0.55,
+      },
+      // Sitting in the bottom-left corner — the one supporting character
+      // that fits without competing with the star for space.
+      {
+        frames: ["/stickers/guinzlysit.png"],
+        widthFrac: 0.22,
+        left: 0.04,
+        bottom: 0.02,
+      },
+    ],
+  },
 };
 
 // Single source of truth for every selectable sticker set — both the
@@ -115,16 +129,23 @@ const stickerLayouts = {
 // this, so they can't drift out of sync. Thumbnail is just the first
 // (hero) image from that sticker's layout.
 const stickerOptions = [
-  { key: null,           label: "None" },
-  { key: "heart",        label: "Heart",        thumb: stickerLayouts.heart[0].src },
-  { key: "star",         label: "Star",         thumb: stickerLayouts.star[0].src },
-  { key: "nailong",      label: "Nailong",      thumb: stickerLayouts.nailong[0].src },
-  { key: "guinzlyLeft",  label: "Guinzly Left",  thumb: stickerLayouts.guinzlyLeft[0].src },
-  { key: "guinzlyRight", label: "Guinzly Right", thumb: stickerLayouts.guinzlyRight[0].src },
-  { key: "guinzlySit",   label: "Guinzly Sit",   thumb: stickerLayouts.guinzlySit[0].src },
-  { key: "bubbles",      label: "Bubbles",      thumb: stickerLayouts.bubbles[0].src },
-  { key: "guinzly",      label: "Guinzly",      thumb: "/stickers/guinzly.png" },
+  { key: null,      label: "None" },
+  { key: "heart",   label: "Heart",   thumb: stickerLayouts.heart[0].src },
+  { key: "star",    label: "Star",    thumb: stickerLayouts.star[0].src },
+  { key: "nailong", label: "Nailong", thumb: stickerLayouts.nailong[0].src },
+  { key: "bubbles", label: "Bubbles", thumb: stickerLayouts.bubbles[0].src },
+  // Fixed-position camera-only sticker sets. Each option here renders
+  // multiple parts at once (see fixedStickerSets), not a single sticker.
+  ...Object.entries(fixedStickerSets).map(([key, cfg]) => ({
+    key,
+    label: cfg.label,
+    thumb: cfg.thumb,
+  })),
 ];
+
+// Camera-screen-exclusive keys — bubbles (floats) plus every fixed
+// sticker set. Everything else (Heart/Star/Nailong) is result-screen only.
+const cameraOnlyStickerKeys = new Set(["bubbles", ...Object.keys(fixedStickerSets)]);
 
 // Live-only "float from bottom to top" animation shown on the result
 // screen when Bubbles is selected. left/size are percentages of the
@@ -156,19 +177,6 @@ function generateBubbleParticles(count = 12) {
     };
   });
 }
-
-// GUINZLY — a fixed-position 3-frame sprite cycle (not floating). Frames
-// play in this exact order, looping. Position/size are fractions of the
-// camera/photo frame so the anchor point is the same on any screen size.
-const guinzlyFrames = [
-  "/stickers/guinzly.png",
-  "/stickers/guinzlyhandsside.png",
-  "/stickers/guinzlyhandsup.png",
-];
-const GUINZLY_FRAME_MS = 450;     // how long each frame is shown
-const GUINZLY_WIDTH_FRAC = 0.26;  // width as a fraction of frame width (height follows the image's own aspect ratio)
-const GUINZLY_RIGHT_FRAC = 0.05;  // inset from the right edge
-const GUINZLY_CENTER_Y_FRAC = 0.52; // vertical center point
 
 // ─── BORDER PATTERNS ─────────────────────────────────────────────────────
 // Every non-solid border option lives here as a single source of truth:
@@ -327,7 +335,11 @@ function App() {
 
   const getGuinzlyFrameIndexNow = useCallback(() => {
     const elapsed = Date.now() - guinzlyStartRef.current;
-    return Math.floor(elapsed / GUINZLY_FRAME_MS) % guinzlyFrames.length;
+    // Animation frame count comes from the animated part (which is
+    // the one part in the set that has multiple frames).
+    const animated = fixedStickerSets.guinzly.parts.find(p => p.frames.length > 1);
+    if (!animated) return 0;
+    return Math.floor(elapsed / GUINZLY_FRAME_MS) % animated.frames.length;
   }, []);
 
   // Drives the visible <img> on the camera screen — ticks every
@@ -496,16 +508,29 @@ function App() {
       }
     }
 
-    // Guinzly — bake whichever of the 3 frames was showing right now,
-    // at the same fixed anchor point used by the live preview.
-    if (selectedSticker === "guinzly") {
-      const frameSrc = guinzlyFrames[getGuinzlyFrameIndexNow()];
-      const img = await loadImg(frameSrc);
-      if (img) {
-        const w = cropWidth * GUINZLY_WIDTH_FRAC;
+    // Fixed-position sticker set (Guinzly) — bake every part at its
+    // configured anchor, using whichever frame is currently showing for
+    // the animated ones. Aspect ratio is preserved on every part.
+    if (fixedStickerSets[selectedSticker]) {
+      const { parts } = fixedStickerSets[selectedSticker];
+      for (const part of parts) {
+        const frameSrc = part.frames.length > 1
+          ? part.frames[getGuinzlyFrameIndexNow()]
+          : part.frames[0];
+        const img = await loadImg(frameSrc);
+        if (!img) continue;
+
+        const w = cropWidth * part.widthFrac;
         const h = w * (img.naturalHeight / img.naturalWidth); // preserve aspect ratio
-        const x = cropWidth * (1 - GUINZLY_RIGHT_FRAC) - w;
-        const y = cropHeight * GUINZLY_CENTER_Y_FRAC - h / 2;
+        const x = part.right !== undefined
+          ? cropWidth * (1 - part.right) - w
+          : cropWidth * part.left;
+        // bottom anchor: sticker's bottom edge sits `bottom` fraction up
+        // from the frame bottom. centerY anchor: sticker's middle at that
+        // fraction. Use whichever the part specifies.
+        const y = part.bottom !== undefined
+          ? cropHeight * (1 - part.bottom) - h
+          : cropHeight * part.centerY - h / 2;
         ctx.drawImage(img, x, y, w, h);
       }
     }
@@ -555,7 +580,11 @@ function App() {
         const img = await loadImg(sticker.src);
         if (!img) continue;
 
-        const stickerSize = slot.w * sticker.size;
+        // `size` sets the sticker's WIDTH as a fraction of the slot;
+        // height follows the image's own natural aspect ratio so
+        // non-square stickers never get stretched/squished.
+        const stickerWidth = slot.w * sticker.size;
+        const stickerHeight = stickerWidth * (img.naturalHeight / img.naturalWidth);
 
         // Base position from layout definition (fractions of slot size)
         const baseX = slot.x + sticker.x * slot.w;
@@ -573,9 +602,9 @@ function App() {
         const rotation = ((sticker.rotation || 0) + rotWobble) * Math.PI / 180;
 
         ctx.save();
-        ctx.translate(x + stickerSize / 2, y + stickerSize / 2);
+        ctx.translate(x + stickerWidth / 2, y + stickerHeight / 2);
         ctx.rotate(rotation);
-        ctx.drawImage(img, -stickerSize / 2, -stickerSize / 2, stickerSize, stickerSize);
+        ctx.drawImage(img, -stickerWidth / 2, -stickerHeight / 2, stickerWidth, stickerHeight);
         ctx.restore();
       }
     }
@@ -749,20 +778,38 @@ function App() {
                 </div>
               )}
 
-              {/* Guinzly — fixed position, cycles through 3 frames in
-                  place (no floating/movement). */}
-              {selectedSticker === "guinzly" && (
-                <img
-                  src={guinzlyFrames[guinzlyFrameIndex]}
-                  alt=""
-                  className="guinzly-live-preview"
-                  style={{
-                    right: `${GUINZLY_RIGHT_FRAC * 100}%`,
-                    top: `${GUINZLY_CENTER_Y_FRAC * 100}%`,
-                    width: `${GUINZLY_WIDTH_FRAC * 100}%`,
-                  }}
-                />
-              )}
+              {/* Fixed-position sticker set — renders every part in the
+                  set at its own anchor point. Animated parts (multiple
+                  frames) get their current frame; static parts show a
+                  single fixed image. */}
+              {fixedStickerSets[selectedSticker] &&
+                fixedStickerSets[selectedSticker].parts.map((part, i) => {
+                  const src = part.frames.length > 1
+                    ? part.frames[guinzlyFrameIndex]
+                    : part.frames[0];
+                  // Vertical anchor: bottom pins the bottom edge (no
+                  // translateY centering); centerY pins the middle
+                  // (needs the -50% translate to actually center).
+                  const verticalStyle = part.bottom !== undefined
+                    ? { bottom: `${part.bottom * 100}%` }
+                    : { top: `${part.centerY * 100}%` };
+                  return (
+                    <img
+                      key={i}
+                      src={src}
+                      alt=""
+                      className="fixed-sticker-preview"
+                      data-anchor={part.bottom !== undefined ? "bottom" : "center"}
+                      style={{
+                        ...(part.right !== undefined
+                          ? { right: `${part.right * 100}%` }
+                          : { left: `${part.left * 100}%` }),
+                        ...verticalStyle,
+                        width: `${part.widthFrac * 100}%`,
+                      }}
+                    />
+                  );
+                })}
 
               {selectedSticker && selectedSticker !== "bubbles" && stickerLayouts[selectedSticker] && (
                 <div className="sticker-live-overlay">
@@ -792,7 +839,7 @@ function App() {
                 afterward on the result screen. */}
             <div className="camera-sticker-menu">
               {stickerOptions
-                .filter(({ key }) => key === "bubbles" || key === "guinzly")
+                .filter(({ key }) => cameraOnlyStickerKeys.has(key))
                 .map(({ key, label, thumb }) => (
                   <div
                     key={label}
@@ -900,7 +947,7 @@ function App() {
               <p>Stickers</p>
               <div className="sticker-row">
                 {stickerOptions
-                  .filter(({ key }) => key !== "bubbles" && key !== "guinzly")
+                  .filter(({ key }) => !cameraOnlyStickerKeys.has(key))
                   .map(({ key, label, thumb }) => (
                   <div
                     key={label}

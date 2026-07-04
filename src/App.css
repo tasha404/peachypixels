@@ -273,6 +273,15 @@ h1 {
   box-shadow: var(--shadow-lg);
 }
 
+/* Kill the base .video rule's margin-bottom (14px) when the video is
+   inside the camera wrapper — otherwise it creates a strip of empty
+   wrapper background below the video where floating bubbles show through.
+   Also display: block prevents inline-baseline gaps. */
+.camera-wrapper .video {
+  margin: 0;
+  display: block;
+}
+
 /* ===== CAMERA STAGE (wraps camera-wrapper + side sticker menu) ===== */
 .camera-stage {
   position: relative;
@@ -295,15 +304,24 @@ h1 {
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
-/* ===== GUINZLY (fixed-position 3-frame sprite cycle — no movement,
-   just frame swapping driven by React state) ===== */
-.guinzly-live-preview {
+/* ===== FIXED-POSITION STICKERS (Guinzly + poses — no movement,
+   just sit at their own configured spot; frame swapping for Guinzly
+   is driven by React state, not CSS) ===== */
+.fixed-sticker-preview {
   position: absolute;
-  transform: translateY(-50%);
   pointer-events: none;
   user-select: none;
   z-index: 9;
   filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.2));
+  height: auto;
+  object-fit: contain;
+}
+
+/* Center-anchored stickers use top: N% to place their MIDDLE, so they
+   need translateY(-50%) to actually center. Bottom-anchored ones use
+   CSS `bottom` directly (no translate needed). */
+.fixed-sticker-preview[data-anchor="center"] {
+  transform: translateY(-50%);
 }
 
 /* ===== CAMERA STICKER MENU (side picker, visible while framing the shot) ===== */
