@@ -182,18 +182,29 @@ function generateBubbleParticles(count = 12) {
 // Every non-solid border option lives here as a single source of truth:
 // key -> { src, label }. Add a new border by adding one line here — the
 // swatch row and the canvas draw logic both read from this automatically.
+// Each pattern picks its render style:
+//   mode "repeat" — pattern tiles as a small repeating motif (dots,
+//                   plaids, tiles). tileWidth is the target width for
+//                   each tile in pixels (before EXPORT_SCALE); the
+//                   image is pre-scaled to that width so tiles aren't
+//                   awkwardly huge or tiny regardless of source size.
+//   mode "cover"  — pattern fills the entire frame like a background
+//                   photo (single instance, cover-fit). Use for
+//                   wallpaper-style images that shouldn't tile.
 const borderPatterns = {
-  redPlaid:      { src: "/redplaid.png",      label: "Red Plaid" },
-  bluePlaid:     { src: "/blueplaid.png",     label: "Blue Plaid" },
-  pinkDots:      { src: "/pinkdots.jpg",      label: "Pink Dots" },
-  pinkPiano:     { src: "/pinkpiano.jpg",     label: "Pink Piano" },
-  pinkStar:      { src: "/pinkstar.jpg",      label: "Pink Star" },
-  plaidMix:      { src: "/plaidmix.jpg",      label: "Plaid Mix" },
-  plaidPinkSide: { src: "/plaidpinkside.jpg", label: "Plaid Pink Side" },
-  sky:           { src: "/sky.jpg",           label: "Sky" },
-  spiralGreen:   { src: "/spiralgreen.jpg",   label: "Spiral Green" },
-  starWhimsy:    { src: "/starwhimsy.jpg",    label: "Star Whimsy" },
-  tilePink:      { src: "/tilepink.jpg",      label: "Tile Pink" },
+  redPlaid:      { src: "/redplaid.png",      label: "Red Plaid",       mode: "repeat", tileWidth: 200 },
+  bluePlaid:     { src: "/blueplaid.png",     label: "Blue Plaid",      mode: "repeat", tileWidth: 200 },
+  pinkDots:      { src: "/pinkdots.jpg",      label: "Pink Dots",       mode: "repeat", tileWidth: 140 },
+  pinkPiano:     { src: "/pinkpiano.jpg",     label: "Pink Piano",      mode: "cover" },
+  pinkStar:      { src: "/pinkstar.jpg",      label: "Pink Star",       mode: "repeat", tileWidth: 180 },
+  plaidMix:      { src: "/plaidmix.jpg",      label: "Plaid Mix",       mode: "repeat", tileWidth: 240 },
+  plaidPinkSide: { src: "/plaidpinkside.jpg", label: "Plaid Pink Side", mode: "cover" },
+  sky:           { src: "/sky.jpg",           label: "Sky",             mode: "cover" },
+  spiralGreen:   { src: "/spiralgreen.jpg",   label: "Spiral Green",    mode: "cover" },
+  starWhimsy:    { src: "/starwhimsy.jpg",    label: "Star Whimsy",     mode: "repeat", tileWidth: 200 },
+  tilePink:      { src: "/tilepink.jpg",      label: "Tile Pink",       mode: "repeat", tileWidth: 160 },
+  windows:       { src: "/windows.jpg",       label: "Windows",         mode: "cover" },
+  newspaper:     { src: "/newspaper.jpg",     label: "Newspaper",       mode: "cover" },
 };
 
 // Stable pseudo-random: same seed+salt always returns the same float in [-1, 1].
@@ -385,7 +396,7 @@ function App() {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" }
+        video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: "user" }
       });
       videoRef.current.srcObject = stream;
     } catch (err) {
@@ -465,6 +476,8 @@ function App() {
     const videoHeight = video.videoHeight;
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     const targetRatio = 4 / 3;
     let cropWidth = videoWidth;
     let cropHeight = videoWidth / targetRatio;
@@ -615,12 +628,24 @@ function App() {
     if (screen !== "result" || photos.length === 0) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
+    // High-quality image smoothing for the sharpest possible scaled output
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     const maxMobileWidth = 380;
-    const width = window.innerWidth < 768
+    // Display width (on-screen preview size)
+    const displayWidth = window.innerWidth < 768
       ? Math.min(window.innerWidth * 0.85, maxMobileWidth)
       : 200;
-    const padding = 20;
-    const textSpace = 100;
+    // Export scale — the canvas is drawn this many times larger internally,
+    // then displayed at displayWidth via CSS. Result: sharp downloaded PNG
+    // (roughly displayWidth * EXPORT_SCALE pixels wide) without the preview
+    // looking different visually. 4 gives crisp exports without absurd file
+    // sizes; bump higher (5, 6) if you want even more detail at the cost of
+    // slower render + bigger file.
+    const EXPORT_SCALE = 4;
+    const width = displayWidth * EXPORT_SCALE;
+    const padding = 20 * EXPORT_SCALE;
+    const textSpace = 100 * EXPORT_SCALE;
 
     const drawAll = async () => {
       const columns = layout === "grid2x2" || layout === "grid3x2" ? 2 : 1;
@@ -651,11 +676,45 @@ function App() {
         ctx.fillStyle = borderColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       } else if (borderPatterns[borderType]) {
-        const bg = await loadImg(borderPatterns[borderType].src);
+        const cfg = borderPatterns[borderType];
+        const bg = await loadImg(cfg.src);
         if (bg) {
-          const pattern = ctx.createPattern(bg, "repeat");
-          ctx.fillStyle = pattern;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          if (cfg.mode === "cover") {
+            // Fill the entire strip with the image, no tiling — scaled
+            // to cover both dimensions, cropped to fit. Same visual
+            // behavior as CSS `background-size: cover`.
+            const scale = Math.max(
+              canvas.width / bg.naturalWidth,
+              canvas.height / bg.naturalHeight
+            );
+            const drawW = bg.naturalWidth * scale;
+            const drawH = bg.naturalHeight * scale;
+            const dx = (canvas.width - drawW) / 2;
+            const dy = (canvas.height - drawH) / 2;
+            ctx.drawImage(bg, dx, dy, drawW, drawH);
+          } else {
+            // "repeat" — pre-scale the source image to a consistent tile
+            // width first (accounting for EXPORT_SCALE so tiles look the
+            // same size regardless of export resolution), then tile it.
+            // Without this, small source images tile as tiny dots and big
+            // ones tile as awkward giant crops.
+            const targetTileWidth = (cfg.tileWidth || 180) * EXPORT_SCALE;
+            const tileScale = targetTileWidth / bg.naturalWidth;
+            const tileW = Math.round(bg.naturalWidth * tileScale);
+            const tileH = Math.round(bg.naturalHeight * tileScale);
+
+            const tileCanvas = document.createElement("canvas");
+            tileCanvas.width = tileW;
+            tileCanvas.height = tileH;
+            const tileCtx = tileCanvas.getContext("2d");
+            tileCtx.imageSmoothingEnabled = true;
+            tileCtx.imageSmoothingQuality = "high";
+            tileCtx.drawImage(bg, 0, 0, tileW, tileH);
+
+            const pattern = ctx.createPattern(tileCanvas, "repeat");
+            ctx.fillStyle = pattern;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
         }
       }
 
@@ -691,11 +750,12 @@ function App() {
         photoSlots.push({ x, y, w: drawWidth, h: drawH });
       }
 
-      // 3. Draw caption
+      // 3. Draw caption — scaled by EXPORT_SCALE so it renders at the
+      // right visual size on the high-resolution export canvas.
       ctx.fillStyle = captionColor;
-      ctx.font = `${captionSize}px ${captionFont}`;
+      ctx.font = `${captionSize * EXPORT_SCALE}px ${captionFont}`;
       ctx.textAlign = "center";
-      ctx.fillText(caption, canvas.width / 2, canvas.height - 50);
+      ctx.fillText(caption, canvas.width / 2, canvas.height - 50 * EXPORT_SCALE);
 
       // 4. Draw stickers — positioned relative to each photo slot
       await drawSticker(ctx, photoSlots);
