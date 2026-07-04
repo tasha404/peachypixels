@@ -128,8 +128,9 @@ body::before {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   padding: 32px 28px;
-  width: 100%;
-  max-width: 680px;
+  width: min(90vw, 900px);
+  padding: 48px 40px;
+  max-width: 900px;
   margin: 0 auto;
   border-radius: var(--radius-xl);
   border: 1px solid var(--glass-border);
@@ -539,7 +540,7 @@ button:disabled::after {
 .layout-picker-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 24px;
   align-items: end;
   width: 100%;
 }
@@ -558,6 +559,9 @@ button:disabled::after {
   box-shadow: none;
   min-width: 0;
   width: 100%;
+  overflow: visible;
+  height: auto;
+  min-height: 0;
 }
 
 .layout-card::after {
@@ -579,9 +583,7 @@ button:disabled::after {
   transform: translateY(-1px) scale(0.98);
 }
 
-/* Paper photo-strip card — matches MEI's dimensions: 224w × 564h ≈ 1:2.5.
-   White background, soft gray border, small brand mark in bottom-right.
-   Padding-based inset (~3.3%) gives a real polaroid-margin feel. */
+
 .layout-card-preview {
   position: relative;
   width: 100%;

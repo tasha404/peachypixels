@@ -252,6 +252,32 @@ function applyPixelFilter(ctx, x, y, w, h, filterType) {
         b *= 1.3;
         break;
       }
+      case "retro": {
+        // Lower saturation
+        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+        r = r * 0.85 + gray * 0.15;
+        g = g * 0.85 + gray * 0.15;
+        b = b * 0.85 + gray * 0.15;
+        // Tiny sepia
+        const sr = r * 0.393 + g * 0.769 + b * 0.189;
+        const sg = r * 0.349 + g * 0.686 + b * 0.168;
+        const sb = r * 0.272 + g * 0.534 + b * 0.131;
+        r = r * 0.92 + sr * 0.08;
+        g = g * 0.92 + sg * 0.08;
+        b = b * 0.92 + sb * 0.08;
+        // Contrast
+        r = (r - 128) * 0.88 + 128;
+        g = (g - 128) * 0.88 + 128;
+        b = (b - 128) * 0.88 + 128;
+        // Brightness
+        r *= 0.96;
+        g *= 0.96;
+        b *= 0.96;
+        // Tiny warm tint
+        r *= 1.02;
+        b *= 0.96;
+        break;
+      }
       default:
         break;
     }
@@ -466,6 +492,7 @@ function App() {
       case "bw":      return "grayscale(100%)";
       case "vintage": return "sepia(60%) contrast(110%)";
       case "bright":  return "brightness(130%)";
+      case "retro":   return "saturate(85%) sepia(8%) contrast(88%) brightness(96%)";
       default:        return "none";
     }
   }, [filter]);
@@ -827,8 +854,7 @@ function App() {
                       <div key={i} className="layout-card-slot" />
                     ))}
                   </div>
-                  <span className="layout-card-brand">P</span>
-                </div>
+                  </div>
                 <span className="layout-card-label">{label}</span>
               </button>
             ))}
@@ -941,13 +967,28 @@ function App() {
                   <div
                     key={label}
                     title={label}
-                    onClick={() => setSelectedSticker(selectedSticker === key ? null : key)}
+                    onClick={() => {
+                      if (isCapturing) return;
+                      setSelectedSticker(selectedSticker === key ? null : key);
+                    }}
                     className={selectedSticker === key ? "camera-sticker-btn active" : "camera-sticker-btn"}
-                    style={
-                      thumb
-                        ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
-                        : { background: "#fff0f5" }
-                    }
+                    style={{
+                      ...(thumb
+                        ? {
+                            backgroundImage: `url('${thumb}')`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }
+                        : {
+                            background: "#fff0f5",
+                          }),
+                      opacity: isCapturing && selectedSticker !== key ? 0.45 : 1,
+                      pointerEvents:
+                          isCapturing && selectedSticker !== key ? "none" : "auto",
+
+                        cursor:
+                          isCapturing && selectedSticker !== key ? "not-allowed" : "pointer",
+                    }}
                   />
                 ))}
             </div>
@@ -959,6 +1000,7 @@ function App() {
               { id: "bw",      label: "B&W"     },
               { id: "vintage", label: "Vintage" },
               { id: "bright",  label: "Bright"  },
+              { id: "retro",   label: "Retro"   },
             ].map(({ id, label }) => (
               <button
                 key={id}
