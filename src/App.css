@@ -553,8 +553,8 @@ button:disabled::after {
 
 .layout-picker-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
   align-items: end;
   width: 100%;
 }
@@ -614,6 +614,13 @@ button:disabled::after {
    proportion but let CSS grid handle rows/cols dynamically. */
 .layout-card-preview[data-cols="2"] {
   aspect-ratio: 1 / 1.5;
+}
+
+/* Single photo — one shot, so a short near-square card instead of a
+   tall strip. (data-cols="1" alone also matches the strips, so the
+   extra data-rows="1" pins this to the single format only.) */
+.layout-card-preview[data-cols="1"][data-rows="1"] {
+  aspect-ratio: 4 / 5;
 }
 
 .layout-card-preview-inner {

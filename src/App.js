@@ -466,6 +466,7 @@ function App() {
   };
 
   const getPhotoCount = () => {
+    if (layout === "single") return 1;
     if (layout === "strip3") return 3;
     if (layout === "grid3x2") return 6;
     return 4;
@@ -779,7 +780,9 @@ const displayWidth = window.innerWidth < 768
         let x = padding;
         let y = padding;
 
-        if (layout === "strip4" || layout === "strip3") {
+        if (layout === "strip4" || layout === "strip3" || layout === "single") {
+          // Single = one photo; strips = a vertical stack. Same math,
+          // single just has a single row (i is always 0).
           x = padding;
           y = padding + i * (drawH + padding);
         } else if (layout === "grid2x2" || layout === "grid3x2") {
@@ -840,7 +843,7 @@ const displayWidth = window.innerWidth < 768
       <h1>Peachy Pixels</h1>
 
       {screen !== "home" && (
-        <div className="home-icon" onClick={goHome}>🏠</div>
+        <div className="home-icon" onClick={goHome}>合</div>
       )}
 
       {/* ── HOME SCREEN ────────────────────────────────────────────── */}
@@ -849,6 +852,7 @@ const displayWidth = window.innerWidth < 768
           <p className="layout-picker-title">Pick your format</p>
           <div className="layout-picker-grid">
             {[
+              { key: "single",  label: "Single",    rows: 1, cols: 1 },
               { key: "strip4",  label: "4 Strip",   rows: 4, cols: 1 },
               { key: "strip3",  label: "3 Strip",   rows: 3, cols: 1 },
               { key: "grid2x2", label: "2×2 Grid",  rows: 2, cols: 2 },
@@ -860,7 +864,7 @@ const displayWidth = window.innerWidth < 768
                 onClick={() => { setLayout(key); setScreen("camera"); }}
                 aria-label={label}
               >
-                <div className="layout-card-preview" data-cols={cols}>
+                <div className="layout-card-preview" data-cols={cols} data-rows={rows}>
                   <div
                     className="layout-card-preview-inner"
                     style={{
@@ -977,30 +981,32 @@ const displayWidth = window.innerWidth < 768
 
             {/* Sticker picker — only Bubbles and Guinzly are offered here.
                 The full set (Heart/Star/Nailong) is still available
-                afterward on the result screen. */}
+                afterward on the result screen. Locked once a capture
+                session is running so the per-frame bake can't be
+                switched out mid-shoot. */}
             <div className="camera-sticker-menu">
-  {stickerOptions
-    .filter(({ key }) => cameraOnlyStickerKeys.has(key))
-    .map(({ key, label, thumb }) => (
-      <div
-        key={label}
-        title={label}
-        onClick={() => {
-          if (isCapturing) return;                       // locked once Start is pressed
-          setSelectedSticker(selectedSticker === key ? null : key);
-        }}
-        className={
-          (selectedSticker === key ? "camera-sticker-btn active" : "camera-sticker-btn") +
-          (isCapturing ? " disabled" : "")
-        }
-        style={
-          thumb
-            ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
-            : { background: "#fff0f5" }
-        }
-      />
-    ))}
-</div>
+              {stickerOptions
+                .filter(({ key }) => cameraOnlyStickerKeys.has(key))
+                .map(({ key, label, thumb }) => (
+                  <div
+                    key={label}
+                    title={label}
+                    onClick={() => {
+                      if (isCapturing) return; // locked once Start is pressed
+                      setSelectedSticker(selectedSticker === key ? null : key);
+                    }}
+                    className={
+                      (selectedSticker === key ? "camera-sticker-btn active" : "camera-sticker-btn") +
+                      (isCapturing ? " disabled" : "")
+                    }
+                    style={
+                      thumb
+                        ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
+                        : { background: "#fff0f5" }
+                    }
+                  />
+                ))}
+            </div>
           </div>
 
           <div className="filter-group">
