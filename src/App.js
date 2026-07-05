@@ -18,47 +18,65 @@ import "./App.css";
 // copy-pasted into all four corners at once. All values are fractions
 // of the photo slot, so composition scales identically on any screen.
 const stickerLayouts = {
+  // HEART — romantic edge scatter. Hearts hug the borders like
+  // they're drifting inward from all sides, none dead-center. Softer
+  // rotations, generally smaller so the arrangement feels lacy.
   heart: [
-    // HERO — top-left, largest, sets the anchor point for the eye
-    { src: "/stickers/heart.png", x: -0.09, y: -0.08, size: 0.27, rotation: -16, seed: 11 },
-    // ANCHOR — bottom-right, opposite diagonal, medium size
-    { src: "/stickers/heart.png", x:  0.80, y:  0.76, size: 0.20, rotation:  22, seed: 15 },
-    // small accent, top-right, trailing off the hero's energy
-    { src: "/stickers/heart.png", x:  0.86, y: -0.05, size: 0.13, rotation:  16, seed: 13 },
-    // small accent, left edge, upper third — breaks up empty left side
-    { src: "/stickers/heart.png", x: -0.05, y:  0.30, size: 0.11, rotation: -20, seed: 17 },
-    // tiny accent, bottom-left — balances the bottom-right anchor
-    { src: "/stickers/heart.png", x: -0.04, y:  0.80, size: 0.10, rotation: -10, seed: 16 },
-    // tiny accent, fully inside near top-center — keeps composition from feeling edge-only
-    { src: "/stickers/heart.png", x:  0.52, y:  0.04, size: 0.08, rotation:   6, seed: 18 },
+    // hero, top-left corner bleed
+    { src: "/stickers/heart.png", x: -0.08, y: -0.06, size: 0.22, rotation: -18, seed: 11 },
+    // anchor, bottom-right corner bleed
+    { src: "/stickers/heart.png", x:  0.82, y:  0.78, size: 0.19, rotation:  16, seed: 15 },
+    // right edge midway — off frame
+    { src: "/stickers/heart.png", x:  0.88, y:  0.38, size: 0.14, rotation:   8, seed: 12 },
+    // left edge lower — off frame
+    { src: "/stickers/heart.png", x: -0.04, y:  0.58, size: 0.13, rotation: -12, seed: 17 },
+    // top-right small
+    { src: "/stickers/heart.png", x:  0.72, y: -0.04, size: 0.10, rotation:  22, seed: 13 },
+    // bottom-left small
+    { src: "/stickers/heart.png", x:  0.10, y:  0.86, size: 0.11, rotation: -14, seed: 16 },
+    // tiny accent floating near the middle-top
+    { src: "/stickers/heart.png", x:  0.36, y:  0.06, size: 0.07, rotation:   4, seed: 18 },
   ],
 
+  // STAR — sparkle scatter. Twinkles scattered mostly around edges
+  // with a couple sitting inside, various sizes and rotations,
+  // deliberately uneven counts on each side so it feels random rather
+  // than symmetrical. Like glitter caught mid-air.
   star: [
-    // HERO — top-right, largest, diagonal sweep down to bottom-left
-    { src: "/stickers/star.png", x:  0.84, y: -0.10, size: 0.27, rotation:  18, seed: 21 },
-    // ANCHOR — bottom-left, opposite diagonal, medium size
-    { src: "/stickers/star.png", x: -0.10, y:  0.75, size: 0.21, rotation: -20, seed: 25 },
-    // small accent, top-left, balances the hero
-    { src: "/stickers/star.png", x: -0.06, y: -0.05, size: 0.12, rotation: -15, seed: 22 },
-    // small accent, right edge, upper third
-    { src: "/stickers/star.png", x:  0.89, y:  0.22, size: 0.11, rotation:  30, seed: 24 },
-    // tiny accent, bottom-right — closes the loop without matching the anchor's size
-    { src: "/stickers/star.png", x:  0.84, y:  0.82, size: 0.10, rotation: -14, seed: 26 },
-    // tiny accent, fully visible top-center
-    { src: "/stickers/star.png", x:  0.44, y:  0.02, size: 0.08, rotation:  10, seed: 27 },
+    // big anchor sparkles at opposite corners
+    { src: "/stickers/star.png", x: -0.06, y: -0.06, size: 0.22, rotation: -12, seed: 21 },
+    { src: "/stickers/star.png", x:  0.84, y:  0.80, size: 0.20, rotation:  18, seed: 22 },
+    // medium sparkles, non-symmetrical placement
+    { src: "/stickers/star.png", x:  0.82, y:  0.06, size: 0.15, rotation:  25, seed: 23 },
+    { src: "/stickers/star.png", x:  0.06, y:  0.82, size: 0.14, rotation: -22, seed: 24 },
+    // inside twinkles — near face level but off to the sides
+    { src: "/stickers/star.png", x:  0.22, y:  0.34, size: 0.09, rotation:  15, seed: 25 },
+    { src: "/stickers/star.png", x:  0.72, y:  0.46, size: 0.10, rotation:  -8, seed: 26 },
+    // tiny top-mid twinkle
+    { src: "/stickers/star.png", x:  0.48, y: -0.04, size: 0.08, rotation:   5, seed: 27 },
+    // tiny bottom-mid twinkle
+    { src: "/stickers/star.png", x:  0.44, y:  0.90, size: 0.07, rotation: -18, seed: 28 },
   ],
 
+  // NAILONG — friends around the frame. Spread evenly around the
+  // perimeter (top, right, bottom, left, corners) like a group of
+  // friends peeking into the shot from all sides. Center stays clear
+  // for your face. Sizes stay moderate — no giant hero.
   nailong: [
-    // HERO — top-left, largest
-    { src: "/stickers/nailong.png", x: -0.11, y: -0.10, size: 0.29, rotation: -12, seed: 31 },
-    // ANCHOR — bottom-right, opposite diagonal, clearly secondary in size
-    { src: "/stickers/nailong.png", x:  0.80, y:  0.74, size: 0.22, rotation: -16, seed: 34 },
-    // small accent, top-right
-    { src: "/stickers/nailong.png", x:  0.84, y: -0.07, size: 0.16, rotation:  14, seed: 32 },
-    // small accent, bottom-left — deliberately smaller than the anchor to avoid a 4-corner grid feel
-    { src: "/stickers/nailong.png", x: -0.08, y:  0.78, size: 0.15, rotation:  10, seed: 33 },
-    // tiny accent near top-center for asymmetry
-    { src: "/stickers/nailong.png", x:  0.40, y: -0.05, size: 0.12, rotation:   6, seed: 35 },
+    // top-center
+  // top-center  { src: "/stickers/nailong.png", x:  0.38, y: -0.08, size: 0.18, rotation:  -8, seed: 31 },
+    // right side, upper
+    { src: "/stickers/nailong.png", x:  0.84, y:  0.18, size: 0.17, rotation:  14, seed: 32 },
+    // right side, lower
+    { src: "/stickers/nailong.png", x:  0.86, y:  0.62, size: 0.15, rotation:  -6, seed: 33 },
+    // bottom-center
+  // bottom-center  { src: "/stickers/nailong.png", x:  0.40, y:  0.84, size: 0.18, rotation:  10, seed: 34 },
+    // bottom-left, bleeding off
+    { src: "/stickers/nailong.png", x: -0.06, y:  0.72, size: 0.16, rotation:  -14, seed: 35 },
+    // left side, mid
+    { src: "/stickers/nailong.png", x: -0.08, y:  0.32, size: 0.17, rotation:   8, seed: 36 },
+    // top-left corner
+    { src: "/stickers/nailong.png", x: -0.05, y: -0.04, size: 0.14, rotation:  18, seed: 37 },
   ],
 
   bubbles: [
@@ -967,28 +985,13 @@ function App() {
                   <div
                     key={label}
                     title={label}
-                    onClick={() => {
-                      if (isCapturing) return;
-                      setSelectedSticker(selectedSticker === key ? null : key);
-                    }}
+                    onClick={() => setSelectedSticker(selectedSticker === key ? null : key)}
                     className={selectedSticker === key ? "camera-sticker-btn active" : "camera-sticker-btn"}
-                    style={{
-                      ...(thumb
-                        ? {
-                            backgroundImage: `url('${thumb}')`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                          }
-                        : {
-                            background: "#fff0f5",
-                          }),
-                      opacity: isCapturing && selectedSticker !== key ? 0.45 : 1,
-                      pointerEvents:
-                          isCapturing && selectedSticker !== key ? "none" : "auto",
-
-                        cursor:
-                          isCapturing && selectedSticker !== key ? "not-allowed" : "pointer",
-                    }}
+                    style={
+                      thumb
+                        ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
+                        : { background: "#fff0f5" }
+                    }
                   />
                 ))}
             </div>
