@@ -676,11 +676,11 @@ function App() {
     // High-quality image smoothing for the sharpest possible scaled output
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
-    const maxMobileWidth = 380;
-    // Display width (on-screen preview size)
-    const displayWidth = window.innerWidth < 768
-      ? Math.min(window.innerWidth * 0.85, maxMobileWidth)
-      : 200;
+    const maxMobileWidth = 500;
+
+const displayWidth = window.innerWidth < 768
+  ? Math.min(window.innerWidth * 0.9, maxMobileWidth)
+  : 450
     // Export scale — the canvas is drawn this many times larger internally,
     // then displayed at displayWidth via CSS. Result: sharp downloaded PNG
     // (roughly displayWidth * EXPORT_SCALE pixels wide) without the preview
@@ -836,7 +836,7 @@ function App() {
   });
 
   return (
-    <div className="container">
+    <div className={`container${screen === "result" ? " result-view" : ""}`}>
       <h1>Peachy Pixels</h1>
 
       {screen !== "home" && (
@@ -979,22 +979,28 @@ function App() {
                 The full set (Heart/Star/Nailong) is still available
                 afterward on the result screen. */}
             <div className="camera-sticker-menu">
-              {stickerOptions
-                .filter(({ key }) => cameraOnlyStickerKeys.has(key))
-                .map(({ key, label, thumb }) => (
-                  <div
-                    key={label}
-                    title={label}
-                    onClick={() => setSelectedSticker(selectedSticker === key ? null : key)}
-                    className={selectedSticker === key ? "camera-sticker-btn active" : "camera-sticker-btn"}
-                    style={
-                      thumb
-                        ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
-                        : { background: "#fff0f5" }
-                    }
-                  />
-                ))}
-            </div>
+  {stickerOptions
+    .filter(({ key }) => cameraOnlyStickerKeys.has(key))
+    .map(({ key, label, thumb }) => (
+      <div
+        key={label}
+        title={label}
+        onClick={() => {
+          if (isCapturing) return;                       // locked once Start is pressed
+          setSelectedSticker(selectedSticker === key ? null : key);
+        }}
+        className={
+          (selectedSticker === key ? "camera-sticker-btn active" : "camera-sticker-btn") +
+          (isCapturing ? " disabled" : "")
+        }
+        style={
+          thumb
+            ? { backgroundImage: `url('${thumb}')`, backgroundSize: "cover", backgroundPosition: "center" }
+            : { background: "#fff0f5" }
+        }
+      />
+    ))}
+</div>
           </div>
 
           <div className="filter-group">

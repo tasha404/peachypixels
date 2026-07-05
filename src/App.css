@@ -20,10 +20,12 @@
   font-family: "Bubble Street Fill";
   src: url("./assets/fonts/BubbleStreetFill.ttf") format("truetype");
 }
+
 @font-face {
   font-family: "Bubble Street Outline";
   src: url("./assets/fonts/BubbleStreetOutline.ttf") format("truetype");
 }
+
 @font-face {
   font-family: "Hooey DEMO";
   src: url("./assets/fonts/HooeyDEMO.otf") format("opentype");
@@ -127,10 +129,8 @@ body::before {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  padding: 32px 28px;
-  width: min(90vw, 900px);
+  width: min(92vw, 900px);
   padding: 48px 40px;
-  max-width: 900px;
   margin: 0 auto;
   border-radius: var(--radius-xl);
   border: 1px solid var(--glass-border);
@@ -139,6 +139,7 @@ body::before {
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   overflow: visible;
   animation: containerIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s ease;
 }
 
 @keyframes containerIn {
@@ -248,8 +249,9 @@ h1 {
 
 /* ===== CANVAS FRAME (wraps the result canvas + floating bubble overlay) ===== */
 .canvas-frame {
-  position: relative;
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 /* ===== FLOATING BUBBLES (live preview only — not baked into the download) ===== */
@@ -381,7 +383,9 @@ h1 {
   cursor: pointer;
   border: 3px solid white;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 
 .camera-sticker-btn:hover {
@@ -391,6 +395,16 @@ h1 {
 .camera-sticker-btn.active {
   border-color: var(--rose-500);
   box-shadow: 0 4px 14px rgba(255, 77, 126, 0.4);
+}
+
+/* Locked while a capture session is running — the sticker choice is
+   baked per-frame at capture time, so switching mid-session would
+   corrupt the strip. Greyed + un-clickable until capture finishes. */
+.camera-sticker-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(55%);
 }
 
 /* Inner ring glow on camera */
@@ -670,7 +684,7 @@ button:disabled::after {
   text-transform: uppercase;
 }
 
-.filter-group button:hover {
+.filter-group button:hover:not(:disabled) {
   background: var(--rose-50);
   color: var(--rose-500);
   border-color: var(--rose-200);
@@ -701,26 +715,40 @@ button:disabled::after {
   text-transform: uppercase;
 }
 
-/* ===== RESULT LAYOUT ===== */
+/* ============================================================
+   RESULT LAYOUT
+   Two columns on desktop: a big photo-strip preview on the left,
+   the editor panel on the right. Stacks (preview on top) on mobile.
+   ============================================================ */
 .result-layout {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 32px;
   align-items: flex-start;
-  margin-top: 16px;
-  animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  justify-content: center;
+  width: 100%;
+  margin-top: 24px;
 }
 
+/* PREVIEW — the actual photo strip / grid. Given a real, generous width
+   so it reads as the hero of the screen instead of a thumbnail. */
 .preview-side {
   flex: 0 0 auto;
-  max-width: 185px;
-}
-
-.editor-side {
-  flex: 1;
-  min-width: 0;
+  width: 300px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+}
+
+/* EDITOR — grows to fill the remaining space beside the preview. */
+.editor-side {
+  flex: 1 1 300px;
+  min-width: 0;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 /* ===== EDITOR CARDS ===== */
@@ -728,7 +756,7 @@ button:disabled::after {
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-radius: var(--radius-md);
   border: 1px solid rgba(255, 200, 220, 0.45);
   box-shadow:
@@ -890,14 +918,16 @@ button:disabled::after {
 
 /* ===== RESULT BUTTONS ===== */
 .result-buttons {
-  margin-top: 14px;
+  margin-top: 16px;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
+  width: 100%;
 }
 
 .result-buttons button {
-  padding: 9px 12px;
+  flex: 1;
+  padding: 11px 12px;
   font-size: clamp(11px, 3.4vw, 13px);
   min-width: 0;
   letter-spacing: 0.4px;
@@ -948,11 +978,20 @@ button:disabled::after {
   background: var(--rose-100);
 }
 
-/* ===== DESKTOP ===== */
+/* ============================================================
+   DESKTOP / TABLET  (>= 768px)
+   ============================================================ */
 @media (min-width: 768px) {
   .container {
-    max-width: 660px;
-    padding: 32px 30px;
+    max-width: 680px;
+    padding: 36px 34px;
+  }
+
+  /* On the result screen the container gets noticeably wider so the
+     preview + editor can sit side by side with room to breathe. */
+  .container.result-view {
+    max-width: 880px;
+    padding: 40px 48px;
   }
 
   h1 {
@@ -965,13 +1004,14 @@ button:disabled::after {
     object-fit: cover;
   }
 
+  /* Big, prominent strip preview (was shrinking to ~175px before). */
   .preview-side {
-    max-width: 175px;
+    width: 340px;
   }
 
   .editor-side {
-    width: 210px;
-    flex: 0 0 210px;
+    flex: 1 1 auto;
+    max-width: 420px;
   }
 
   .layout-picker-grid {
@@ -979,16 +1019,19 @@ button:disabled::after {
   }
 }
 
-/* ===== MOBILE ===== */
+/* ============================================================
+   MOBILE  (<= 767px)
+   ============================================================ */
 @media (max-width: 767px) {
   body {
     padding: 12px 10px;
     align-items: flex-start;
   }
 
-  .container {
+  .container,
+  .container.result-view {
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
     margin: 0 auto;
     padding: 22px 18px;
     border-radius: 28px;
@@ -1028,27 +1071,26 @@ button:disabled::after {
     font-size: 80px;
   }
 
+  /* Stack: preview on top, editor below — both centered. */
   .result-layout {
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 20px;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
   }
 
   .preview-side {
     width: 100%;
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    max-width: 340px;
   }
 
   .canvas {
-    max-width: 300px;
+    max-width: 320px;
   }
 
   .editor-side {
     width: 100%;
-    flex: 1;
+    max-width: 360px;
+    flex: 1 1 auto;
   }
 
   .layout-picker {
@@ -1167,9 +1209,13 @@ button:disabled::after {
   }
 }
 
-/* ===== SMALL MOBILE ===== */
+/* ============================================================
+   SMALL MOBILE  (<= 380px)
+   ============================================================ */
 @media (max-width: 380px) {
-  .container {
+
+  .container,
+  .container.result-view {
     padding: 18px 14px;
     border-radius: 22px;
   }
@@ -1182,6 +1228,14 @@ button:disabled::after {
     min-width: 64px;
     padding: 8px 10px;
     font-size: 10px;
+  }
+
+  .preview-side {
+    max-width: 300px;
+  }
+
+  .canvas {
+    max-width: 280px;
   }
 
   /* Keep at 16px to avoid iOS zoom-on-focus even on small screens */
