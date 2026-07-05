@@ -1269,3 +1269,19 @@ button:disabled::after {
     letter-spacing: 0.2px;
   }
 }
+.bts-status {
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-align: center;
+  color: var(--rose-500);
+}
+
+.bts-status--ready {
+  color: var(--text-mid);
+}
+
+.bts-status--error {
+  color: var(--text-soft);
+}

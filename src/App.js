@@ -1,7 +1,10 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { HexColorPicker } from "react-colorful";
+import GIF from "gif.js";
+import QRCode from "qrcode";
+import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "./firebase";
 import "./App.css";
-
 // Organic sticker placement.
 //
 // Positions (x, y) are fractions of photo width/height, anchored to the sticker's
@@ -336,6 +339,15 @@ function App() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
 
+  // ─── BEHIND-THE-SCENES GIF + QR ──────────────────────────────────────────
+  // We sample small frames off the live video during each 3-2-1 countdown,
+  // stitch them into a GIF after the shoot, upload it to Firebase Storage,
+  // and encode that hosted URL into a QR drawn on the strip. (A QR can't hold
+  // a GIF directly — it can only point at where the GIF lives.)
+  const btsFramesRef = useRef([]);               // captured countdown frames (canvases)
+  const [btsUrl, setBtsUrl] = useState(null);    // hosted GIF url -> goes into the QR
+  const [btsStatus, setBtsStatus] = useState("idle"); // idle | working | ready | error
+
   // Fresh random float pattern (position/speed/drift) every time bubbles
   // is turned on — recomputes whenever selectedSticker flips to "bubbles",
   // not on every render, so it stays stable while you're framing the shot.
@@ -457,11 +469,17 @@ function App() {
     stopCamera();
     setPhotos([]);
     setLayout(null);
+    setBtsUrl(null);
+    setBtsStatus("idle");
+    btsFramesRef.current = [];
     setScreen("home");
   };
 
   const retake = () => {
     setPhotos([]);
+    setBtsUrl(null);
+    setBtsStatus("idle");
+    btsFramesRef.current = [];
     setScreen("camera");
   };
 
@@ -472,9 +490,76 @@ function App() {
     return 4;
   };
 
+  // Grab one small, mirrored 4:3 frame off the live video for the
+  // behind-the-scenes GIF. Kept tiny (240×180) so encoding is fast and
+  // the upload stays small.
+  const grabBtsFrame = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) return;
+
+    const W = 240, H = 180; // 4:3
+    const c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    const cx = c.getContext("2d");
+
+    // mirror so it matches the on-screen preview
+    cx.translate(W, 0);
+    cx.scale(-1, 1);
+
+    // center-crop 4:3 from the raw feed (same crop logic as takePhoto)
+    const vw = video.videoWidth, vh = video.videoHeight;
+    let cw = vw, ch = vw / (4 / 3);
+    if (ch > vh) { ch = vh; cw = vh * (4 / 3); }
+    const sx = (vw - cw) / 2, sy = (vh - ch) / 2;
+
+    cx.drawImage(video, sx, sy, cw, ch, 0, 0, W, H);
+    btsFramesRef.current.push(c);
+  }, []);
+
+  // Encode the captured frames into a GIF, upload to Firebase Storage,
+  // and stash the download URL (which the result canvas turns into a QR).
+  const buildAndUploadBts = useCallback(async () => {
+    const frames = btsFramesRef.current;
+    if (!frames.length) return;
+    setBtsStatus("working");
+
+    try {
+      const blob = await new Promise((resolve, reject) => {
+        const gif = new GIF({
+          workers: 2,
+          quality: 10,
+          workerScript: "/gif.worker.js", // the file copied into public/
+          width: frames[0].width,
+          height: frames[0].height,
+        });
+        frames.forEach((f) => gif.addFrame(f, { delay: 120, copy: true }));
+        gif.on("finished", resolve);
+        gif.on("abort", () => reject(new Error("gif aborted")));
+        gif.render();
+      });
+
+      const path = `bts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.gif`;
+      const fileRef = storageRef(storage, path);
+      await uploadBytes(fileRef, blob, { contentType: "image/gif" });
+      const url = await getDownloadURL(fileRef);
+
+      setBtsUrl(url);
+      setBtsStatus("ready");
+    } catch (e) {
+      console.error("BTS gif failed:", e);
+      setBtsStatus("error");
+    }
+  }, []);
+
   const startCapture = async () => {
     if (isCapturing) return;
     setIsCapturing(true);
+
+    // reset behind-the-scenes state for this fresh session
+    btsFramesRef.current = [];
+    setBtsUrl(null);
+    setBtsStatus("idle");
+
     let newPhotos = [];
     const total = getPhotoCount();
     for (let i = 0; i < total; i++) {
@@ -485,16 +570,23 @@ function App() {
     setPhotos(newPhotos);
     setScreen("result");
     setIsCapturing(false);
+
+    buildAndUploadBts(); // fire-and-forget — QR appears once the url is ready
   };
 
   const startCountdown = () => {
     return new Promise((resolve) => {
       let timeLeft = 3;
       setCountdown(timeLeft);
+
+      // sample frames for the behind-the-scenes gif (~8 fps)
+      const sampler = setInterval(grabBtsFrame, 125);
+
       const timer = setInterval(() => {
         timeLeft--;
         if (timeLeft === 0) {
           clearInterval(timer);
+          clearInterval(sampler);
           setCountdown(null);
           resolve();
         } else {
@@ -816,13 +908,51 @@ const displayWidth = window.innerWidth < 768
 
       // 4. Draw stickers — positioned relative to each photo slot
       await drawSticker(ctx, photoSlots);
+
+      // 5. Behind-the-scenes QR — bottom-right corner. Only drawn once the
+      // GIF has finished uploading and we have a URL to encode.
+      if (btsUrl) {
+        try {
+          const qrDataUrl = await QRCode.toDataURL(btsUrl, {
+            margin: 1,
+            width: 512,
+            color: { dark: "#3a1a2a", light: "#ffffff" }, // plum on white, on-brand
+          });
+          const qrImg = await loadImg(qrDataUrl);
+          if (qrImg) {
+            const qrSize = Math.round(canvas.width * 0.16);
+            const inset = padding;
+            const qx = canvas.width - qrSize - inset;
+            const qy = canvas.height - qrSize - inset;
+
+            // white rounded backing so it scans on any border/pattern
+            const pad = qrSize * 0.08;
+            const bx = qx - pad, by = qy - pad, bw = qrSize + pad * 2, bh = qrSize + pad * 2;
+            const r = pad;
+            ctx.save();
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.moveTo(bx + r, by);
+            ctx.arcTo(bx + bw, by, bx + bw, by + bh, r);
+            ctx.arcTo(bx + bw, by + bh, bx, by + bh, r);
+            ctx.arcTo(bx, by + bh, bx, by, r);
+            ctx.arcTo(bx, by, bx + bw, by, r);
+            ctx.closePath();
+            ctx.fill();
+            ctx.drawImage(qrImg, qx, qy, qrSize, qrSize);
+            ctx.restore();
+          }
+        } catch (e) {
+          console.error("QR draw failed:", e);
+        }
+      }
     };
 
     drawAll();
   }, [
     screen, photos, layout, borderColor, borderType,
     caption, captionColor, captionSize, captionFont,
-    selectedSticker, drawSticker, loadImg
+    selectedSticker, drawSticker, loadImg, btsUrl
   ]);
 
   // ─── helper: swatch style for border & sticker selectors ───────────────────
@@ -1049,6 +1179,21 @@ const displayWidth = window.innerWidth < 768
               <button onClick={download}>Download</button>
               <button onClick={retake}>Retake</button>
             </div>
+
+            {/* Behind-the-scenes GIF status */}
+            {btsStatus === "working" && (
+              <p className="bts-status">✨ Stitching your behind-the-scenes…</p>
+            )}
+            {btsStatus === "ready" && (
+              <p className="bts-status bts-status--ready">
+                📸 Scan the QR to see your behind-the-scenes!
+              </p>
+            )}
+            {btsStatus === "error" && (
+              <p className="bts-status bts-status--error">
+                Couldn't make the behind-the-scenes clip this time.
+              </p>
+            )}
           </div>
 
           {/* EDITOR PANEL */}
