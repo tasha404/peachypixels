@@ -8,20 +8,20 @@ import "./App.css";
 // Organic sticker placement.
 //
 // Positions (x, y) are fractions of photo width/height, anchored to the sticker's
-// top-left corner. Values outside 0–1 intentionally bleed off the edge — that's
+// top-left corner. Values outside 0-1 intentionally bleed off the edge - that's
 // the look we want. size is a fraction of photo width.
 //
 // Each entry has a small seeded jitter applied at draw time (see seededRand) so
 // nothing looks grid-snapped, but the arrangement stays stable across re-renders.
 
-// Each layout follows a hero → anchor → accent hierarchy rather than
-// uniform corner repetition — one large "lead" sticker, one mid-size
-// sticker on the opposite diagonal, and 2–3 small trailing accents.
+// Each layout follows a hero -> anchor -> accent hierarchy rather than
+// uniform corner repetition - one large "lead" sticker, one mid-size
+// sticker on the opposite diagonal, and 2-3 small trailing accents.
 // This size variation is what reads as hand-placed instead of
 // copy-pasted into all four corners at once. All values are fractions
 // of the photo slot, so composition scales identically on any screen.
 const stickerLayouts = {
-  // HEART — romantic edge scatter. Hearts hug the borders like
+  // HEART - romantic edge scatter. Hearts hug the borders like
   // they're drifting inward from all sides, none dead-center. Softer
   // rotations, generally smaller so the arrangement feels lacy.
   heart: [
@@ -29,9 +29,9 @@ const stickerLayouts = {
     { src: "/stickers/heart.png", x: -0.08, y: -0.06, size: 0.22, rotation: -18, seed: 11 },
     // anchor, bottom-right corner bleed
     { src: "/stickers/heart.png", x:  0.82, y:  0.78, size: 0.19, rotation:  16, seed: 15 },
-    // right edge midway — off frame
+    // right edge midway - off frame
     { src: "/stickers/heart.png", x:  0.88, y:  0.38, size: 0.14, rotation:   8, seed: 12 },
-    // left edge lower — off frame
+    // left edge lower - off frame
     { src: "/stickers/heart.png", x: -0.04, y:  0.58, size: 0.13, rotation: -12, seed: 17 },
     // top-right small
     { src: "/stickers/heart.png", x:  0.72, y: -0.04, size: 0.10, rotation:  22, seed: 13 },
@@ -41,7 +41,7 @@ const stickerLayouts = {
     { src: "/stickers/heart.png", x:  0.36, y:  0.06, size: 0.07, rotation:   4, seed: 18 },
   ],
 
-  // STAR — sparkle scatter. Twinkles scattered mostly around edges
+  // STAR - sparkle scatter. Twinkles scattered mostly around edges
   // with a couple sitting inside, various sizes and rotations,
   // deliberately uneven counts on each side so it feels random rather
   // than symmetrical. Like glitter caught mid-air.
@@ -52,7 +52,7 @@ const stickerLayouts = {
     // medium sparkles, non-symmetrical placement
     { src: "/stickers/star.png", x:  0.82, y:  0.06, size: 0.15, rotation:  25, seed: 23 },
     { src: "/stickers/star.png", x:  0.06, y:  0.82, size: 0.14, rotation: -22, seed: 24 },
-    // inside twinkles — near face level but off to the sides
+    // inside twinkles - near face level but off to the sides
     { src: "/stickers/star.png", x:  0.22, y:  0.34, size: 0.09, rotation:  15, seed: 25 },
     { src: "/stickers/star.png", x:  0.72, y:  0.46, size: 0.10, rotation:  -8, seed: 26 },
     // tiny top-mid twinkle
@@ -61,10 +61,10 @@ const stickerLayouts = {
     { src: "/stickers/star.png", x:  0.44, y:  0.90, size: 0.07, rotation: -18, seed: 28 },
   ],
 
-  // NAILONG — friends around the frame. Spread evenly around the
+  // NAILONG - friends around the frame. Spread evenly around the
   // perimeter (top, right, bottom, left, corners) like a group of
   // friends peeking into the shot from all sides. Center stays clear
-  // for your face. Sizes stay moderate — no giant hero.
+  // for your face. Sizes stay moderate - no giant hero.
   nailong: [
     // top-center
   // top-center  { src: "/stickers/nailong.png", x:  0.38, y: -0.08, size: 0.18, rotation:  -8, seed: 31 },
@@ -83,9 +83,9 @@ const stickerLayouts = {
   ],
 
   bubbles: [
-    // HERO — bubbletrio (already a clustered group), bottom-left, bleeding off the edge
+    // HERO - bubbletrio (already a clustered group), bottom-left, bleeding off the edge
     { src: "/stickers/bubbletrio.png", x: -0.08, y:  0.58, size: 0.27, rotation:  -4, seed: 51 },
-    // ANCHOR — bubblehollow, top-right, opposite diagonal
+    // ANCHOR - bubblehollow, top-right, opposite diagonal
     { src: "/stickers/bubblehollow.png", x:  0.76, y: -0.08, size: 0.17, rotation:   6, seed: 52 },
     // small accent drifting near center-right
     { src: "/stickers/bubbleaespa.png", x:  0.58, y:  0.34, size: 0.10, rotation:  -8, seed: 53 },
@@ -98,19 +98,19 @@ const stickerLayouts = {
   ],
 };
 
-// FIXED-POSITION CAMERA STICKER SETS — each key maps to a list of parts
+// FIXED-POSITION CAMERA STICKER SETS - each key maps to a list of parts
 // that all render together simultaneously. Currently just Guinzly: one
 // animated cycling sprite plus static poses, each at its own anchor
 // point so they don't overlap. Selecting "guinzly" draws every part
 // listed here at once (both live preview AND baked into the photo).
 //
 // Each part has:
-//   frames[]   — cycled if length > 1 (animation), single static if 1
-//   widthFrac  — width as a fraction of the frame width
-//   left/right — horizontal anchor (use ONE, not both)
-//   VERTICAL ANCHOR — use ONE of:
-//     centerY  — sticker's center at this fraction of frame height
-//     bottom   — sticker's BOTTOM edge inset from the frame bottom
+//   frames[]   - cycled if length > 1 (animation), single static if 1
+//   widthFrac  - width as a fraction of the frame width
+//   left/right - horizontal anchor (use ONE, not both)
+//   VERTICAL ANCHOR - use ONE of:
+//     centerY  - sticker's center at this fraction of frame height
+//     bottom   - sticker's BOTTOM edge inset from the frame bottom
 //                (0 = feet touch floor, negative = bleeds off bottom).
 //                Use this for tall stickers so they can grow upward
 //                without ever clipping the feet.
@@ -121,7 +121,7 @@ const fixedStickerSets = {
     label: "Guinzly",
     thumb: "/stickers/guinzly.png",
     parts: [
-      // ⭐ STAR — anchored by his FEET (bottom: 0) so we can grow him as
+      // STAR - anchored by his FEET (bottom: 0) so we can grow him as
       // big as we want without ever losing his feet off the bottom.
       {
         frames: [
@@ -133,7 +133,7 @@ const fixedStickerSets = {
         right: 0.02,
         centerY: 0.55,
       },
-      // Sitting in the bottom-left corner — the one supporting character
+      // Sitting in the bottom-left corner - the one supporting character
       // that fits without competing with the star for space.
       {
         frames: ["/stickers/guinzlysit.png"],
@@ -145,7 +145,7 @@ const fixedStickerSets = {
   },
 };
 
-// Single source of truth for every selectable sticker set — both the
+// Single source of truth for every selectable sticker set - both the
 // camera-screen side menu and the result-screen sticker row read from
 // this, so they can't drift out of sync. Thumbnail is just the first
 // (hero) image from that sticker's layout.
@@ -164,7 +164,7 @@ const stickerOptions = [
   })),
 ];
 
-// Camera-screen-exclusive keys — bubbles (floats) plus every fixed
+// Camera-screen-exclusive keys - bubbles (floats) plus every fixed
 // sticker set. Everything else (Heart/Star/Nailong) is result-screen only.
 const cameraOnlyStickerKeys = new Set(["bubbles", ...Object.keys(fixedStickerSets)]);
 
@@ -172,7 +172,7 @@ const cameraOnlyStickerKeys = new Set(["bubbles", ...Object.keys(fixedStickerSet
 // screen when Bubbles is selected. left/size are percentages of the
 // Bubble source images and the pool of possible visual variety. Actual
 // positions/timing/drift are generated fresh each time Bubbles is
-// selected — see the useMemo below in App() — so the pattern never
+// selected - see the useMemo below in App() - so the pattern never
 // looks identical twice.
 const bubbleSrcs = [
   "/stickers/bubbletrio.png",
@@ -191,32 +191,32 @@ function generateBubbleParticles(count = 12) {
     const left = sliceStart + Math.random() * sliceWidth * 0.9 + sliceWidth * 0.05;
     return {
       src: bubbleSrcs[Math.floor(Math.random() * bubbleSrcs.length)],
-      left,                                  // spread across the full 0%–100%
-      size: Math.random() * 10 + 6,          // 6%–16% of frame width
-      duration: Math.random() * 4 + 3,       // 3s–7s per rise — wide variance so they don't move in lock-step
-      delay: Math.random() * 3.5,            // 0s–3.5s stagger
+      left,                                  // spread across the full 0%-100%
+      size: Math.random() * 10 + 6,          // 6%-16% of frame width
+      duration: Math.random() * 4 + 3,       // 3s-7s per rise - wide variance so they don't move in lock-step
+      delay: Math.random() * 3.5,            // 0s-3.5s stagger
     };
   });
 }
 
-// ─── BORDER PATTERNS ─────────────────────────────────────────────────────
+// --- BORDER PATTERNS -----------------------------------------------------
 // Every non-solid border option lives here as a single source of truth:
-// key -> { src, label }. Add a new border by adding one line here — the
+// key -> { src, label }. Add a new border by adding one line here - the
 // swatch row and the canvas draw logic both read from this automatically.
 // Each pattern picks its render style:
-//   mode "repeat" — pattern tiles as a small repeating motif (dots,
+//   mode "repeat" - pattern tiles as a small repeating motif (dots,
 //                   plaids, tiles). tileWidth is the target width for
 //                   each tile in pixels (before EXPORT_SCALE); the
 //                   image is pre-scaled to that width so tiles aren't
 //                   awkwardly huge or tiny regardless of source size.
-//   mode "cover"  — pattern fills the entire frame like a background
+//   mode "cover"  - pattern fills the entire frame like a background
 //                   photo (single instance, cover-fit). Use for
 //                   wallpaper-style images that shouldn't tile.
 const borderPatterns = {
   redPlaid:      { src: "/redplaid.png",      label: "Red Plaid",       mode: "repeat", tileWidth: 200 },
   bluePlaid:     { src: "/blueplaid.png",     label: "Blue Plaid",      mode: "repeat", tileWidth: 200 },
   pinkDots:      { src: "/pinkdots.jpg",      label: "Pink Dots",       mode: "repeat", tileWidth: 140 },
-  pinkPiano:     { src: "/pinkpiano.jpg",     label: "Pink Piano",      mode: "cover" },
+  pinkPiano:     { src: "/pinkpiano.jpg",      label: "Pink Piano",      mode: "cover" },
   pinkStar:      { src: "/pinkstar.jpg",      label: "Pink Star",       mode: "repeat", tileWidth: 180 },
   plaidMix:      { src: "/plaidmix.jpg",      label: "Plaid Mix",       mode: "repeat", tileWidth: 240 },
   plaidPinkSide: { src: "/plaidpinkside.jpg", label: "Plaid Pink Side", mode: "cover" },
@@ -232,6 +232,21 @@ const borderPatterns = {
 function seededRand(seed, salt = 0) {
   const x = Math.sin(seed * 9301 + salt * 49297 + 233) * 93458;
   return (x - Math.floor(x)) * 2 - 1; // remap to [-1, 1]
+}
+
+// Pick a MediaRecorder mime type this browser actually supports.
+// Chrome/Firefox -> webm (vp9/vp8); Safari/iOS -> mp4. Returns "" if none,
+// letting MediaRecorder use its own default.
+function pickClipMimeType() {
+  if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) return "";
+  const candidates = [
+    "video/webm;codecs=vp9",
+    "video/webm;codecs=vp8",
+    "video/webm",
+    "video/mp4;codecs=h264",
+    "video/mp4",
+  ];
+  return candidates.find((t) => MediaRecorder.isTypeSupported(t)) || "";
 }
 
 // Applies a filter directly to pixel data in a canvas region.
@@ -339,17 +354,22 @@ function App() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
 
-  // ─── BEHIND-THE-SCENES GIF + QR ──────────────────────────────────────────
+  // --- BEHIND-THE-SCENES GIF + QR ------------------------------------------
   // We sample small frames off the live video during each 3-2-1 countdown,
   // stitch them into a GIF after the shoot, upload it to Firebase Storage,
   // and encode that hosted URL into a QR drawn on the strip. (A QR can't hold
-  // a GIF directly — it can only point at where the GIF lives.)
+  // a GIF directly - it can only point at where the GIF lives.)
   const btsFramesRef = useRef([]);               // captured countdown frames (canvases)
   const [btsUrl, setBtsUrl] = useState(null);    // hosted GIF url -> goes into the QR
   const [btsStatus, setBtsStatus] = useState("idle"); // idle | working | ready | error
 
+  // STAGE 1: one short muted video clip per shot (the countdown moment).
+  const shotClipsRef = useRef([]);        // array of { blob, mimeType }, one per photo
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
+
   // Fresh random float pattern (position/speed/drift) every time bubbles
-  // is turned on — recomputes whenever selectedSticker flips to "bubbles",
+  // is turned on - recomputes whenever selectedSticker flips to "bubbles",
   // not on every render, so it stays stable while you're framing the shot.
   const bubbleParticles = useMemo(() => {
     if (selectedSticker !== "bubbles") return [];
@@ -357,7 +377,7 @@ function App() {
   }, [selectedSticker]);
 
   // Timestamp the float animation actually started (matches when
-  // bubbleParticles was generated) — takePhoto() uses this to work out
+  // bubbleParticles was generated) - takePhoto() uses this to work out
   // exactly where each bubble is at the moment a shot is taken.
   const bubbleStartRef = useRef(Date.now());
   useEffect(() => {
@@ -365,7 +385,7 @@ function App() {
   }, [bubbleParticles]);
 
   // Computes each bubble's live position/opacity right now, using the same
-  // math as the CSS @keyframes floatUp (linear bottom -15%→115%, with the
+  // math as the CSS @keyframes floatUp (linear bottom -15%->115%, with the
   // matching opacity fade-in/out envelope). Used to bake a frozen snapshot
   // of "whatever was on screen" into the photo at capture time.
   const getBubbleSnapshotNow = useCallback(() => {
@@ -377,9 +397,9 @@ function App() {
         if (elapsedSinceStart < b.delay) return null; // hasn't risen yet
 
         const cycleTime = (elapsedSinceStart - b.delay) % b.duration;
-        const progress = cycleTime / b.duration; // 0 → 1 over one rise
+        const progress = cycleTime / b.duration; // 0 -> 1 over one rise
 
-        const bottomPercent = -15 + progress * 130; // matches keyframe 0%→100%
+        const bottomPercent = -15 + progress * 130; // matches keyframe 0%->100%
 
         let opacity;
         if (progress < 0.10) opacity = (progress / 0.10) * 0.9;
@@ -391,7 +411,7 @@ function App() {
       .filter((b) => b && b.opacity > 0.05);
   }, [selectedSticker, bubbleParticles]);
 
-  // GUINZLY — fixed-position 3-frame sprite cycle. Same start-time-based
+  // GUINZLY - fixed-position 3-frame sprite cycle. Same start-time-based
   // approach as bubbles: a ref timestamps when it was selected, and both
   // the live display and the capture-time bake compute "which frame right
   // now" from elapsed time, so they always agree.
@@ -409,7 +429,7 @@ function App() {
     return Math.floor(elapsed / GUINZLY_FRAME_MS) % animated.frames.length;
   }, []);
 
-  // Drives the visible <img> on the camera screen — ticks every
+  // Drives the visible <img> on the camera screen - ticks every
   // GUINZLY_FRAME_MS while guinzly is selected, otherwise sits idle.
   const [guinzlyFrameIndex, setGuinzlyFrameIndex] = useState(0);
   useEffect(() => {
@@ -465,6 +485,58 @@ function App() {
     if (stream) stream.getTracks().forEach((track) => track.stop());
   };
 
+  // STAGE 1 - start recording the clip for the shot we're about to take.
+  // The stream has no audio track (getUserMedia only requests video), so
+  // the clip is silent.
+  const startShotRecording = useCallback(() => {
+    const stream = videoRef.current?.srcObject;
+    if (!stream) return;
+    try {
+      const mimeType = pickClipMimeType();
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+      recordedChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+    } catch (err) {
+      console.error("Could not start shot recording:", err);
+      mediaRecorderRef.current = null;
+    }
+  }, []);
+
+  // STAGE 1 - stop the recorder and resolve with the finished clip blob.
+  const stopShotRecording = useCallback(() => {
+    return new Promise((resolve) => {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder || recorder.state === "inactive") { resolve(null); return; }
+      recorder.onstop = () => {
+        const type = recorder.mimeType || "video/webm";
+        const blob = new Blob(recordedChunksRef.current, { type });
+        recordedChunksRef.current = [];
+        mediaRecorderRef.current = null;
+        resolve({ blob, mimeType: type });
+      };
+      recorder.stop();
+    });
+  }, []);
+
+  // TEMPORARY (stage 1) - download a clip to confirm it recorded & plays.
+  const downloadClip = (index = 0) => {
+    const clip = shotClipsRef.current[index];
+    if (!clip) { alert("No clip for that shot."); return; }
+    const ext = clip.mimeType.includes("mp4") ? "mp4" : "webm";
+    const url = URL.createObjectURL(clip.blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shot-${index + 1}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const goHome = () => {
     stopCamera();
     setPhotos([]);
@@ -472,6 +544,7 @@ function App() {
     setBtsUrl(null);
     setBtsStatus("idle");
     btsFramesRef.current = [];
+    shotClipsRef.current = [];
     setScreen("home");
   };
 
@@ -480,6 +553,7 @@ function App() {
     setBtsUrl(null);
     setBtsStatus("idle");
     btsFramesRef.current = [];
+    shotClipsRef.current = [];
     setScreen("camera");
   };
 
@@ -491,7 +565,7 @@ function App() {
   };
 
   // Grab one small, mirrored 4:3 frame off the live video for the
-  // behind-the-scenes GIF. Kept tiny (240×180) so encoding is fast and
+  // behind-the-scenes GIF. Kept tiny (240x180) so encoding is fast and
   // the upload stays small.
   const grabBtsFrame = useCallback(() => {
     const video = videoRef.current;
@@ -557,21 +631,25 @@ function App() {
 
     // reset behind-the-scenes state for this fresh session
     btsFramesRef.current = [];
+    shotClipsRef.current = [];
     setBtsUrl(null);
     setBtsStatus("idle");
 
     let newPhotos = [];
     const total = getPhotoCount();
     for (let i = 0; i < total; i++) {
+      startShotRecording();                     // begin this shot's clip
       await startCountdown();
       newPhotos.push(await takePhoto());
+      const clip = await stopShotRecording();   // finish this shot's clip
+      if (clip) shotClipsRef.current.push(clip);
     }
     stopCamera();
     setPhotos(newPhotos);
     setScreen("result");
     setIsCapturing(false);
 
-    buildAndUploadBts(); // fire-and-forget — QR appears once the url is ready
+    buildAndUploadBts(); // fire-and-forget - QR appears once the url is ready
   };
 
   const startCountdown = () => {
@@ -597,7 +675,7 @@ function App() {
   };
 
   // Used for the LIVE PREVIEW only (CSS filter on camera-wrapper).
-  // CSS filter works fine on iOS Safari — it's ctx.filter (canvas) that's unreliable.
+  // CSS filter works fine on iOS Safari - it's ctx.filter (canvas) that's unreliable.
   const getCanvasFilter = useCallback(() => {
     switch (filter) {
       case "bw":      return "grayscale(100%)";
@@ -639,7 +717,7 @@ function App() {
     // Bake the filter into pixel data instead of ctx.filter (iOS-safe)
     applyPixelFilter(ctx, 0, 0, cropWidth, cropHeight, filter);
 
-    // Bake whichever bubbles were on screen at this exact instant —
+    // Bake whichever bubbles were on screen at this exact instant -
     // each photo in a strip/grid gets its own frozen moment.
     if (selectedSticker === "bubbles") {
       const snapshot = getBubbleSnapshotNow();
@@ -659,7 +737,7 @@ function App() {
       }
     }
 
-    // Fixed-position sticker set (Guinzly) — bake every part at its
+    // Fixed-position sticker set (Guinzly) - bake every part at its
     // configured anchor, using whichever frame is currently showing for
     // the animated ones. Aspect ratio is preserved on every part.
     if (fixedStickerSets[selectedSticker]) {
@@ -711,14 +789,14 @@ function App() {
   }, []);
 
   // photoSlots: array of { x, y, w, h } in canvas pixels.
-  // Sticker x/y are fractions of the slot — values outside 0–1 bleed off the edge
+  // Sticker x/y are fractions of the slot - values outside 0-1 bleed off the edge
   // intentionally. A tiny seeded jitter (~3% of slot width) is added so nothing
   // looks grid-snapped, but the composition stays stable across re-renders.
   const drawSticker = useCallback(async (ctx, photoSlots) => {
     if (!selectedSticker || !photoSlots?.length) return;
 
     // Bubbles are already baked into each individual photo at capture
-    // time (see takePhoto/getBubbleSnapshotNow) — drawing the generic
+    // time (see takePhoto/getBubbleSnapshotNow) - drawing the generic
     // stickerLayouts.bubbles composition here on top would double them up.
     if (selectedSticker === "bubbles") return;
 
@@ -741,14 +819,14 @@ function App() {
         const baseX = slot.x + sticker.x * slot.w;
         const baseY = slot.y + sticker.y * slot.h;
 
-        // Tiny seeded jitter — ±3% of slot width/height so it feels hand-placed
+        // Tiny seeded jitter - +/-3% of slot width/height so it feels hand-placed
         const jitterX = seededRand(sticker.seed, i)     * slot.w * 0.03;
         const jitterY = seededRand(sticker.seed, i + 1) * slot.h * 0.03;
 
         const x = baseX + jitterX;
         const y = baseY + jitterY;
 
-        // Rotation: base angle + tiny seeded wobble (±5°)
+        // Rotation: base angle + tiny seeded wobble (+/-5deg)
         const rotWobble = seededRand(sticker.seed, i + 2) * 5;
         const rotation = ((sticker.rotation || 0) + rotWobble) * Math.PI / 180;
 
@@ -774,7 +852,7 @@ function App() {
 const displayWidth = window.innerWidth < 768
   ? Math.min(window.innerWidth * 0.9, maxMobileWidth)
   : 450
-    // Export scale — the canvas is drawn this many times larger internally,
+    // Export scale - the canvas is drawn this many times larger internally,
     // then displayed at displayWidth via CSS. Result: sharp downloaded PNG
     // (roughly displayWidth * EXPORT_SCALE pixels wide) without the preview
     // looking different visually. 4 gives crisp exports without absurd file
@@ -818,7 +896,7 @@ const displayWidth = window.innerWidth < 768
         const bg = await loadImg(cfg.src);
         if (bg) {
           if (cfg.mode === "cover") {
-            // Fill the entire strip with the image, no tiling — scaled
+            // Fill the entire strip with the image, no tiling - scaled
             // to cover both dimensions, cropped to fit. Same visual
             // behavior as CSS `background-size: cover`.
             const scale = Math.max(
@@ -831,7 +909,7 @@ const displayWidth = window.innerWidth < 768
             const dy = (canvas.height - drawH) / 2;
             ctx.drawImage(bg, dx, dy, drawW, drawH);
           } else {
-            // "repeat" — pre-scale the source image to a consistent tile
+            // "repeat" - pre-scale the source image to a consistent tile
             // width first (accounting for EXPORT_SCALE so tiles look the
             // same size regardless of export resolution), then tile it.
             // Without this, small source images tile as tiny dots and big
@@ -856,7 +934,7 @@ const displayWidth = window.innerWidth < 768
         }
       }
 
-      // 2. Draw photos — collect slot positions as we go
+      // 2. Draw photos - collect slot positions as we go
       // NOTE: photos already have the filter baked in from takePhoto(), so we
       // do NOT re-apply a filter here.
       const photoSlots = [];
@@ -890,7 +968,7 @@ const displayWidth = window.innerWidth < 768
         photoSlots.push({ x, y, w: drawWidth, h: drawH });
       }
 
-      // 3. Draw caption — scaled by EXPORT_SCALE so it renders at the
+      // 3. Draw caption - scaled by EXPORT_SCALE so it renders at the
       // right visual size on the high-resolution export canvas.
       // Force-load the font first: canvas silently falls back to the
       // default sans-serif if the @font-face font isn't loaded yet, so
@@ -906,10 +984,10 @@ const displayWidth = window.innerWidth < 768
       ctx.textAlign = "center";
       ctx.fillText(caption, canvas.width / 2, canvas.height - 50 * EXPORT_SCALE);
 
-      // 4. Draw stickers — positioned relative to each photo slot
+      // 4. Draw stickers - positioned relative to each photo slot
       await drawSticker(ctx, photoSlots);
 
-      // 5. Behind-the-scenes QR — bottom-right corner. Only drawn once the
+      // 5. Behind-the-scenes QR - bottom-right corner. Only drawn once the
       // GIF has finished uploading and we have a URL to encode.
       if (btsUrl) {
         try {
@@ -955,7 +1033,7 @@ const displayWidth = window.innerWidth < 768
     selectedSticker, drawSticker, loadImg, btsUrl
   ]);
 
-  // ─── helper: swatch style for border & sticker selectors ───────────────────
+  // --- helper: swatch style for border & sticker selectors -------------------
   const swatchStyle = (isActive, extraStyle = {}) => ({
     width: "36px",
     height: "36px",
@@ -973,10 +1051,12 @@ const displayWidth = window.innerWidth < 768
       <h1>Peachy Pixels</h1>
 
       {screen !== "home" && (
-        <div className="home-icon" onClick={goHome}>合</div>
+        <div className="home-icon" onClick={goHome}>
+          合
+        </div>
       )}
 
-      {/* ── HOME SCREEN ────────────────────────────────────────────── */}
+      {/* -- HOME SCREEN --------------------------------------------- */}
       {screen === "home" && (
         <div className="layout-picker">
           <p className="layout-picker-title">Pick your format</p>
@@ -985,8 +1065,8 @@ const displayWidth = window.innerWidth < 768
               { key: "single",  label: "Single",    rows: 1, cols: 1 },
               { key: "strip4",  label: "4 Strip",   rows: 4, cols: 1 },
               { key: "strip3",  label: "3 Strip",   rows: 3, cols: 1 },
-              { key: "grid2x2", label: "2×2 Grid",  rows: 2, cols: 2 },
-              { key: "grid3x2", label: "3×2 Grid",  rows: 3, cols: 2 },
+              { key: "grid2x2", label: "2x2 Grid",  rows: 2, cols: 2 },
+              { key: "grid3x2", label: "3x2 Grid",  rows: 3, cols: 2 },
             ].map(({ key, label, rows, cols }) => (
               <button
                 key={key}
@@ -1014,7 +1094,7 @@ const displayWidth = window.innerWidth < 768
         </div>
       )}
 
-      {/* ── CAMERA SCREEN ──────────────────────────────────────────── */}
+      {/* -- CAMERA SCREEN ------------------------------------------- */}
       {screen === "camera" && (
         <>
           <div className="camera-stage">
@@ -1029,7 +1109,7 @@ const displayWidth = window.innerWidth < 768
               />
 
               {/* Live sticker preview. Deliberately NOT inside the filtered
-                  element — stickers should keep their own colors regardless
+                  element - stickers should keep their own colors regardless
                   of B&W/Vintage/Bright, so the filter is applied to the
                   video only, above. Bubbles get the actual floating
                   animation here (same as the result screen); other
@@ -1053,7 +1133,7 @@ const displayWidth = window.innerWidth < 768
                 </div>
               )}
 
-              {/* Fixed-position sticker set — renders every part in the
+              {/* Fixed-position sticker set - renders every part in the
                   set at its own anchor point. Animated parts (multiple
                   frames) get their current frame; static parts show a
                   single fixed image. */}
@@ -1109,7 +1189,7 @@ const displayWidth = window.innerWidth < 768
               {flash && <div className="flash" />}
             </div>
 
-            {/* Sticker picker — only Bubbles and Guinzly are offered here.
+            {/* Sticker picker - only Bubbles and Guinzly are offered here.
                 The full set (Heart/Star/Nailong) is still available
                 afterward on the result screen. Locked once a capture
                 session is running so the per-frame bake can't be
@@ -1160,13 +1240,13 @@ const displayWidth = window.innerWidth < 768
 
           <div className="start-wrapper">
             <button disabled={isCapturing} onClick={startCapture}>
-              {isCapturing ? "Capturing…" : "Start"}
+              {isCapturing ? "Capturing..." : "Start"}
             </button>
           </div>
         </>
       )}
 
-      {/* ── RESULT SCREEN ──────────────────────────────────────────── */}
+      {/* -- RESULT SCREEN ------------------------------------------- */}
       {screen === "result" && (
         <div className="result-layout">
 
@@ -1180,13 +1260,20 @@ const displayWidth = window.innerWidth < 768
               <button onClick={retake}>Retake</button>
             </div>
 
+            {/* TEMPORARY stage-1 test - remove later */}
+            {shotClipsRef.current.length > 0 && (
+              <button onClick={() => downloadClip(0)} style={{ marginTop: 8 }}>
+                Test: download clip 1
+              </button>
+            )}
+
             {/* Behind-the-scenes GIF status */}
             {btsStatus === "working" && (
-              <p className="bts-status">✨ Stitching your behind-the-scenes…</p>
+              <p className="bts-status">Stitching your behind-the-scenes...</p>
             )}
             {btsStatus === "ready" && (
               <p className="bts-status bts-status--ready">
-                📸 Scan the QR to see your behind-the-scenes!
+                Scan the QR to see your behind-the-scenes!
               </p>
             )}
             {btsStatus === "error" && (
@@ -1270,7 +1357,7 @@ const displayWidth = window.innerWidth < 768
                 type="text"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                placeholder="Type here…"
+                placeholder="Type here..."
               />
             </div>
 
