@@ -1,17 +1,15 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import Viewer from "./Viewer";           
+const root = ReactDOM.createRoot(document.getElementById("root"));
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+// <-- add: if the URL is /s/{id}, show the viewer instead of the app
+const stripMatch = window.location.pathname.match(/^\/s\/([A-Za-z0-9_-]+)\/?$/);
+
 root.render(
   <React.StrictMode>
-    <App />
+    {stripMatch ? <Viewer id={stripMatch[1]} /> : <App />}
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
