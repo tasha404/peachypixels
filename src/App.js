@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { HexColorPicker } from "react-colorful";
-import GIF from "gif.js";
 import QRCode from "qrcode";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "./firebase";
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from "firebase/firestore";
+import { storage, db } from "./firebase";
 import "./App.css";
 // Organic sticker placement.
 //
@@ -354,19 +354,22 @@ function App() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedSticker, setSelectedSticker] = useState(null);
 
-  // --- BEHIND-THE-SCENES GIF + QR ------------------------------------------
-  // We sample small frames off the live video during each 3-2-1 countdown,
-  // stitch them into a GIF after the shoot, upload it to Firebase Storage,
-  // and encode that hosted URL into a QR drawn on the strip. (A QR can't hold
-  // a GIF directly - it can only point at where the GIF lives.)
-  const btsFramesRef = useRef([]);               // captured countdown frames (canvases)
-  const [btsUrl, setBtsUrl] = useState(null);    // hosted GIF url -> goes into the QR
-  const [btsStatus, setBtsStatus] = useState("idle"); // idle | working | ready | error
-
-  // STAGE 1: one short muted video clip per shot (the countdown moment).
-  const shotClipsRef = useRef([]);        // array of { blob, mimeType }, one per photo
+  // --- BEHIND-THE-SCENES (video clips + shareable strip record) ------------
+  // During each countdown we record a short muted clip of the camera (one per
+  // shot). When the user taps "Get behind-the-scenes QR" on the result
+  // screen, those clips upload to Storage, a Firestore "strip" record saves
+  // the full decorated layout (border/caption/sticker + clip URLs), and the
+  // QR encodes a short /s/{docId} link to the (stage-3) viewer page.
+  const shotClipsRef = useRef([]);        // [{ blob, mimeType }], one per photo
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
+  // Caches uploaded clip URLs + the created doc id so re-tapping the button
+  // (after tweaking decoration) reuses the same clips + updates the same
+  // record instead of re-uploading and creating duplicates.
+  const shareRef = useRef({ clipUrls: null, docId: null });
+
+  const [btsUrl, setBtsUrl] = useState(null);         // viewer url -> goes into the QR
+  const [btsStatus, setBtsStatus] = useState("idle"); // idle | working | ready | error
 
   // Fresh random float pattern (position/speed/drift) every time bubbles
   // is turned on - recomputes whenever selectedSticker flips to "bubbles",
@@ -485,9 +488,8 @@ function App() {
     if (stream) stream.getTracks().forEach((track) => track.stop());
   };
 
-  // STAGE 1 - start recording the clip for the shot we're about to take.
-  // The stream has no audio track (getUserMedia only requests video), so
-  // the clip is silent.
+  // Start recording the clip for the shot we're about to take. The stream
+  // has no audio track (getUserMedia only requests video), so it's silent.
   const startShotRecording = useCallback(() => {
     const stream = videoRef.current?.srcObject;
     if (!stream) return;
@@ -508,7 +510,7 @@ function App() {
     }
   }, []);
 
-  // STAGE 1 - stop the recorder and resolve with the finished clip blob.
+  // Stop the recorder and resolve with the finished clip blob.
   const stopShotRecording = useCallback(() => {
     return new Promise((resolve) => {
       const recorder = mediaRecorderRef.current;
@@ -524,27 +526,14 @@ function App() {
     });
   }, []);
 
-  // TEMPORARY (stage 1) - download a clip to confirm it recorded & plays.
-  const downloadClip = (index = 0) => {
-    const clip = shotClipsRef.current[index];
-    if (!clip) { alert("No clip for that shot."); return; }
-    const ext = clip.mimeType.includes("mp4") ? "mp4" : "webm";
-    const url = URL.createObjectURL(clip.blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `shot-${index + 1}.${ext}`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const goHome = () => {
     stopCamera();
     setPhotos([]);
     setLayout(null);
     setBtsUrl(null);
     setBtsStatus("idle");
-    btsFramesRef.current = [];
     shotClipsRef.current = [];
+    shareRef.current = { clipUrls: null, docId: null };
     setScreen("home");
   };
 
@@ -552,8 +541,8 @@ function App() {
     setPhotos([]);
     setBtsUrl(null);
     setBtsStatus("idle");
-    btsFramesRef.current = [];
     shotClipsRef.current = [];
+    shareRef.current = { clipUrls: null, docId: null };
     setScreen("camera");
   };
 
@@ -564,74 +553,70 @@ function App() {
     return 4;
   };
 
-  // Grab one small, mirrored 4:3 frame off the live video for the
-  // behind-the-scenes GIF. Kept tiny (240x180) so encoding is fast and
-  // the upload stays small.
-  const grabBtsFrame = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !video.videoWidth) return;
-
-    const W = 240, H = 180; // 4:3
-    const c = document.createElement("canvas");
-    c.width = W; c.height = H;
-    const cx = c.getContext("2d");
-
-    // mirror so it matches the on-screen preview
-    cx.translate(W, 0);
-    cx.scale(-1, 1);
-
-    // center-crop 4:3 from the raw feed (same crop logic as takePhoto)
-    const vw = video.videoWidth, vh = video.videoHeight;
-    let cw = vw, ch = vw / (4 / 3);
-    if (ch > vh) { ch = vh; cw = vh * (4 / 3); }
-    const sx = (vw - cw) / 2, sy = (vh - ch) / 2;
-
-    cx.drawImage(video, sx, sy, cw, ch, 0, 0, W, H);
-    btsFramesRef.current.push(c);
-  }, []);
-
-  // Encode the captured frames into a GIF, upload to Firebase Storage,
-  // and stash the download URL (which the result canvas turns into a QR).
-  const buildAndUploadBts = useCallback(async () => {
-    const frames = btsFramesRef.current;
-    if (!frames.length) return;
+  // Upload the per-shot clips (once) + save/update the strip record in
+  // Firestore, then point the QR at the viewer url. Called from a button on
+  // the result screen so it captures whatever decoration is currently applied.
+  const generateShareLink = useCallback(async () => {
+    const clips = shotClipsRef.current;
+    if (!clips.length) { setBtsStatus("error"); return; }
     setBtsStatus("working");
 
     try {
-      const blob = await new Promise((resolve, reject) => {
-        const gif = new GIF({
-          workers: 2,
-          quality: 10,
-          workerScript: "/gif.worker.js", // the file copied into public/
-          width: frames[0].width,
-          height: frames[0].height,
+      // 1. Upload clips ONCE; reuse the URLs on later taps.
+      if (!shareRef.current.clipUrls) {
+        const sessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const urls = [];
+        for (let i = 0; i < clips.length; i++) {
+          const { blob, mimeType } = clips[i];
+          const ext = mimeType.includes("mp4") ? "mp4" : "webm";
+          const fileRef = storageRef(storage, `clips/${sessionId}/${i}.${ext}`);
+          await uploadBytes(fileRef, blob, { contentType: mimeType });
+          urls.push(await getDownloadURL(fileRef));
+        }
+        shareRef.current.clipUrls = urls;
+      }
+
+      // 2. The full decorated-strip payload the viewer page will rebuild from.
+      const data = {
+        layout,
+        borderType,
+        borderColor,
+        caption,
+        captionColor,
+        captionSize,
+        captionFont,
+        sticker: selectedSticker,     // key only; viewer has the same layouts
+        clipUrls: shareRef.current.clipUrls,
+        updatedAt: serverTimestamp(),
+      };
+
+      // 3. First tap creates the record; later taps update the same one, so
+      //    the QR (and its /s/{id} link) stays stable across edits.
+      if (!shareRef.current.docId) {
+        const docRef = await addDoc(collection(db, "strips"), {
+          ...data,
+          createdAt: serverTimestamp(),
         });
-        frames.forEach((f) => gif.addFrame(f, { delay: 120, copy: true }));
-        gif.on("finished", resolve);
-        gif.on("abort", () => reject(new Error("gif aborted")));
-        gif.render();
-      });
+        shareRef.current.docId = docRef.id;
+        setBtsUrl(`${window.location.origin}/s/${docRef.id}`);
+      } else {
+        await updateDoc(doc(db, "strips", shareRef.current.docId), data);
+      }
 
-      const path = `bts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.gif`;
-      const fileRef = storageRef(storage, path);
-      await uploadBytes(fileRef, blob, { contentType: "image/gif" });
-      const url = await getDownloadURL(fileRef);
-
-      setBtsUrl(url);
       setBtsStatus("ready");
     } catch (e) {
-      console.error("BTS gif failed:", e);
+      console.error("Share link failed:", e);
       setBtsStatus("error");
     }
-  }, []);
+  }, [layout, borderType, borderColor, caption, captionColor, captionSize, captionFont, selectedSticker]);
 
   const startCapture = async () => {
     if (isCapturing) return;
     setIsCapturing(true);
 
     // reset behind-the-scenes state for this fresh session
-    btsFramesRef.current = [];
     shotClipsRef.current = [];
+    shareRef.current = { clipUrls: null, docId: null };
     setBtsUrl(null);
     setBtsStatus("idle");
 
@@ -648,8 +633,6 @@ function App() {
     setPhotos(newPhotos);
     setScreen("result");
     setIsCapturing(false);
-
-    buildAndUploadBts(); // fire-and-forget - QR appears once the url is ready
   };
 
   const startCountdown = () => {
@@ -657,14 +640,10 @@ function App() {
       let timeLeft = 3;
       setCountdown(timeLeft);
 
-      // sample frames for the behind-the-scenes gif (~8 fps)
-      const sampler = setInterval(grabBtsFrame, 125);
-
       const timer = setInterval(() => {
         timeLeft--;
         if (timeLeft === 0) {
           clearInterval(timer);
-          clearInterval(sampler);
           setCountdown(null);
           resolve();
         } else {
@@ -988,7 +967,7 @@ const displayWidth = window.innerWidth < 768
       await drawSticker(ctx, photoSlots);
 
       // 5. Behind-the-scenes QR - bottom-right corner. Only drawn once the
-      // GIF has finished uploading and we have a URL to encode.
+      // strip record is saved and we have a viewer url to encode.
       if (btsUrl) {
         try {
           const qrDataUrl = await QRCode.toDataURL(btsUrl, {
@@ -1051,9 +1030,7 @@ const displayWidth = window.innerWidth < 768
       <h1>Peachy Pixels</h1>
 
       {screen !== "home" && (
-        <div className="home-icon" onClick={goHome}>
-          合
-        </div>
+        <div className="home-icon" onClick={goHome}>合</div>
       )}
 
       {/* -- HOME SCREEN --------------------------------------------- */}
@@ -1260,25 +1237,28 @@ const displayWidth = window.innerWidth < 768
               <button onClick={retake}>Retake</button>
             </div>
 
-            {/* TEMPORARY stage-1 test - remove later */}
-            {shotClipsRef.current.length > 0 && (
-              <button onClick={() => downloadClip(0)} style={{ marginTop: 8 }}>
-                Test: download clip 1
-              </button>
-            )}
+            {/* Behind-the-scenes: upload clips + save strip record + QR */}
+            <button
+              onClick={generateShareLink}
+              disabled={btsStatus === "working"}
+              style={{ marginTop: 10 }}
+            >
+              {btsStatus === "working"
+                ? "Saving..."
+                : btsStatus === "ready"
+                ? "Update behind-the-scenes"
+                : "Get behind-the-scenes QR"}
+            </button>
 
-            {/* Behind-the-scenes GIF status */}
-            {btsStatus === "working" && (
-              <p className="bts-status">Stitching your behind-the-scenes...</p>
-            )}
-            {btsStatus === "ready" && (
+            {btsStatus === "ready" && btsUrl && (
               <p className="bts-status bts-status--ready">
-                Scan the QR to see your behind-the-scenes!
+                QR added to your strip &middot;{" "}
+                <a href={btsUrl} target="_blank" rel="noreferrer">open link</a>
               </p>
             )}
             {btsStatus === "error" && (
               <p className="bts-status bts-status--error">
-                Couldn't make the behind-the-scenes clip this time.
+                Couldn't save the behind-the-scenes. Check the console.
               </p>
             )}
           </div>
