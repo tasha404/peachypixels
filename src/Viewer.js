@@ -66,8 +66,21 @@ function gridFor(layout, clipCount) {
   if (layout === "grid2x2") return { cols: 2, rows: 2 };
   if (layout === "grid3x2") return { cols: 2, rows: 3 };
   if (layout === "single")  return { cols: 1, rows: 1 };
-  // strip3 / strip4 (and any fallback): 1 column, one row per shot
-  return { cols: 1, rows: clipCount || (layout === "strip3" ? 3 : 4) };
+  if (layout === "strip3")  return { cols: 1, rows: 3 };
+  if (layout === "strip4")  return { cols: 1, rows: 4 };
+  // unknown layout (older records): fall back to however many clips exist
+  return { cols: 1, rows: clipCount || 1 };
+}
+
+// CSS filter matching App.js getCanvasFilter - applied to the viewer <video>.
+function filterCss(f) {
+  switch (f) {
+    case "bw":      return "grayscale(100%)";
+    case "vintage": return "sepia(60%) contrast(110%)";
+    case "bright":  return "brightness(130%)";
+    case "retro":   return "saturate(85%) sepia(8%) contrast(88%) brightness(96%)";
+    default:        return "none";
+  }
 }
 
 // The App.js canvas uses these ratios (padding 20, caption band 100, photo
@@ -290,8 +303,11 @@ export default function Viewer({ id }) {
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
-                    // Clips are now recorded already-mirrored + decorated in
-                    // App.js, so we display them as-is (no extra flip).
+                    // Raw clip -> mirror for selfie orientation + apply the
+                    // filter the user chose, both via reliable CSS.
+                    transform: "scaleX(-1)",
+                    filter: filterCss(data.filter),
+                    WebkitFilter: filterCss(data.filter),
                     display: "block",
                   }}
                 />

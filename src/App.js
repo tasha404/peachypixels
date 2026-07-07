@@ -488,111 +488,15 @@ function App() {
     if (stream) stream.getTracks().forEach((track) => track.stop());
   };
 
-  // --- DECORATED CLIP RECORDING --------------------------------------------
-  // Instead of recording the raw camera stream, we record from an offscreen
-  // canvas that we draw EACH frame into with the same decorations as the
-  // still photo: mirror + filter + Bubbles/Guinzly baked in. captureStream()
-  // turns that canvas into a MediaStream we hand to MediaRecorder, so the
-  // saved clip already looks decorated. (Border/heart/star/nailong/caption
-  // are still layered on top in the viewer, since they're chosen later.)
-  const recCanvasRef = useRef(null);   // offscreen canvas we record from
-  const recRafRef = useRef(null);      // requestAnimationFrame id for the draw loop
-  const lastDrawRef = useRef(0);       // throttle timestamp
-
-  // Make sure every image the draw loop needs is cached before we start
-  // (the loop reads imgCache synchronously and can't await).
-  const preloadCaptureStickers = useCallback(async () => {
-    const srcs = [];
-    if (selectedSticker === "bubbles") srcs.push(...bubbleSrcs);
-    if (fixedStickerSets[selectedSticker]) {
-      fixedStickerSets[selectedSticker].parts.forEach((p) =>
-        p.frames.forEach((f) => srcs.push(f))
-      );
-    }
-    await Promise.all(srcs.map((s) => loadImg(s)));
-  }, [selectedSticker, loadImg]);
-
-  // Draw ONE decorated frame into the recording canvas. Mirrors takePhoto's
-  // decoration steps, but reads images from imgCache synchronously.
-  const drawRecFrame = useCallback(() => {
-    const video = videoRef.current;
-    const canvas = recCanvasRef.current;
-    if (!video || !canvas || !video.videoWidth) return;
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width, H = canvas.height;
-
-    // center-crop 4:3 from the raw feed + mirror (selfie orientation)
-    const vw = video.videoWidth, vh = video.videoHeight;
-    let cw = vw, ch = vw / (4 / 3);
-    if (ch > vh) { ch = vh; cw = vh * (4 / 3); }
-    const sx = (vw - cw) / 2, sy = (vh - ch) / 2;
-
-    ctx.save();
-    ctx.translate(W, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, sx, sy, cw, ch, 0, 0, W, H);
-    ctx.restore();
-
-    // filter (iOS-safe pixel version; early-returns for "none")
-    applyPixelFilter(ctx, 0, 0, W, H, filter);
-
-    // Bubbles - live floating snapshot at this instant
-    if (selectedSticker === "bubbles") {
-      const snap = getBubbleSnapshotNow();
-      for (const b of snap) {
-        const img = imgCache.current[b.src];
-        if (!img) continue;
-        const size = W * (b.size / 100);
-        const x = W * (b.left / 100);
-        const bottomOffset = H * (b.bottomPercent / 100);
-        const y = H - bottomOffset - size;
-        ctx.save();
-        ctx.globalAlpha = b.opacity;
-        ctx.drawImage(img, x, y, size, size);
-        ctx.restore();
-      }
-    }
-
-    // Guinzly - fixed-position animated sprite set
-    if (fixedStickerSets[selectedSticker]) {
-      const { parts } = fixedStickerSets[selectedSticker];
-      const idx = getGuinzlyFrameIndexNow();
-      for (const part of parts) {
-        const src = part.frames.length > 1 ? part.frames[idx] : part.frames[0];
-        const img = imgCache.current[src];
-        if (!img) continue;
-        const w = W * part.widthFrac;
-        const h = w * (img.naturalHeight / img.naturalWidth);
-        const x = part.right !== undefined ? W * (1 - part.right) - w : W * part.left;
-        const y = part.bottom !== undefined ? H * (1 - part.bottom) - h : H * part.centerY - h / 2;
-        ctx.drawImage(img, x, y, w, h);
-      }
-    }
-  }, [filter, selectedSticker, getBubbleSnapshotNow, getGuinzlyFrameIndexNow, loadImg]);
-
-  // Start recording this shot's decorated clip. The recording canvas has no
-  // audio, so the clip is silent.
-  const startShotRecording = useCallback(async () => {
-    if (!recCanvasRef.current) {
-      const c = document.createElement("canvas");
-      c.width = 320; c.height = 240; // 4:3, small for speed
-      recCanvasRef.current = c;
-    }
-    await preloadCaptureStickers();
-
-    // throttled draw loop (~22 fps) so the pixel filter isn't run at 60 fps
-    lastDrawRef.current = 0;
-    const loop = (t) => {
-      if (t - lastDrawRef.current >= 45) {
-        drawRecFrame();
-        lastDrawRef.current = t;
-      }
-      recRafRef.current = requestAnimationFrame(loop);
-    };
-    recRafRef.current = requestAnimationFrame(loop);
-
+  // --- CLIP RECORDING (raw camera stream) ----------------------------------
+  // Record the raw camera stream per shot - far more reliable than recording
+  // from a canvas. The saved clip is unfiltered + un-mirrored; the viewer
+  // applies the chosen filter + selfie mirror with CSS on the <video>, which
+  // is reliable across browsers (unlike canvas pixel filtering).
+  const startShotRecording = useCallback(() => {
+    const stream = videoRef.current?.srcObject;
+    if (!stream) return;
     try {
-      const stream = recCanvasRef.current.captureStream(24);
       const mimeType = pickClipMimeType();
       const recorder = mimeType
         ? new MediaRecorder(stream, { mimeType })
@@ -604,18 +508,13 @@ function App() {
       recorder.start();
       mediaRecorderRef.current = recorder;
     } catch (err) {
-      console.error("Could not start decorated recording:", err);
+      console.error("Could not start shot recording:", err);
       mediaRecorderRef.current = null;
     }
-  }, [preloadCaptureStickers, drawRecFrame]);
+  }, []);
 
-  // Stop the recorder + draw loop and resolve with the finished clip blob.
   const stopShotRecording = useCallback(() => {
     return new Promise((resolve) => {
-      if (recRafRef.current) {
-        cancelAnimationFrame(recRafRef.current);
-        recRafRef.current = null;
-      }
       const recorder = mediaRecorderRef.current;
       if (!recorder || recorder.state === "inactive") { resolve(null); return; }
       recorder.onstop = () => {
@@ -689,6 +588,7 @@ function App() {
         captionSize,
         captionFont,
         sticker: selectedSticker,     // key only; viewer has the same layouts
+        filter,                       // applied as CSS on the viewer video
         clipUrls: shareRef.current.clipUrls,
         updatedAt: serverTimestamp(),
       };
@@ -726,7 +626,7 @@ function App() {
     let newPhotos = [];
     const total = getPhotoCount();
     for (let i = 0; i < total; i++) {
-      await startShotRecording();               // begin this shot's decorated clip
+      startShotRecording();                     // begin this shot's clip
       await startCountdown();
       newPhotos.push(await takePhoto());
       const clip = await stopShotRecording();   // finish this shot's clip
