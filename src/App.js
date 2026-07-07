@@ -611,8 +611,8 @@ function App() {
       console.error("Share link failed:", e);
       setBtsStatus("error");
     }
-  }, [layout, borderType, borderColor, caption, captionColor, captionSize, captionFont, selectedSticker]);
-
+  }, [layout, borderType, borderColor, caption, captionColor, captionSize, captionFont, selectedSticker, filter]);
+  
   const startCapture = async () => {
     if (isCapturing) return;
     setIsCapturing(true);
