@@ -239,18 +239,28 @@ export default function Viewer({ id }) {
         Behind the scenes
       </p>
 
-      {/* THE STRIP - absolutely-positioned slots reproduce the canvas layout */}
+      {/* THE STRIP - absolutely-positioned slots reproduce the canvas layout.
+          A white base sits UNDER the border so even a pale or default border
+          still reads as a physical paper strip against the page. */}
       <div
         style={{
           position: "relative",
           width: L.stripW,
           height: L.stripH,
-          borderRadius: 20,
-          boxShadow: "0 20px 60px rgba(200,60,100,0.18)",
+          borderRadius: 18,
+          background: "#ffffff",
+          boxShadow: "0 24px 70px rgba(200,60,100,0.28), 0 0 0 1px rgba(120,40,70,0.08)",
           overflow: "hidden",
-          ...stripBackground(),
         }}
       >
+        {/* Border layer (solid colour or pattern) painted over the white base */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            ...stripBackground(),
+          }}
+        />
         {/* Video slots */}
         {L.slots.map((slot, i) => {
           const url = clipUrls[i];
