@@ -280,8 +280,8 @@ export default function Viewer({ id }) {
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
-                    // Mirror to match the selfie preview (clips record un-mirrored)
-                    transform: "scaleX(-1)",
+                    // Clips are now recorded already-mirrored + decorated in
+                    // App.js, so we display them as-is (no extra flip).
                     display: "block",
                   }}
                 />
