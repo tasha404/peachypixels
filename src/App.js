@@ -5,6 +5,7 @@ import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from "firebase/firestore";
 import { storage, db } from "./firebase";
 import "./App.css";
+
 // Organic sticker placement.
 //
 // Positions (x, y) are fractions of photo width/height, anchored to the sticker's
@@ -612,7 +613,7 @@ function App() {
       setBtsStatus("error");
     }
   }, [layout, borderType, borderColor, caption, captionColor, captionSize, captionFont, selectedSticker, filter]);
-  
+
   const startCapture = async () => {
     if (isCapturing) return;
     setIsCapturing(true);
